@@ -4,32 +4,44 @@ using VSEIoTCoreServer.Services;
 using System;
 using AutoMapper;
 using VSEIoTCoreServer.DAL;
+using Microsoft.Extensions.Logging;
 
-namespace VSEIoTCoreServer.IntegrationTests
+namespace VSEIoTCoreServer.UnitTest
 {
     public class DeviceConfigurationServiceTest
     {
         [Fact]
         public void Ctor_Test()
         {
-            var mapper = new Mock<IMapper>().Object;
-            var dbContext = new Mock<SQLiteDbContext>().Object;
-            Assert.NotNull(new DeviceConfigurationService(mapper, dbContext));
+            var mockMapper = new Mock<IMapper>().Object;
+            var mockDbContext = new Mock<SQLiteDbContext>().Object;
+            var mockLoggerFactory = new Mock<ILoggerFactory>().Object;
+            Assert.NotNull(new DeviceConfigurationService(mockMapper, mockDbContext, mockLoggerFactory));
         }
 
         [Fact]
         public void Ctor_Mapper_Null_Error_Test()
         {
-            var dbContext = new Mock<SQLiteDbContext>().Object;
-            Assert.Throws<ArgumentNullException>("mapper", () => new DeviceConfigurationService(null, dbContext));
+            var mockDbContext = new Mock<SQLiteDbContext>().Object;
+            var mockLoggerFactory = new Mock<ILoggerFactory>().Object;
+            Assert.Throws<ArgumentNullException>("mapper", () => new DeviceConfigurationService(null, mockDbContext, mockLoggerFactory));
         }
 
 
         [Fact]
         public void Ctor_Context_Null_Error_Test()
         {
-            var mapper = new Mock<IMapper>().Object;
-            Assert.Throws<ArgumentNullException>("context", () => new DeviceConfigurationService(mapper, null));
+            var mockMapper = new Mock<IMapper>().Object;
+            var mockLoggerFactory = new Mock<ILoggerFactory>().Object;
+            Assert.Throws<ArgumentNullException>("context", () => new DeviceConfigurationService(mockMapper, null, mockLoggerFactory));
+        }
+
+        [Fact]
+        public void Ctor_Logger_Null_Error_Test()
+        {
+            var mockMapper = new Mock<IMapper>().Object;
+            var mockDbContext = new Mock<SQLiteDbContext>().Object;
+            Assert.Throws<ArgumentNullException>("loggerFactory", () => new DeviceConfigurationService(mockMapper, mockDbContext, null));
         }
 
 

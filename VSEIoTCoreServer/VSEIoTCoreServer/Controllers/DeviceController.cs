@@ -8,14 +8,13 @@ namespace VSEIoTCoreServer.Controllers
     public class DeviceController : Controller
     {
         private readonly IDeviceConfigurationService _deviceConfigurationService;
-        private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger<DeviceController> _logger;
 
         public DeviceController(IDeviceConfigurationService deviceConfigurationService, ILoggerFactory loggerFactory)
         {
             _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
-            _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-            _logger = _loggerFactory.CreateLogger<DeviceController>();
+            var factory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            _logger = factory.CreateLogger<DeviceController>();
         }
 
         [ProducesResponseType(200, Type = typeof(List<DeviceConfigurationViewModel>))]

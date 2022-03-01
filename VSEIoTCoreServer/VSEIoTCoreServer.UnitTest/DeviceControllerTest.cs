@@ -5,7 +5,7 @@ using VSEIoTCoreServer.Controllers;
 using System;
 using Microsoft.Extensions.Logging;
 
-namespace VSEIoTCoreServer.IntegrationTests
+namespace VSEIoTCoreServer.UnitTest
 {
     public class DeviceControllerTest
     {

@@ -4,7 +4,7 @@ using VSEIoTCoreServer.Services;
 using System;
 using VSEIoTCoreServer.ViewModels;
 
-namespace VSEIoTCoreServer.IntegrationTests
+namespace VSEIoTCoreServer.UnitTest
 {
     public class DeviceConfigurationViewModelTest
     {

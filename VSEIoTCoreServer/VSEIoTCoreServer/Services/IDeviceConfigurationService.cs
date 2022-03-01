@@ -1,4 +1,4 @@
-﻿using VSEIoTCoreServer.ViewModels;
+using VSEIoTCoreServer.ViewModels;
 
 namespace VSEIoTCoreServer.Services
 {

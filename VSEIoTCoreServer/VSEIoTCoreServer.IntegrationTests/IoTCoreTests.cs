@@ -21,27 +21,17 @@ using System.Net;
 
 namespace VSEIoTCoreServer.IntegrationTests
 {
+    [Collection("Sequential")]
     public class IoTCoreTests
     {
+        private readonly TestDeviceOptions _testDevice1;
+        private readonly TestDeviceOptions _testDevice2;
         private readonly IOptions<IoTCoreOptions> _iotCoreOptions;
-
-        private readonly DeviceConfiguration _deviceConfig1 = new DeviceConfiguration()
-        {
-            Id = 1,
-            VseType = "VSE100",
-            VseIpAddress = "172.29.12.12",
-            VsePort = 3321,
-            IoTCorePort = 8092
-        };
-
-        private readonly DeviceConfiguration _deviceConfig2 = new DeviceConfiguration()
-        {
-            Id = 2,
-            VseType = "VSE100",
-            VseIpAddress = "172.29.12.13",
-            VsePort = 3321,
-            IoTCorePort = 8093
-        };
+        private DeviceConfiguration _deviceConfig1;
+        private DeviceConfiguration _deviceConfig2;
+        private IMapper _mapper;
+        private NullLoggerFactory _nullLoggerFactory;
+        private Mock<SQLiteDbContext> _mockDbContext;
 
         public IoTCoreTests()
         {
@@ -55,17 +45,38 @@ namespace VSEIoTCoreServer.IntegrationTests
             configuration.GetSection(IoTCoreOptions.IoTCoreSettings).Bind(options);
 
             _iotCoreOptions = Options.Create<IoTCoreOptions>(options);
+
+            _testDevice1 = new TestDeviceOptions();
+            configuration.GetSection("TestDevices:TestDevice1").Bind(_testDevice1);
+            _testDevice2 = new TestDeviceOptions();
+            configuration.GetSection("TestDevices:TestDevice2").Bind(_testDevice2);
         }
 
-        [Fact]
-        public async Task GetAllDevicesTest()
+        private void Arrange()
         {
-            // Arrange 
+            _deviceConfig1 = new DeviceConfiguration()
+            {
+                Id = _testDevice1.Id,
+                VseType = _testDevice1.VseType,
+                VseIpAddress = _testDevice1.VseIpAddress,
+                VsePort = _testDevice1.VsePort,
+                IoTCorePort = _testDevice1.IoTCorePort
+            };
+
+            _deviceConfig2 = new DeviceConfiguration()
+            {
+                Id = _testDevice2.Id,
+                VseType = _testDevice2.VseType,
+                VseIpAddress = _testDevice2.VseIpAddress,
+                VsePort = _testDevice2.VsePort,
+                IoTCorePort = _testDevice2.IoTCorePort
+            };
+
             var myProfile = new AutoMapperProfile();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
-            var mapper = new Mapper(configuration);
+            _mapper = new Mapper(configuration);
 
-            var nullLoggerFactory = new NullLoggerFactory();
+            _nullLoggerFactory = new NullLoggerFactory();
 
             var deviceConfigurations = new List<DeviceConfiguration>()
             {
@@ -75,11 +86,18 @@ namespace VSEIoTCoreServer.IntegrationTests
 
             var mockDbSet = deviceConfigurations.AsQueryable().BuildMockDbSet();
 
-            var mockDbContext = new Mock<SQLiteDbContext>();
-            mockDbContext.Setup(x => x.DeviceConfigurations).Returns(mockDbSet.Object);
+            _mockDbContext = new Mock<SQLiteDbContext>();
+            _mockDbContext.Setup(x => x.DeviceConfigurations).Returns(mockDbSet.Object);
+        }
+
+        [Fact]
+        public async Task GetAllDevicesTest()
+        {
+            // Arrange 
+            Arrange();
 
             // Act
-            var deviceConfigurationService = new DeviceConfigurationService(mapper, mockDbContext.Object);
+            var deviceConfigurationService = new DeviceConfigurationService(_mapper, _mockDbContext.Object, _nullLoggerFactory);
 
             var devices = await deviceConfigurationService.GetAll();
 
@@ -107,7 +125,7 @@ namespace VSEIoTCoreServer.IntegrationTests
         public async Task StartAndStopDeviceTest()
         {
             // Arrange
-            var nullLoggerFactory = new NullLoggerFactory();
+            Arrange();
 
             var mockDeviceConfigurationService = new Mock<IDeviceConfigurationService>();
             mockDeviceConfigurationService.Setup(x => x.GetById(It.IsAny<int>()))
@@ -119,18 +137,18 @@ namespace VSEIoTCoreServer.IntegrationTests
                     VsePort = _deviceConfig1.VsePort,
                     IoTCorePort = _deviceConfig1.IoTCorePort
                 }));
-
+            var iotCoreService = new IoTCoreService(mockDeviceConfigurationService.Object, _nullLoggerFactory, _iotCoreOptions);
 
             // Act
-            var iotCoreService = new IoTCoreService(mockDeviceConfigurationService.Object, nullLoggerFactory, _iotCoreOptions);
-
             await iotCoreService.Start(_deviceConfig1.Id);
+
+            // Wait for the asynchronous call to finish
             Thread.Sleep(5000);
 
-            using (var client = new Client("http://127.0.0.1:" + _deviceConfig1.IoTCorePort))
+            using (var client = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig1.IoTCorePort))
             {
                 var result = await client.SendRequestAndAwaitResponseAsync("/Device/Status/getdata");
-                var message = ifmIoTCore.Elements.ServiceData.ServiceDataBase.FromJson<ResponseMessage>(JToken.Parse(result));
+                var message = TestUtils.CreateResponseMessage(result);
                 var status = message.Data["value"]["ConnectionState"];
 
                 // Assert
@@ -139,15 +157,15 @@ namespace VSEIoTCoreServer.IntegrationTests
                 Assert.True(status.ToString() == "connected" || status.ToString() == "connecting");
             }
 
-
-
-            // stop the IoTCore process for each configured device and assert that it is no longer reachable
-
+            // Act
             await iotCoreService.Stop(_deviceConfig1.Id);
+
+            // Wait for the asynchronous call to finish
             Thread.Sleep(5000);
 
-            using (var client = new Client("http://127.0.0.1:" + _deviceConfig1.IoTCorePort))
+            using (var client = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig1.IoTCorePort))
             {
+                // Assert
                 await Assert.ThrowsAsync<HttpRequestException>(async () =>
                 {
                     try
@@ -161,9 +179,6 @@ namespace VSEIoTCoreServer.IntegrationTests
                     }
                 });
             }
-
-
         }
-
     }
 }

@@ -6,6 +6,7 @@ using VSEIoTCoreServer.ViewModels;
 using Serilog;
 using VSEIoTCoreServer;
 using Microsoft.EntityFrameworkCore;
+using VSEIoTCoreServer.LibraryRuntime;
 
 // Setup logging
 var loggingConfig = "serilogsettings.json";
@@ -47,6 +48,8 @@ services.AddDbContext<SQLiteDbContext>(options => options.UseSqlite(conStr));
 
 services.AddScoped<IDeviceConfigurationService, DeviceConfigurationService>();
 services.AddScoped<IIoTCoreService, IoTCoreService>();
+services.AddScoped<IGlobalIoTCoreService, GlobalIoTCoreService>();
+services.AddScoped<IIoTCoreRuntime, IoTCoreRuntime>();
 
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
@@ -65,28 +68,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// instanciate device configuration service directly here
-
-//IDeviceConfigurationService deviceConfigurationService = new DeviceConfigurationService();
-
-//IIoTCoreService iotCoreService = new IoTCoreService();
-
-// Issue#51 - Read VSE connection data -> start IoT Cores
-
-await using (var context = new SQLiteDbContext())
-{
-    // read VSE connection data from SQLite db and store them in a in-memory settings object
-    var deviceConfigurations = context.DeviceConfigurations.ToList();
-
-    // start IoTCore instances based on the connection settings
-    deviceConfigurations.ForEach(x =>
-    {
-        ProcessStartInfo startInfo = new ProcessStartInfo("..\\..\\VSEIoTCore\\win-x64\\vse-iotcore-adapter-process.exe");
-        startInfo.Arguments = "--vse-ip " + x.VseIpAddress + " --vse-port " + x.VsePort + " --iotcore-uri " + "http://127.0.0.1" + ":" + x.IoTCorePort;
-        Process process = Process.Start(startInfo);
-    });
-}
-
 
 app.Run();

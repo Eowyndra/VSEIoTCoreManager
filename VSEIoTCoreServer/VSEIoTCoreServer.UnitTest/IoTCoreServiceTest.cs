@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace VSEIoTCoreServer.IntegrationTests
+namespace VSEIoTCoreServer.UnitTest
 {
     public class IoTCoreServiceTest
     {

@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSEIoTCoreServer.DAL", "VSE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4209423A-59E9-4A84-8EEE-ED5358FF7A12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEIoTCoreServer.UnitTest", "VSEIoTCoreServer.UnitTest\VSEIoTCoreServer.UnitTest.csproj", "{7E589E16-100B-46CA-BE41-D4880A8F02C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSEIoTCoreServer.UnitTest", "VSEIoTCoreServer.UnitTest\VSEIoTCoreServer.UnitTest.csproj", "{7E589E16-100B-46CA-BE41-D4880A8F02C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEIoTCoreServer.IntegrationTests", "VSEIoTCoreServer.IntegrationTests\VSEIoTCoreServer.IntegrationTests.csproj", "{166B5666-9FCA-4529-B9E6-44DA75DD2DAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSEIoTCoreServer.IntegrationTests", "VSEIoTCoreServer.IntegrationTests\VSEIoTCoreServer.IntegrationTests.csproj", "{166B5666-9FCA-4529-B9E6-44DA75DD2DAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEIoTCoreServer.LibraryRuntime", "VSEIoTCoreServer.LibraryRuntime\VSEIoTCoreServer.LibraryRuntime.csproj", "{46AEA5F4-370B-4551-BBAC-C32E03751F9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +37,10 @@ Global
 		{166B5666-9FCA-4529-B9E6-44DA75DD2DAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{166B5666-9FCA-4529-B9E6-44DA75DD2DAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{166B5666-9FCA-4529-B9E6-44DA75DD2DAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46AEA5F4-370B-4551-BBAC-C32E03751F9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46AEA5F4-370B-4551-BBAC-C32E03751F9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46AEA5F4-370B-4551-BBAC-C32E03751F9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46AEA5F4-370B-4551-BBAC-C32E03751F9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

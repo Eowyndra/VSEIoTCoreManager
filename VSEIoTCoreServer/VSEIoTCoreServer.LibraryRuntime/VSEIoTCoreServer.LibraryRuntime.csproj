@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ifmIoTCore" Version="1.4.12396" />
+    <PackageReference Include="ifmIoTCore.Converter.Json" Version="1.4.12395" />
+    <PackageReference Include="ifmIoTCore.NetAdapter.Http" Version="1.4.12397" />
+    <PackageReference Include="ifmIoTCore.Profiles.Device" Version="1.4.12397" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+  </ItemGroup>
+
+</Project>

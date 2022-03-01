@@ -6,5 +6,6 @@
 
         public string AdapterLocation { get; set; } = String.Empty;
         public string IoTCoreURI { get; set; } = String.Empty;
+        public int GlobalIoTCorePort { get; set; } = 0;   
     }
 }

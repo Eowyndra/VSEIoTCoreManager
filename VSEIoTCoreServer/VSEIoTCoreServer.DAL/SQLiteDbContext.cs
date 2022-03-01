@@ -15,7 +15,7 @@ namespace VSEIoTCoreServer.DAL
         {
 
         }
-        
+
         public virtual DbSet<DeviceConfiguration> DeviceConfigurations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
