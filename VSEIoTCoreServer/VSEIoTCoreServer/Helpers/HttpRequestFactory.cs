@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 
-namespace VSEIoTCoreServer.IntegrationTests
+namespace VSEIoTCoreServer.Helpers
 {
     public class HttpRequestFactory
     {

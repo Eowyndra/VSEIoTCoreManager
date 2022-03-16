@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
+using VSEIoTCoreServer.DAL.Models.Enums;
+using VSEIoTCoreServer.Helpers;
 using VSEIoTCoreServer.LibraryRuntime;
 using VSEIoTCoreServer.ViewModels;
 
@@ -12,6 +14,7 @@ namespace VSEIoTCoreServer.Services
         private readonly IoTCoreOptions _iotCoreOptions;
         private readonly ILogger<GlobalIoTCoreService> _logger;
         private readonly Uri _globalIoTCoreServerUri;
+        private static GlobalIoTCoreStatusViewModel _globalIoTCoreStatus = new GlobalIoTCoreStatusViewModel();
 
         public GlobalIoTCoreService(IDeviceConfigurationService deviceConfigurationService, 
             IIoTCoreService iotCoreService,
@@ -56,6 +59,7 @@ namespace VSEIoTCoreServer.Services
             {
                 _logger.LogInformation("Starting global IoTCore server... ");
                 _iotCoreRuntime.Start(_iotCoreOptions.IoTCoreURI, _iotCoreOptions.GlobalIoTCorePort);
+                _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.PartlyRunning;
                 _logger.LogInformation("Global IoTCore server started!");
             }
             catch (Exception ex)
@@ -71,11 +75,19 @@ namespace VSEIoTCoreServer.Services
             await StartVSEIoTCores(deviceConfigurations);
 
             // IoTCores are started asynchronous
-            // this waiting period is to ensure they are started to avoid problem when adding them to the global IoTCore instance
-            Thread.Sleep(5000);
+            // this call ensures they are started to avoid problems when adding them to the global IoTCore instance
+            bool started = await WaitUntilStarted(deviceConfigurations);
+
+            if (!started)
+            {
+                _logger.LogError("Error: IoTCores are not started");
+                throw new TimeoutException();
+            }
 
             // activate mirroring for every started VSEIoTCore
             await ActivateMirroring(deviceConfigurations);
+            _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.Running;
+
         }
 
         public async Task Stop()
@@ -85,46 +97,55 @@ namespace VSEIoTCoreServer.Services
 
             // stop the VSEIoTCore instance for each device
             await StopVSEIoTCores(deviceConfigurations);
+            _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.PartlyRunning;
 
             // stop the global IoTCore instance
-            await Task.Run(() =>
+
+            try
             {
-                try
-                {
-                    _logger.LogInformation("Stopping global IoTCore server... ");
-                    _iotCoreRuntime.Stop();
-                    _logger.LogInformation("Global IoTCore server stopped!");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError("Error stopping global IoTCore server: " + ex.Message);
-                    throw;
-                }
-            });
+                _logger.LogInformation("Stopping global IoTCore server... ");
+                _iotCoreRuntime.Stop();
+                _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.Stopped;
+                _logger.LogInformation("Global IoTCore server stopped!");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error stopping global IoTCore server: " + ex.Message);
+                throw;
+            }
         }
 
-        private async Task StartVSEIoTCores(List<DeviceConfigurationViewModel> deviceConfigurations)
+        public Task<GlobalIoTCoreStatusViewModel> GetStatus()
         {
-            foreach (var device in deviceConfigurations)
-            {
-                await _iotCoreService.Start(device.Id);
-            }
+            return Task.FromResult(_globalIoTCoreStatus);
+        }
+
+        private Task StartVSEIoTCores(List<DeviceConfigurationViewModel> deviceConfigurations)
+        {
+            return Task.WhenAll(deviceConfigurations.Select(device => _iotCoreService.Start(device.Id)));
         }
 
         private async Task ActivateMirroring(List<DeviceConfigurationViewModel> deviceConfigurations)
         {
             foreach (var device in deviceConfigurations)
             {
-                await AddMirror(device);
+                await AddMirror(device);    
             }
         }
 
-        private async Task StopVSEIoTCores(List<DeviceConfigurationViewModel> deviceConfigurations)
+        private Task StopVSEIoTCores(List<DeviceConfigurationViewModel> deviceConfigurations)
         {
+            return Task.WhenAll(deviceConfigurations.Select(device => _iotCoreService.Stop(device.Id)));
+        }
+
+        private async Task<bool> WaitUntilStarted(List<DeviceConfigurationViewModel> deviceConfigurations, int maxWaitInMilliseconds = 5_000)
+        {
+            var allStarted = true;
             foreach (var device in deviceConfigurations)
             {
-                await _iotCoreService.Stop(device.Id);
+                allStarted &= await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(_iotCoreOptions.IoTCoreURI, device.IoTCorePort);
             }
+            return allStarted;
         }
     }
 }

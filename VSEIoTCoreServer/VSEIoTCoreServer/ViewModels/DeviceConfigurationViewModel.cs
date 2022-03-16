@@ -1,8 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using VSEIoTCoreServer.DAL.Models.Enums;
 
 namespace VSEIoTCoreServer.ViewModels
 {
-    public class DeviceConfigurationViewModel
+    public interface IStatus
+    {
+        IoTStatus IoTStatus { get; set; }
+        DeviceStatus DeviceStatus { get; set; }
+    }
+    public class DeviceConfigurationViewModel : IStatus
     {
         [Required]
         public int Id { get; set; }
@@ -16,5 +22,7 @@ namespace VSEIoTCoreServer.ViewModels
         [Required]
         [Range(1, 65535)]
         public int IoTCorePort { get; set; }
+        public IoTStatus IoTStatus { get; set; }
+        public DeviceStatus DeviceStatus { get; set; }
     }
 }

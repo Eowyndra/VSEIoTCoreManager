@@ -1,4 +1,6 @@
-﻿namespace VSEIoTCoreServer.Services
+﻿using VSEIoTCoreServer.ViewModels;
+
+namespace VSEIoTCoreServer.Services
 {
     public interface IIoTCoreService
     {
@@ -15,5 +17,12 @@
         /// <param name="deviceId"></param>
         /// <returns></returns>
         Task Stop(int deviceId);
+
+        /// <summary>
+        /// Get the current status of the device with the given deviceId
+        /// </summary>
+        /// <param name="deviceId"></param>
+        /// <returns></returns>
+        Task<IStatus> Status(int deviceId);
     }
 }

@@ -61,5 +61,26 @@ namespace VSEIoTCoreServer.Controllers
 
             return result;
         }
+
+        [ProducesResponseType(200, Type = typeof(GlobalIoTCoreStatusViewModel))]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(404)]
+        [HttpGet("status")]
+        public async Task<IActionResult> GetStatus()
+        {
+            ActionResult result;
+            try
+            {
+                var status = await _globalIoTCoreService.GetStatus();   
+                
+                result = Ok(status);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Internal Error: " + ex.Message);
+                result = StatusCode(500);
+            }
+            return result;
+        }
     }
 }

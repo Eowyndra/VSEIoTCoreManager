@@ -1,6 +1,10 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using VSEIoTCoreServer.Helpers;
+using VSEIoTCoreServer.ViewModels;
+using VSEIoTCoreServer.ExtensionMethods;
+using VSEIoTCoreServer.DAL.Models.Enums;
 
 namespace VSEIoTCoreServer.Services
 {
@@ -78,6 +82,37 @@ namespace VSEIoTCoreServer.Services
                     throw;
                 }
             });
+        }
+
+        public async Task<IStatus> Status(int deviceId)
+        {
+            var device = await _deviceConfigurationService.GetById(deviceId);
+
+            // device.IoTStatus: has the VSEIoTCore process been started?
+            device.IoTStatus = _iotCoreProcessForDeviceId.ContainsKey(deviceId) ? IoTStatus.Running : IoTStatus.Stopped;
+
+            // device.DeviceStatus: is the device reachable via IoTCore URI?
+            try
+            {
+                using (var client = new Client(_iotCoreOptions.IoTCoreURI + ":" + device.IoTCorePort))
+                {
+                    var result = await client.RequestDeviceStatus();
+                    var deviceStatusMessage = IoTCoreUtils.CreateResponseMessage(result);
+                    device.DeviceStatus = deviceStatusMessage.Data.GetDeviceStatus();
+                }
+            }
+            catch (HttpRequestException)
+            {
+                // IoTCore has not been started and/or is not reachable, set status to disconnected
+                device.DeviceStatus = DeviceStatus.Disconnected;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Error getting VSEIoTCore status: " + e.Message);
+                throw;
+            }
+
+            return device;
         }
     }
 }

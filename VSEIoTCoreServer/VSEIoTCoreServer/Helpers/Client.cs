@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace VSEIoTCoreServer.IntegrationTests
+namespace VSEIoTCoreServer.Helpers
 {
     public class Client : IDisposable
     {
@@ -37,6 +37,21 @@ namespace VSEIoTCoreServer.IntegrationTests
             response.EnsureSuccessStatusCode();
             var body = await response.Content.ReadAsStringAsync();
             return body;
+        }
+
+        public async Task<string> RequestDeviceStatus()
+        {
+            return await SendRequestAndAwaitResponseAsync("/Device/Status/getdata");
+        }
+
+        public async Task<string> RequestTree()
+        {
+            return await SendRequestAndAwaitResponseAsync("/gettree");
+        }
+
+        public async Task<string> RequestDeviceInformationDevice()
+        {
+            return await SendRequestAndAwaitResponseAsync("/Device/Information/Device/getdata");
         }
     }
 }
