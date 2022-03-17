@@ -1,0 +1,28 @@
+:host::ng-deep .ifm-master-list {
+  background-color: transparent !important;
+}
+
+:host::ng-deep .mat-list-item {
+  border-bottom: 1px solid var(--ifm-border-color);
+}
+
+:host::ng-deep .mat-list-item-content {
+  justify-content: space-between;
+}
+
+.status-icons {
+  display: flex;
+  align-items: center;
+
+  .warning-icon {
+    color: var(--ifm-warning-color);
+    font-size: 28px;
+    width: 32px;
+  }
+
+  .server-status-icon {
+    font-size: 58px;
+    height: 48px;
+    width: 32px;
+  }
+}

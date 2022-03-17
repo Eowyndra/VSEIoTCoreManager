@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VSEIoTCoreServer\VSEIoTCoreServer.csproj" />
+    <ProjectReference Include="..\VSEIoTCoreServer.WebApp\VSEIoTCoreServer.WebApp.csproj" />
   </ItemGroup>
 
 </Project>

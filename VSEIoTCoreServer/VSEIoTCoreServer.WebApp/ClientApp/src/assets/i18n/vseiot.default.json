@@ -1,0 +1,44 @@
+{
+  "header": {
+    "help-centre": {
+      "name": "VSE IoT Core Server Configurator",
+      "version": "Version",
+      "copyright": "ifm electronic gmbh",
+      "license-info": "Licence info"
+    },
+    "license-info": {
+      "title": "Licence information",
+      "line1": "This product contains free software or open source software from various program authors, which are subject to the specific licence conditions given below.",
+      "line2": "Any open source software used in the product is subject to the relevant licence terms which remain unaffected by the End-user Licence Agreement for the product.",
+      "line3": "In particular, the licensee may modify the respective open source software in accordance with the applicable licence terms.",
+      "line4": "The copyright holders (program authors) do not provide any warranty and assume no liability for the free and open source software components.",
+      "line5": "The responsibility of ifm electronic gmbh for its products remains unaffected by the above disclaimer.",
+      "package-name": "Package name",
+      "version": "Version",
+      "copyright": "Copyright",
+      "license-url": "Licence URL",
+      "license-type": "Licence type",
+      "publisher": "Publisher",
+      "button-close": "Close"
+    }
+  },
+  "sidebar": {
+    "serverStatus": "Server status"
+  },
+  "server-status": {
+    "title": "Server status",
+    "current-status": "Current status",
+    "button-start": "Start server",
+    "button-stop": "Stop server"
+  },
+  "service-status": {
+    "Stopped": "Stopped",
+    "StartPending": "Start pending",
+    "StopPending": "Stop pending",
+    "Running": "Running",
+    "ContinuePending": "Continue pending",
+    "PausePending": "Pause pending",
+    "Paused": "Paused",
+    "undefined": "Unreachable"
+  }
+}

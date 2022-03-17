@@ -12,18 +12,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using VSEIoTCoreServer.DAL;
 using VSEIoTCoreServer.DAL.Models;
-using VSEIoTCoreServer.Services;
-using VSEIoTCoreServer.ViewModels;
+using VSEIoTCoreServer.WebApp.Services;
+using VSEIoTCoreServer.WebApp.ViewModels;
 using Xunit;
 using System.Linq;
 using System.Net.Http;
 using System.Diagnostics;
 using VSEIoTCoreServer.LibraryRuntime;
-using VSEIoTCoreServer.Helpers;
+using VSEIoTCoreServer.WebApp.Helpers;
 using VSEIoTCoreServer.DAL.Models.Enums;
 using System;
-using VSEIoTCoreServer.ExtensionMethods;
+using VSEIoTCoreServer.WebApp.ExtensionMethods;
 using VSEIoTCoreServer.CommonTestUtils;
+using VSEIoTCoreServer.WebApp;
 
 namespace VSEIoTCoreServer.IntegrationTests
 {

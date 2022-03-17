@@ -1,11 +1,12 @@
 ﻿using Xunit;
 using Moq;
-using VSEIoTCoreServer.Services;
+using VSEIoTCoreServer.WebApp.Services;
 using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using VSEIoTCoreServer.LibraryRuntime;
+using VSEIoTCoreServer.WebApp;
 
 namespace VSEIoTCoreServer.UnitTest
 {

@@ -1,0 +1,259 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "VSEIoTCoreServer.WebApp",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/v1/Device": {
+      "get": {
+        "tags": [
+          "Device"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeviceConfigurationViewModel"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeviceConfigurationViewModel"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeviceConfigurationViewModel"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/Device/device/{id}/status": {
+      "get": {
+        "tags": [
+          "Device"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/IStatus"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IStatus"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IStatus"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/Global/start": {
+      "post": {
+        "tags": [
+          "Global"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "500": {
+            "description": "Server Error"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/Global/stop": {
+      "post": {
+        "tags": [
+          "Global"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "500": {
+            "description": "Server Error"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/v1/Global/status": {
+      "get": {
+        "tags": [
+          "Global"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalIoTCoreStatusViewModel"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalIoTCoreStatusViewModel"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalIoTCoreStatusViewModel"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DeviceConfigurationViewModel": {
+        "required": [
+          "id",
+          "ioTCorePort",
+          "vseIpAddress",
+          "vsePort",
+          "vseType"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "vseType": {
+            "type": "string"
+          },
+          "vseIpAddress": {
+            "type": "string"
+          },
+          "vsePort": {
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "ioTCorePort": {
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "ioTStatus": {
+            "$ref": "#/components/schemas/IoTStatus"
+          },
+          "deviceStatus": {
+            "$ref": "#/components/schemas/DeviceStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeviceStatus": {
+        "enum": [
+          "Disconnected",
+          "Connecting",
+          "Connected"
+        ],
+        "type": "string"
+      },
+      "GlobalIoTCoreStatus": {
+        "enum": [
+          "Stopped",
+          "PartlyRunning",
+          "Running"
+        ],
+        "type": "string"
+      },
+      "GlobalIoTCoreStatusViewModel": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/GlobalIoTCoreStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IStatus": {
+        "type": "object",
+        "properties": {
+          "ioTStatus": {
+            "$ref": "#/components/schemas/IoTStatus"
+          },
+          "deviceStatus": {
+            "$ref": "#/components/schemas/DeviceStatus"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IoTStatus": {
+        "enum": [
+          "Stopped",
+          "Running"
+        ],
+        "type": "string"
+      }
+    }
+  }
+}

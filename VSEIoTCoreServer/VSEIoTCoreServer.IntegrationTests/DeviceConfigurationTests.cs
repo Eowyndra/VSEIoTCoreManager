@@ -8,8 +8,9 @@ using System.IO;
 using System.Threading.Tasks;
 using VSEIoTCoreServer.DAL;
 using VSEIoTCoreServer.DAL.Models;
-using VSEIoTCoreServer.Services;
-using VSEIoTCoreServer.ViewModels;
+using VSEIoTCoreServer.WebApp;
+using VSEIoTCoreServer.WebApp.Services;
+using VSEIoTCoreServer.WebApp.ViewModels;
 using Xunit;
 
 namespace VSEIoTCoreServer.IntegrationTests

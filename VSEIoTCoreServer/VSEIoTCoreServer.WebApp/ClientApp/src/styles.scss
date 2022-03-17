@@ -1,0 +1,169 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import 'node_modules/ifm-ui-components/theme';
+@import 'node_modules/@ifm/components/lib/theme/theme';
+
+html,
+body,
+form {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  line-height: 100%;
+  color: white;
+}
+
+*:focus {
+  outline: 0;
+}
+
+.loading-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  .loading-screen-text
+
+{
+  margin-top: 32px;
+}
+
+.spinner {
+  animation: rotator 1.4s linear infinite;
+}
+
+.path {
+  stroke-dasharray: 187;
+  stroke-dashoffset: 0;
+  transform-origin: center;
+  animation: dash 1.4s ease-in-out infinite;
+  stroke: var(--ifm-focus-color);
+}
+
+}
+
+.color-running {
+  color: var(--ifm-accent-04);
+}
+
+.color-stopped {
+  color: var(--ifm-alarm-color);
+}
+
+.color-back-running {
+  background-color: var(--ifm-accent-04);
+}
+
+.color-back-stopped {
+  background-color: var(--ifm-alarm-color);
+}
+
+.inline {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5em;
+}
+
+.margin-bottom {
+  margin-bottom: 3.5em;
+}
+
+.margin-bottom-3em {
+  margin-bottom: 3em;
+}
+
+.tooltip-info {
+  font-size: 22px !important;
+  margin-left: 10px;
+  align-self: center;
+}
+
+.text-left {
+  text-align: left !important;
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.margin-left-20 {
+  margin-left: 20px;
+}
+
+.width-100 {
+  width: 100px;
+}
+
+.width-150 {
+  width: 150px;
+}
+
+.width-250 {
+  width: 250px;
+}
+
+.width-400 {
+  width: 400px;
+}
+
+.width-full {
+  width: 100%;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+div .ifm-menu {
+  min-width: 150px !important;
+}
+
+ifm-confirmation-dialog {
+  .ifm-scroll-panel-expand-container
+
+{
+  text-align: center;
+}
+
+}
+
+.mat-dialog-container {
+  padding: 0 !important;
+}
+
+// set background for standard input fields
+.mat-form-field-flex {
+  background: var(--ifm-color-basic2-14);
+}
+
+.height-small {
+  height: 1rem;
+}
+
+.height-normal {
+  height: 1.5rem;
+}
+
+.height-large {
+  height: 2rem;
+}
+
+.button-standard {
+  padding: 0 3.5rem !important;
+  height: 3.5rem !important;
+}
+
+.text-large {
+  font-size: 1.5rem;
+}

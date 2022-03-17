@@ -8,8 +8,8 @@ namespace VSEIoTCoreServer.IntegrationTests
         public const string TestDevice2 = "TestDevice2";
 
         public int Id { get; set; } = 0;
-        public string VseType { get; set; } = String.Empty;
-        public string VseIpAddress { get; set; } = String.Empty;
+        public string VseType { get; set; } = string.Empty;
+        public string VseIpAddress { get; set; } = string.Empty;
         public int VsePort { get; set; } = 0;
         public int IoTCorePort { get; set; } = 0;
     }

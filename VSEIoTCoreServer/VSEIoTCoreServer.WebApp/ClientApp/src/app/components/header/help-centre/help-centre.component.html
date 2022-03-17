@@ -1,0 +1,26 @@
+<ifm-info-dialog>
+  <div class="help">
+    <h2>
+      {{ appName }}
+    </h2>
+
+    <div class="line text-gray">
+      {{ 'vseiot.header.help-centre.version' | transloco }}
+      &nbsp;
+      {{ version }}
+    </div>
+
+    <div class="line">
+      <ifm-font-icon icon="copyright"></ifm-font-icon>
+      &nbsp;
+      {{ year }}
+      {{ 'vseiot.header.help-centre.copyright' | transloco }}
+    </div>
+
+    <div class="line">
+      <ifm-font-icon icon="info"></ifm-font-icon>
+      &nbsp;
+      <a (click)="displayLicenses()" ifm-link>{{ 'vseiot.header.help-centre.license-info' | transloco }}</a>
+    </div>
+  </div>
+</ifm-info-dialog>

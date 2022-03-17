@@ -1,7 +1,7 @@
 using Xunit;
 using Moq;
-using VSEIoTCoreServer.Services;
-using VSEIoTCoreServer.Controllers;
+using VSEIoTCoreServer.WebApp.Services;
+using VSEIoTCoreServer.WebApp.Controllers;
 using System;
 using Microsoft.Extensions.Logging;
 

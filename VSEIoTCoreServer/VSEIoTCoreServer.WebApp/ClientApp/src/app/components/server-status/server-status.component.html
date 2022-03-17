@@ -1,0 +1,37 @@
+<h1>{{ 'vseiot.server-status.title' | transloco }}</h1>
+<div class="container">
+  <div class="content">
+    <p>{{ 'vseiot.server-status.current-status' | transloco }}</p>
+
+    <ifm-card
+      class="width-full"
+      [ngClass]="{
+        'color-back-running': globalStatus === GlobalStatusEnum.Running,
+        'color-back-stopped': globalStatus === GlobalStatusEnum.Stopped
+      }">
+      <div class="text-center text-large">
+        {{ 'vseiot.service-status.' + globalStatus | transloco }}
+      </div>
+    </ifm-card>
+
+    <div class="height-normal"></div>
+
+    <button
+      class="button-standard width-full"
+      (click)="startServer()"
+      [disabled]="globalStatus === GlobalStatusEnum.Stopped ? null : true"
+      fontIcon="runnnig"
+      ifm-standard-button
+      label="{{ 'vseiot.server-status.button-start' | transloco }}"></button>
+
+    <div class="height-normal"></div>
+
+    <button
+      class="button-standard width-full"
+      (click)="stopServer()"
+      [disabled]="globalStatus === GlobalStatusEnum.Running ? null : true"
+      fontIcon="stopped"
+      ifm-standard-button
+      label="{{ 'vseiot.server-status.button-stop' | transloco }}"></button>
+  </div>
+</div>

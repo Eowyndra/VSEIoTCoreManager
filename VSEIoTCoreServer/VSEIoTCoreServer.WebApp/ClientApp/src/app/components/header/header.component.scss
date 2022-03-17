@@ -1,0 +1,30 @@
+.header {
+  height: 100%;
+  background-color: var(--ifm-shell-background-color);
+  border-bottom: 1px solid var(--ifm-border-color);
+  justify-content: flex-end;
+
+  .divider {
+    width: 2px;
+    height: 100%;
+    background: var(--ifm-border-color);
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .help {
+    display: flex;
+    height: 100%;
+
+    button {
+      height: 3rem;
+      width: 3rem;
+    }
+
+    .time-zone {
+      display: flex;
+      flex-direction: column;
+      font-size: 1rem;
+      margin: 0 1rem;
+    }
+  }
+}

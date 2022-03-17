@@ -1,0 +1,17 @@
+<ng-container *ifmIsTransLoaded>
+  <div class="main">
+    <div class="header">
+      <app-header></app-header>
+    </div>
+    <div class="main-content">
+      <div class="sidebar">
+        <app-sidebar></app-sidebar>
+      </div>
+      <div class="content">
+        <ifm-scroll-panel [allowVertical]="true" [allowHorizontal]="true" [flex]="true">
+          <router-outlet></router-outlet>
+        </ifm-scroll-panel>
+      </div>
+    </div>
+  </div>  
+</ng-container>

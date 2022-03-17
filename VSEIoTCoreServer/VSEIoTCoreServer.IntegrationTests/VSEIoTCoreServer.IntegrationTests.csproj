@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VSEIoTCoreServer.CommonTestUtils\VSEIoTCoreServer.CommonTestUtils.csproj" />
-    <ProjectReference Include="..\VSEIoTCoreServer\VSEIoTCoreServer.csproj" />
+    <ProjectReference Include="..\VSEIoTCoreServer.WebApp\VSEIoTCoreServer.WebApp.csproj" />
   </ItemGroup>
 
 </Project>

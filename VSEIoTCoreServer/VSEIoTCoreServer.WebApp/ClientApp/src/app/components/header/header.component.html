@@ -1,0 +1,12 @@
+<mat-toolbar class="header">
+  <div class="help">
+    <button #helpButton (click)="openHelpDialog()" fontIcon="help" ifm-icon-button></button>
+    <div class="divider"></div>
+    <div *ngIf="currentTime$ | async as currentTime" class="time-zone">
+      <span>{{ currentTime | date: 'shortDate' }}</span> <span>{{ currentTime | date: 'mediumTime' }}</span>
+    </div>
+    <div class="divider"></div>
+    <button (click)="logout()" fontIcon="logout" ifm-icon-button></button>
+    <div class="divider"></div>
+  </div>
+</mat-toolbar>

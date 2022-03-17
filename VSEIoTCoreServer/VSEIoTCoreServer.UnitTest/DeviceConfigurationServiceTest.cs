@@ -1,6 +1,6 @@
 ﻿using Xunit;
 using Moq;
-using VSEIoTCoreServer.Services;
+using VSEIoTCoreServer.WebApp.Services;
 using System;
 using AutoMapper;
 using VSEIoTCoreServer.DAL;

@@ -1,0 +1,28 @@
+.main {
+    background-color: var(--ifm-shell-background-color);
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 1px);
+    min-height: 720px;
+    min-width: 800px;
+  
+    .header {
+      height: 3rem;
+    }
+  
+    .main-content {
+      display: flex;
+      height: calc(100% - 3rem);
+  
+      .sidebar {
+        border-right: 1px solid var(--ifm-border-color);
+      }
+  
+      .content {
+        display: flex;
+        flex: 1;
+        margin: 1.5rem 2rem;
+      }
+    }
+  }
+  

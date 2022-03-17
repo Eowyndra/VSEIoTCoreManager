@@ -1,8 +1,8 @@
 ﻿using Xunit;
 using Moq;
-using VSEIoTCoreServer.Services;
+using VSEIoTCoreServer.WebApp.Services;
 using System;
-using VSEIoTCoreServer.ViewModels;
+using VSEIoTCoreServer.WebApp.ViewModels;
 
 namespace VSEIoTCoreServer.UnitTest
 {

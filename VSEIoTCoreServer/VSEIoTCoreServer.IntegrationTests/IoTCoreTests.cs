@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using VSEIoTCoreServer.DAL;
 using VSEIoTCoreServer.DAL.Models;
-using VSEIoTCoreServer.Services;
-using VSEIoTCoreServer.ViewModels;
+using VSEIoTCoreServer.WebApp.Services;
+using VSEIoTCoreServer.WebApp.ViewModels;
 using Xunit;
 using MockQueryable.Moq;
 using System.Net.Http;
@@ -15,11 +15,12 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 using Microsoft.Extensions.Options;
-using VSEIoTCoreServer.Helpers;
+using VSEIoTCoreServer.WebApp.Helpers;
 using System;
 using VSEIoTCoreServer.DAL.Models.Enums;
-using VSEIoTCoreServer.ExtensionMethods;
+using VSEIoTCoreServer.WebApp.ExtensionMethods;
 using VSEIoTCoreServer.CommonTestUtils;
+using VSEIoTCoreServer.WebApp;
 
 namespace VSEIoTCoreServer.IntegrationTests
 {

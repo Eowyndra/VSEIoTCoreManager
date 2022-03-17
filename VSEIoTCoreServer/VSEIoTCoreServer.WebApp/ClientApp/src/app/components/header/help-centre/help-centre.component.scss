@@ -1,0 +1,14 @@
+.help {
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem;
+
+  .line {
+    display: flex;
+    margin: 1rem 0;
+  }
+
+  .text-gray {
+    color: rgba(var(--ifm-highlight-color-rgb), 0.7);
+  }
+}
