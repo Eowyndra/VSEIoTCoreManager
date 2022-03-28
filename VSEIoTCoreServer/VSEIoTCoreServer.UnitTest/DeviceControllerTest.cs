@@ -4,44 +4,89 @@ using VSEIoTCoreServer.WebApp.Services;
 using VSEIoTCoreServer.WebApp.Controllers;
 using System;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using VSEIoTCoreServer.WebApp;
 
 namespace VSEIoTCoreServer.UnitTest
 {
     public class DeviceControllerTest
     {
+        private readonly IDeviceConfigurationService _deviceConfigurationServiceMock;
+        private readonly IIoTCoreService _iotCoreServiceMock;
+        private readonly IGlobalIoTCoreService _globalIoTCoreServiceMock;
+        private readonly ILoggerFactory _loggerFactoryMock;
+        private readonly IOptions<IoTCoreOptions> _iotCoreOptionsMock;
+
+        public DeviceControllerTest()
+        {
+            _deviceConfigurationServiceMock = new Mock<IDeviceConfigurationService>().Object;
+            _iotCoreServiceMock = new Mock<IIoTCoreService>().Object;
+            _globalIoTCoreServiceMock = new Mock<IGlobalIoTCoreService>().Object;
+            _loggerFactoryMock = new Mock<ILoggerFactory>().Object;
+            _iotCoreOptionsMock = Options.Create<IoTCoreOptions>(new IoTCoreOptions());
+        }
+
+
         [Fact]
         public void Ctor_Test()
         {
-            var deviceConfigurationServiceMock = new Mock<IDeviceConfigurationService>().Object;
-            var iotCoreServiceMock = new Mock<IIoTCoreService>().Object;
-            var loggerFactoryMock = new Mock<ILoggerFactory>().Object;
-            Assert.NotNull(new DeviceController(deviceConfigurationServiceMock, iotCoreServiceMock, loggerFactoryMock));
+            Assert.NotNull(new DeviceController(_deviceConfigurationServiceMock,
+                _iotCoreServiceMock,
+                _globalIoTCoreServiceMock,
+                _loggerFactoryMock,
+                _iotCoreOptionsMock));
         }
 
         [Fact]
         public void Ctor_DeviceConfigService_Null_Error_Test()
         {
-            var iotCoreServiceMock = new Mock<IIoTCoreService>().Object;
-            var loggerFactoryMock = new Mock<ILoggerFactory>().Object;
-            Assert.Throws<ArgumentNullException>("deviceConfigurationService", () => new DeviceController(null, iotCoreServiceMock, loggerFactoryMock));
+            Assert.Throws<ArgumentNullException>("deviceConfigurationService", () => new DeviceController(null,
+                _iotCoreServiceMock,
+                _globalIoTCoreServiceMock,
+                _loggerFactoryMock,
+                _iotCoreOptionsMock));
         }
 
         [Fact]
         public void Ctor_IoTCoreService_Null_Error_Test()
         {
-            var deviceConfigurationServiceMock = new Mock<IDeviceConfigurationService>().Object;
-            var loggerFactoryMock = new Mock<ILoggerFactory>().Object;
-            Assert.Throws<ArgumentNullException>("iotCoreService", () => new DeviceController(deviceConfigurationServiceMock, null, loggerFactoryMock));
+            Assert.Throws<ArgumentNullException>("iotCoreService", () => new DeviceController(_deviceConfigurationServiceMock,
+                null, 
+                _globalIoTCoreServiceMock,
+                _loggerFactoryMock,
+                _iotCoreOptionsMock));
+        }
+
+
+        [Fact]
+        public void Ctor_GlobalIoTCoreService_Null_Error_Test()
+        {
+            Assert.Throws<ArgumentNullException>("globalIoTCoreService", () => new DeviceController(_deviceConfigurationServiceMock,
+                _iotCoreServiceMock,
+                null,
+                _loggerFactoryMock,
+                _iotCoreOptionsMock));
         }
 
         [Fact]
         public void Ctor_Logger_Null_Error_Test()
         {
-            var iotCoreServiceMock = new Mock<IIoTCoreService>().Object;
-            var deviceConfigurationServiceMock = new Mock<IDeviceConfigurationService>().Object;
-            Assert.Throws<ArgumentNullException>("loggerFactory", () => new DeviceController(deviceConfigurationServiceMock, iotCoreServiceMock, null));
+            Assert.Throws<ArgumentNullException>("loggerFactory", () => new DeviceController(_deviceConfigurationServiceMock,
+                _iotCoreServiceMock,
+                _globalIoTCoreServiceMock,
+                null,
+                _iotCoreOptionsMock));
         }
 
+        [Fact]
+        public void Ctor_IoTCoreOptions_Null_Error_Test()
+        {
+            Assert.Throws<ArgumentNullException>("iotCoreOptions", () => new DeviceController(_deviceConfigurationServiceMock,
+                _iotCoreServiceMock,
+                _globalIoTCoreServiceMock,
+                _loggerFactoryMock,
+                null));
+        }
 
     }
 }

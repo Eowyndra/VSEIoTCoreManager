@@ -22,7 +22,7 @@ namespace VSEIoTCoreServer.WebApp.Services
         /// Get the current status of the device with the given deviceId
         /// </summary>
         /// <param name="deviceId"></param>
-        /// <returns></returns>
-        Task<IStatus> Status(int deviceId);
+        /// <returns>The device configuration model containing the status</returns>
+        Task<StatusViewModel?> Status(int deviceId);
     }
 }

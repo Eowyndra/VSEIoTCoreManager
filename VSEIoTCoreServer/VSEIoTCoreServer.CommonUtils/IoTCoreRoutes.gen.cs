@@ -1,6 +1,6 @@
 ﻿
 
-namespace VSEIoTCoreServer.CommonTestUtils
+namespace VSEIoTCoreServer.CommonUtils
 {
 	public static partial class IoTCoreRoutes
 	{
@@ -11,6 +11,7 @@ namespace VSEIoTCoreServer.CommonTestUtils
 		public static string Device(this string s) => s + Device();
 		public static string Information(this string s) => s + Information();
 		public static string Status(this string s) => s + Status();
+		public static string Type(this string s) => s + Type();
 		public static string Objects(this string s) => s + Objects();
 		public static string Object(this string s, int objectId) => s + Object(objectId);
 		public static string Counters(this string s) => s + Counters();

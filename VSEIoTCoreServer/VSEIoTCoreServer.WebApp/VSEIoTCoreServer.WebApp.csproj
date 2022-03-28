@@ -6,7 +6,7 @@
     <IsPackable>false</IsPackable>
     <SpaRoot>ClientApp\</SpaRoot>
     <SpaProxyServerUrl>https://localhost:44400</SpaProxyServerUrl>
-    <SpaProxyLaunchCommand>npm start</SpaProxyLaunchCommand>
+    <!--<SpaProxyLaunchCommand>npm start</SpaProxyLaunchCommand>-->
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\VSEIoTCoreServer.CommonUtils\VSEIoTCoreServer.CommonUtils.csproj" />
     <ProjectReference Include="..\VSEIoTCoreServer.DAL\VSEIoTCoreServer.DAL.csproj" />
     <ProjectReference Include="..\VSEIoTCoreServer.LibraryRuntime\VSEIoTCoreServer.LibraryRuntime.csproj" />
   </ItemGroup>
@@ -42,6 +43,10 @@
     <None Remove="$(SpaRoot)**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="VSEIoTCoreServer.IntegrationTests" />
+	</ItemGroup>
 
   <ItemGroup>
     <Folder Include="ClientApp\src\app\components\" />

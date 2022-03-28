@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ifmIoTCore" Version="1.4.12396" />
+    <PackageReference Include="ifmIoTCore.Converter.Json" Version="1.4.12395" />
+    <PackageReference Include="ifmIoTCore.NetAdapter.Http" Version="1.4.12397" />
+    <PackageReference Include="ifmIoTCore.Profiles.Device" Version="1.4.12397" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="IoTCoreRoutes.tt">
+      <LastGenOutput>IoTCoreRoutes.gen.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="IoTCoreRoutes.gen.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IoTCoreRoutes.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>
+
+

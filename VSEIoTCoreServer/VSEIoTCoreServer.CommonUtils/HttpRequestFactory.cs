@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 
-namespace VSEIoTCoreServer.WebApp.Helpers
+namespace VSEIoTCoreServer.CommonUtils
 {
     public class HttpRequestFactory
     {

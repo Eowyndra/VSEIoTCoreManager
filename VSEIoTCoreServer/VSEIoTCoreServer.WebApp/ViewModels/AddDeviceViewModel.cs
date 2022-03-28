@@ -1,13 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace VSEIoTCoreServer.DAL.Models
+namespace VSEIoTCoreServer.WebApp.ViewModels
 {
-    public class DeviceConfiguration
+    public class AddDeviceViewModel
     {
         [Required]
-        public int Id { get; set; }
-        public string VseType { get; set; }
-        [Required]
+        [RegularExpression(@"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", ErrorMessage = "IP-Address must be valid.")]
         public string VseIpAddress { get; set; }
         [Required]
         [Range(1, 65535)]

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using VSEIoTCoreServer.DAL.Models.Enums;
 using VSEIoTCoreServer.LibraryRuntime;
-using VSEIoTCoreServer.WebApp.Helpers;
+using VSEIoTCoreServer.CommonUtils;
 using VSEIoTCoreServer.WebApp.ViewModels;
 
 namespace VSEIoTCoreServer.WebApp.Services
@@ -26,11 +26,11 @@ namespace VSEIoTCoreServer.WebApp.Services
             _iotCoreService = iotCoreService ?? throw new ArgumentNullException(nameof(iotCoreService));
             _iotCoreRuntime = iotCoreRuntime ?? throw new ArgumentNullException(nameof(iotCoreRuntime));
             var options = iotCoreOptions ?? throw new ArgumentNullException(nameof(iotCoreOptions));
+            _iotCoreOptions = options.Value;
 
             var factory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _logger = factory.CreateLogger<GlobalIoTCoreService>();
 
-            _iotCoreOptions = options.Value;
             _globalIoTCoreServerUri = new Uri($"{_iotCoreOptions.IoTCoreURI}:{_iotCoreOptions.GlobalIoTCorePort}");
         }
 
@@ -138,12 +138,12 @@ namespace VSEIoTCoreServer.WebApp.Services
             return Task.WhenAll(deviceConfigurations.Select(device => _iotCoreService.Stop(device.Id)));
         }
 
-        private async Task<bool> WaitUntilStarted(List<DeviceConfigurationViewModel> deviceConfigurations, int maxWaitInMilliseconds = 5_000)
+        private async Task<bool> WaitUntilStarted(List<DeviceConfigurationViewModel> deviceConfigurations, int maxWaitInMilliseconds = 60_000)
         {
             var allStarted = true;
             foreach (var device in deviceConfigurations)
             {
-                allStarted &= await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(_iotCoreOptions.IoTCoreURI, device.IoTCorePort);
+                allStarted &= await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(_iotCoreOptions.IoTCoreURI, device.IoTCorePort, maxWaitInMilliseconds);
             }
             return allStarted;
         }

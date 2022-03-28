@@ -8,11 +8,17 @@ namespace VSEIoTCoreServer.WebApp.ViewModels
         IoTStatus IoTStatus { get; set; }
         DeviceStatus DeviceStatus { get; set; }
     }
-    public class DeviceConfigurationViewModel : IStatus
+
+    public class StatusViewModel : IStatus
+    {
+        public IoTStatus IoTStatus { get; set; }
+        public DeviceStatus DeviceStatus { get; set; }
+    }
+
+    public class DeviceConfigurationViewModel : StatusViewModel
     {
         [Required]
         public int Id { get; set; }
-        [Required]
         public string VseType { get; set; }
         [Required]
         public string VseIpAddress { get; set; }
@@ -22,7 +28,6 @@ namespace VSEIoTCoreServer.WebApp.ViewModels
         [Required]
         [Range(1, 65535)]
         public int IoTCorePort { get; set; }
-        public IoTStatus IoTStatus { get; set; }
-        public DeviceStatus DeviceStatus { get; set; }
+
     }
 }

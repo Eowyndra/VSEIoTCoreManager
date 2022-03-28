@@ -3,25 +3,32 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using VSEIoTCoreServer.DAL.Models.Enums;
 using VSEIoTCoreServer.WebApp.ExtensionMethods;
-using VSEIoTCoreServer.WebApp.Helpers;
+using VSEIoTCoreServer.CommonUtils;
 using VSEIoTCoreServer.WebApp.ViewModels;
+using AutoMapper;
 
 namespace VSEIoTCoreServer.WebApp.Services
 {
     public class IoTCoreService : IIoTCoreService
     {
-        private static ConcurrentDictionary<int, Process> _iotCoreProcessForDeviceId = new ConcurrentDictionary<int, Process>();
+        private readonly IMapper _mapper;
+        private readonly ILogger<IoTCoreService> _logger;
         private readonly IDeviceConfigurationService _deviceConfigurationService;
         private readonly IoTCoreOptions _iotCoreOptions;
-        private readonly ILogger<IoTCoreService> _logger;
+        private static ConcurrentDictionary<int, Process> _iotCoreProcessForDeviceId = new ConcurrentDictionary<int, Process>();
+ 
 
-        public IoTCoreService(IDeviceConfigurationService deviceConfigurationService, ILoggerFactory loggerFactory, IOptions<IoTCoreOptions> iotCoreOptions)
+        public IoTCoreService(IMapper mapper, 
+            IDeviceConfigurationService deviceConfigurationService,
+            ILoggerFactory loggerFactory,
+            IOptions<IoTCoreOptions> iotCoreOptions)
         {
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
-            var options = iotCoreOptions ?? throw new ArgumentNullException(nameof(iotCoreOptions));
-            _iotCoreOptions = options.Value;
             var factory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _logger = factory.CreateLogger<IoTCoreService>();
+            var options = iotCoreOptions ?? throw new ArgumentNullException(nameof(iotCoreOptions));
+            _iotCoreOptions = options.Value;
         }
 
         public async Task Start(int deviceId)
@@ -53,6 +60,17 @@ namespace VSEIoTCoreServer.WebApp.Services
                     throw;
                 }
             });
+
+            // If device has no device type, try to get device type from IoTCore and update entity in database
+            if (device.VseType == null || device.VseType == "")
+            {
+                var deviceType = await GetDeviceType(_iotCoreOptions.IoTCoreURI, device.IoTCorePort);
+                if (deviceType != "")
+                {
+                    device.VseType = deviceType;
+                    await _deviceConfigurationService.UpdateDevice(device);
+                }
+            }
         }
 
         public async Task Stop(int deviceId)
@@ -84,19 +102,25 @@ namespace VSEIoTCoreServer.WebApp.Services
             });
         }
 
-        public async Task<IStatus> Status(int deviceId)
+        public async Task<StatusViewModel?> Status(int deviceId)
         {
+            // Get device model from database
             var device = await _deviceConfigurationService.GetById(deviceId);
+            if (device == null)
+            {
+                _logger.LogInformation($"Device with Id={deviceId} not found!");
+                return null;
+            }
 
-            // device.IoTStatus: has the VSEIoTCore process been started?
+            // IoTStatus: has the VSEIoTCore process been started?
             device.IoTStatus = _iotCoreProcessForDeviceId.ContainsKey(deviceId) ? IoTStatus.Running : IoTStatus.Stopped;
 
-            // device.DeviceStatus: is the device reachable via IoTCore URI?
+            // DeviceStatus: is the device reachable via IoTCore URI?
             try
             {
                 using (var client = new Client(_iotCoreOptions.IoTCoreURI + ":" + device.IoTCorePort))
                 {
-                    var result = await client.RequestDeviceStatus();
+                    var result = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Status().GetData());
                     var deviceStatusMessage = IoTCoreUtils.CreateResponseMessage(result);
                     device.DeviceStatus = deviceStatusMessage.Data.GetDeviceStatus();
                 }
@@ -112,7 +136,25 @@ namespace VSEIoTCoreServer.WebApp.Services
                 throw;
             }
 
-            return device;
+            var statusViewModel = _mapper.Map<StatusViewModel>(device); 
+            return statusViewModel;
+        }
+
+        private async Task<string> GetDeviceType(string ioTCoreURI, int ioTCorePort)
+        {
+            var deviceType = "";
+            var started = await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(ioTCoreURI, ioTCorePort);
+            if (started)
+            {
+                //get device type from iotcore
+                using (var client = new Client(ioTCoreURI + ":" + ioTCorePort))
+                {
+                    var result = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().Type().GetData());
+                    var message = IoTCoreUtils.CreateResponseMessage(result);
+                    deviceType = message.Data.GetDeviceType();
+                }
+            }
+            return deviceType;
         }
     }
 }

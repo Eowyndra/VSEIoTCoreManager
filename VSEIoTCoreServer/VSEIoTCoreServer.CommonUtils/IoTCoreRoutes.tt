@@ -7,7 +7,7 @@
 <#@ output extension=".gen.cs" #>
 
 
-namespace VSEIoTCoreServer.CommonTestUtils
+namespace VSEIoTCoreServer.CommonUtils
 {
 	public static partial class IoTCoreRoutes
 	{

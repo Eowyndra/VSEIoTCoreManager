@@ -1,8 +1,11 @@
 ﻿using ifmIoTCore.Messages;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace VSEIoTCoreServer.WebApp.Helpers
+namespace VSEIoTCoreServer.CommonUtils
 {
     public class IoTCoreUtils
     {
@@ -11,7 +14,7 @@ namespace VSEIoTCoreServer.WebApp.Helpers
             return ifmIoTCore.Elements.ServiceData.ServiceDataBase.FromJson<ResponseMessage>(JToken.Parse(jsonString));
         }
 
-        public static async Task<bool> WaitUntilVSEIoTCoreStopped(string iotCoreUri, int iotCorePort, int maxWaitInMilliseconds = 5_000)
+        public static async Task<bool> WaitUntilVSEIoTCoreStopped(string iotCoreUri, int iotCorePort, int maxWaitInMilliseconds = 60_000)
         {
             var result = false;
             using (var client = new Client(iotCoreUri + ":" + iotCorePort))
@@ -20,7 +23,7 @@ namespace VSEIoTCoreServer.WebApp.Helpers
                 {
                     try
                     {
-                        var response = await client.RequestDeviceInformationDevice();
+                        var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().GetData());
                     }
                     catch (HttpRequestException)
                     {
@@ -30,13 +33,12 @@ namespace VSEIoTCoreServer.WebApp.Helpers
 
                     Thread.Sleep(500); // waiting 500 ms, then re-checking
                     maxWaitInMilliseconds -= 500;
-                    continue;
                 }
                 return result;
             }
         }
 
-        public static async Task<bool> WaitUntilVSEIoTCoreStarted(string iotCoreUri, int iotCorePort, int maxWaitInMilliseconds = 10_000)
+        public static async Task<bool> WaitUntilVSEIoTCoreStarted(string iotCoreUri, int iotCorePort, int maxWaitInMilliseconds = 60_000)
         {
             var result = false;
             using (var client = new Client(iotCoreUri + ":" + iotCorePort))
@@ -45,7 +47,7 @@ namespace VSEIoTCoreServer.WebApp.Helpers
                 {
                     try
                     {
-                        var response = await client.RequestDeviceInformationDevice();
+                        var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().GetData());
                         var msg = CreateResponseMessage(response);
                         if (msg.Code == 200)
                         {
@@ -60,13 +62,12 @@ namespace VSEIoTCoreServer.WebApp.Helpers
 
                     Thread.Sleep(500); // waiting 500 ms, then re-checking
                     maxWaitInMilliseconds -= 500;
-                    continue;
                 }
                 return result;
             }
         }
 
-        public static async Task<bool> WaitUntilGlobalIoTCoreStopped(string iotCoreUri, int iotCorePort, int maxWaitInMilliseconds = 5_000)
+        public static async Task<bool> WaitUntilGlobalIoTCoreStopped(string iotCoreUri, int iotCorePort, int maxWaitInMilliseconds = 60_000)
         {
             var result = false;
             using (var client = new Client(iotCoreUri + ":" + iotCorePort))
@@ -75,7 +76,7 @@ namespace VSEIoTCoreServer.WebApp.Helpers
                 {
                     try
                     {
-                        var response = await client.RequestTree();
+                        var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.GetTree());
                     }
                     catch (HttpRequestException)
                     {
@@ -85,13 +86,12 @@ namespace VSEIoTCoreServer.WebApp.Helpers
 
                     Thread.Sleep(500); // waiting 500 ms, then re-checking
                     maxWaitInMilliseconds -= 500;
-                    continue;
                 }
                 return result;
             }
         }
 
-        public static async Task<bool> WaitUntilGlobalIoTCoreStarted(string iotCoreUri, int iotCorePort, int maxWaitInMilliseconds = 5_000)
+        public static async Task<bool> WaitUntilGlobalIoTCoreStarted(string iotCoreUri, int iotCorePort, int maxWaitInMilliseconds = 60_000)
         {
             var result = false;
             using (var client = new Client(iotCoreUri + ":" + iotCorePort))
@@ -100,7 +100,7 @@ namespace VSEIoTCoreServer.WebApp.Helpers
                 {
                     try
                     {
-                        var response = await client.RequestTree();
+                        var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.GetTree());
                         var msg = CreateResponseMessage(response);
                         if (msg.Code == 200)
                         {
@@ -115,7 +115,6 @@ namespace VSEIoTCoreServer.WebApp.Helpers
 
                     Thread.Sleep(500); // waiting 500 ms, then re-checking
                     maxWaitInMilliseconds -= 500;
-                    continue;
                 }
                 return result;
             }
