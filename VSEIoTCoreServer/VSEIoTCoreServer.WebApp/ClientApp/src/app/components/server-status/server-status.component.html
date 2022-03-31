@@ -7,10 +7,11 @@
       class="width-full"
       [ngClass]="{
         'color-back-running': globalStatus === GlobalStatusEnum.Running,
+        'color-back-partly-running': globalStatus === GlobalStatusEnum.PartlyRunning,
         'color-back-stopped': globalStatus === GlobalStatusEnum.Stopped
       }">
       <div class="text-center text-large">
-        {{ 'vseiot.service-status.' + globalStatus | transloco }}
+        {{ 'vseiot.server-status.' + globalStatus | transloco }}
       </div>
     </ifm-card>
 

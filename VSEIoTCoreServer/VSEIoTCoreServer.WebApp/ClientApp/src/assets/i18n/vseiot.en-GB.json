@@ -29,16 +29,10 @@
     "title": "Server status",
     "current-status": "Current status",
     "button-start": "Start server",
-    "button-stop": "Stop server"
-  },
-  "service-status": {
+    "button-stop": "Stop server",
     "Stopped": "Stopped",
-    "StartPending": "Start pending",
-    "StopPending": "Stop pending",
     "Running": "Running",
-    "ContinuePending": "Continue pending",
-    "PausePending": "Pause pending",
-    "Paused": "Paused",
+    "PartlyRunning": "Partly running",
     "undefined": "Unreachable"
   }
 }

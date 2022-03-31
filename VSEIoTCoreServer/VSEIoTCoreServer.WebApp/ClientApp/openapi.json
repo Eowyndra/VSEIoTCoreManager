@@ -40,16 +40,122 @@
               }
             }
           },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Device"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AddDeviceViewModel"
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AddDeviceViewModel"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AddDeviceViewModel"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AddDeviceViewModel"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Client Error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error"
           }
         }
       }
     },
-    "/api/v1/Device/device/{id}/status": {
+    "/api/v1/Device/{id}/status": {
       "get": {
         "tags": [
           "Device"
@@ -71,26 +177,43 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/IStatus"
+                  "$ref": "#/components/schemas/StatusViewModel"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IStatus"
+                  "$ref": "#/components/schemas/StatusViewModel"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IStatus"
+                  "$ref": "#/components/schemas/StatusViewModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
           },
           "500": {
             "description": "Server Error"
-          },
-          "404": {
-            "description": "Not Found"
           }
         }
       }
@@ -104,11 +227,28 @@
           "200": {
             "description": "Success"
           },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Server Error"
-          },
-          "404": {
-            "description": "Not Found"
           }
         }
       }
@@ -122,11 +262,28 @@
           "200": {
             "description": "Success"
           },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Server Error"
-          },
-          "404": {
-            "description": "Not Found"
           }
         }
       }
@@ -157,11 +314,28 @@
               }
             }
           },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Server Error"
-          },
-          "404": {
-            "description": "Not Found"
           }
         }
       }
@@ -169,22 +343,55 @@
   },
   "components": {
     "schemas": {
+      "AddDeviceViewModel": {
+        "required": [
+          "ioTCorePort",
+          "vseIpAddress",
+          "vsePort"
+        ],
+        "type": "object",
+        "properties": {
+          "vseIpAddress": {
+            "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
+            "type": "string"
+          },
+          "vsePort": {
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "ioTCorePort": {
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "DeviceConfigurationViewModel": {
         "required": [
           "id",
           "ioTCorePort",
           "vseIpAddress",
-          "vsePort",
-          "vseType"
+          "vsePort"
         ],
         "type": "object",
         "properties": {
+          "ioTStatus": {
+            "$ref": "#/components/schemas/IoTStatus"
+          },
+          "deviceStatus": {
+            "$ref": "#/components/schemas/DeviceStatus"
+          },
           "id": {
             "type": "integer",
             "format": "int32"
           },
           "vseType": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "vseIpAddress": {
             "type": "string"
@@ -200,12 +407,6 @@
             "minimum": 1,
             "type": "integer",
             "format": "int32"
-          },
-          "ioTStatus": {
-            "$ref": "#/components/schemas/IoTStatus"
-          },
-          "deviceStatus": {
-            "$ref": "#/components/schemas/DeviceStatus"
           }
         },
         "additionalProperties": false
@@ -235,7 +436,41 @@
         },
         "additionalProperties": false
       },
-      "IStatus": {
+      "IoTStatus": {
+        "enum": [
+          "Stopped",
+          "Running"
+        ],
+        "type": "string"
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": {}
+      },
+      "StatusViewModel": {
         "type": "object",
         "properties": {
           "ioTStatus": {
@@ -246,13 +481,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "IoTStatus": {
-        "enum": [
-          "Stopped",
-          "Running"
-        ],
-        "type": "string"
       }
     }
   }

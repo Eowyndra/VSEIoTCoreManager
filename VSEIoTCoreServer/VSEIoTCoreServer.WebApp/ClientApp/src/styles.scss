@@ -53,12 +53,20 @@ body {
   color: var(--ifm-accent-04);
 }
 
+.color-partly-running {
+  color: var(--ifm-warning-color);
+}
+
 .color-stopped {
   color: var(--ifm-alarm-color);
 }
 
 .color-back-running {
   background-color: var(--ifm-accent-04);
+}
+
+.color-back-partly-running {
+  background-color: var(--ifm-warning-color);
 }
 
 .color-back-stopped {
