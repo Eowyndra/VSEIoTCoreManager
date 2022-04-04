@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSEIoTCoreServer.DAL", "VSE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4209423A-59E9-4A84-8EEE-ED5358FF7A12}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSEIoTCoreServer.UnitTest", "VSEIoTCoreServer.UnitTest\VSEIoTCoreServer.UnitTest.csproj", "{7E589E16-100B-46CA-BE41-D4880A8F02C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSEIoTCoreServer.UnitTests", "VSEIoTCoreServer.UnitTest\VSEIoTCoreServer.UnitTests.csproj", "{7E589E16-100B-46CA-BE41-D4880A8F02C8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSEIoTCoreServer.IntegrationTests", "VSEIoTCoreServer.IntegrationTests\VSEIoTCoreServer.IntegrationTests.csproj", "{166B5666-9FCA-4529-B9E6-44DA75DD2DAE}"
 EndProject
@@ -17,7 +17,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSEIoTCoreServer.WebApp", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSEIoTCoreServer.CommonUtils", "VSEIoTCoreServer.CommonUtils\VSEIoTCoreServer.CommonUtils.csproj", "{58434B07-1858-4650-A0CF-DB9FF9CA5EEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSEIoTCoreServer.CommonTestUtils", "VSEIoTCoreServer.CommonTestUtils\VSEIoTCoreServer.CommonTestUtils.csproj", "{483C4985-B40A-4A92-B3F5-415CAF8E508D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSEIoTCoreServer.CommonTestUtils", "VSEIoTCoreServer.CommonTestUtils\VSEIoTCoreServer.CommonTestUtils.csproj", "{483C4985-B40A-4A92-B3F5-415CAF8E508D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{00110E10-A31A-4CAB-850D-0916D082409F}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.stylecop.json = .stylecop.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

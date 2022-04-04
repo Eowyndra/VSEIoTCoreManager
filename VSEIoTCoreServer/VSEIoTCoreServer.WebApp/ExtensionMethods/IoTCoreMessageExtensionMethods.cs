@@ -1,14 +1,20 @@
-﻿using Newtonsoft.Json.Linq;
-using VSEIoTCoreServer.DAL.Models.Enums;
+﻿// ----------------------------------------------------------------------------
+// Filename: IoTCoreMessageExtensionMethods.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.WebApp.ExtensionMethods
 {
-    internal static class IoTCoreMessageExtensionMethods
-    {
+    using Newtonsoft.Json.Linq;
+    using VSEIoTCoreServer.DAL.Models.Enums;
 
+    public static class IoTCoreMessageExtensionMethods
+    {
         public static string? GetConnectionState(this JToken objectData)
         {
-            if (objectData["value"] == null || objectData["value"]?.ToList().Count < 1)
+            if (objectData?["value"] == null || objectData["value"]?.ToList().Count < 1)
             {
                 return null;
             }
@@ -32,13 +38,14 @@ namespace VSEIoTCoreServer.WebApp.ExtensionMethods
             }
         }
 
-        public static string GetDeviceType(this JToken objectData)
+        public static string? GetDeviceType(this JToken objectData)
         {
-            if (objectData["value"] == null)
+            if (objectData?["value"] == null)
             {
                 return null;
             }
-            return objectData["value"].ToString();
+
+            return objectData["value"]?.ToString();
         }
     }
 }

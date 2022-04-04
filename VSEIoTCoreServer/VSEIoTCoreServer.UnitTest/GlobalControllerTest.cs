@@ -1,13 +1,20 @@
-using Xunit;
-using Moq;
-using VSEIoTCoreServer.WebApp.Services;
-using VSEIoTCoreServer.WebApp.Controllers;
-using System;
-using Microsoft.Extensions.Logging;
+// ----------------------------------------------------------------------------
+// Filename: GlobalControllerTest.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.UnitTest
 {
-    public class GlobalControllerTest
+    using System;
+    using Microsoft.Extensions.Logging;
+    using Moq;
+    using VSEIoTCoreServer.WebApp.Controllers;
+    using VSEIoTCoreServer.WebApp.Services;
+    using Xunit;
+
+    public class GlobalControllerTest : IDisposable
     {
         [Fact]
         public void Ctor_Test()
@@ -31,6 +38,8 @@ namespace VSEIoTCoreServer.UnitTest
             Assert.Throws<ArgumentNullException>("loggerFactory", () => new GlobalController(mockGlobalIoTCoreService, null));
         }
 
-
+        public void Dispose()
+        {
+        }
     }
 }

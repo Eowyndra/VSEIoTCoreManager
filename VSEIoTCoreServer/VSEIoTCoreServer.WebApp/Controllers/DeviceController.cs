@@ -1,12 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using VSEIoTCoreServer.WebApp.Services;
-using VSEIoTCoreServer.WebApp.ViewModels;
-using VSEIoTCoreServer.DAL.Models.Enums;
-using VSEIoTCoreServer.CommonUtils;
-using Microsoft.Extensions.Options;
+﻿// ----------------------------------------------------------------------------
+// Filename: DeviceController.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.WebApp.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Options;
+    using VSEIoTCoreServer.CommonUtils;
+    using VSEIoTCoreServer.DAL.Models.Enums;
+    using VSEIoTCoreServer.WebApp.Services;
+    using VSEIoTCoreServer.WebApp.ViewModels;
+
     [ApiController]
     [Route("api/v1/[controller]")]
     public class DeviceController : ControllerBase
@@ -17,10 +24,10 @@ namespace VSEIoTCoreServer.WebApp.Controllers
         private readonly IoTCoreOptions _iotCoreOptions;
         private readonly ILogger<DeviceController> _logger;
 
-
-        public DeviceController(IDeviceConfigurationService deviceConfigurationService, 
-            IIoTCoreService iotCoreService, 
-            IGlobalIoTCoreService globalIoTCoreService, 
+        public DeviceController(
+            IDeviceConfigurationService deviceConfigurationService,
+            IIoTCoreService iotCoreService,
+            IGlobalIoTCoreService globalIoTCoreService,
             ILoggerFactory loggerFactory,
             IOptions<IoTCoreOptions> iotCoreOptions)
         {
@@ -69,8 +76,8 @@ namespace VSEIoTCoreServer.WebApp.Controllers
             {
                 _logger.LogError("Internal Error:" + e.Message);
                 result = StatusCode(500);
-
             }
+
             return result;
         }
 
@@ -83,7 +90,9 @@ namespace VSEIoTCoreServer.WebApp.Controllers
         {
             // Validate model
             if (!ModelState.IsValid)
+            {
                 return UnprocessableEntity(ModelState);
+            }
 
             StatusCodeResult result;
             try

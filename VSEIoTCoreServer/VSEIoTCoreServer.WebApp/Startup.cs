@@ -1,15 +1,22 @@
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-using VSEIoTCoreServer.DAL;
-using VSEIoTCoreServer.LibraryRuntime;
-using VSEIoTCoreServer.WebApp.Services;
-using VSEIoTCoreServer.WebApp.ViewModels;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
+// ----------------------------------------------------------------------------
+// Filename: Startup.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.WebApp
 {
+    using System.Text.Json.Serialization;
+    using Microsoft.EntityFrameworkCore;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
+    using Newtonsoft.Json.Serialization;
+    using VSEIoTCoreServer.DAL;
+    using VSEIoTCoreServer.LibraryRuntime;
+    using VSEIoTCoreServer.WebApp.Services;
+    using VSEIoTCoreServer.WebApp.ViewModels;
+
     public class Startup
     {
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
@@ -27,8 +34,7 @@ namespace VSEIoTCoreServer.WebApp
             services.Configure<IoTCoreOptions>(Configuration.GetSection(IoTCoreOptions.IoTCoreSettings));
             services.AddAutoMapper(typeof(AutoMapperProfile));
 
-
-            string conStr = Configuration.GetConnectionString("SQLiteConnection");
+            var conStr = Configuration.GetConnectionString("SQLiteConnection");
             services.AddDbContext<SQLiteDbContext>(options => options.UseSqlite(conStr));
 
             services.AddScoped<IDeviceConfigurationService, DeviceConfigurationService>();
@@ -56,8 +62,9 @@ namespace VSEIoTCoreServer.WebApp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            else //Only in Dev mode
+            else
             {
+                // Only in Dev mode
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
@@ -72,8 +79,7 @@ namespace VSEIoTCoreServer.WebApp
                         name: "default",
                         pattern: "{controller}/{action=Index}/{id?}");
                     endpoints.MapFallbackToFile("index.html");
-                }
-            );
+                });
         }
     }
 }

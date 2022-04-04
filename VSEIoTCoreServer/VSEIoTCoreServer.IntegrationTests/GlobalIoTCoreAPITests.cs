@@ -1,31 +1,40 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using System.IO;
-using Xunit;
-using System;
-using VSEIoTCoreServer.WebApp;
-using VSEIoTCoreServer.CommonTestUtils;
-using VSEIoTCoreServer.DAL.Models;
-using System.Net.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Hosting;
-using System.Linq;
-using VSEIoTCoreServer.DAL;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Net;
-using VSEIoTCoreServer.CommonUtils;
-using VSEIoTCoreServer.WebApp.ViewModels;
-using Newtonsoft.Json;
-using VSEIoTCoreServer.DAL.Models.Enums;
+﻿// ----------------------------------------------------------------------------
+// Filename: GlobalIoTCoreAPITests.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.IntegrationTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Net;
+    using System.Net.Http;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Mvc.Testing;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
+    using Newtonsoft.Json;
+    using VSEIoTCoreServer.CommonTestUtils;
+    using VSEIoTCoreServer.CommonUtils;
+    using VSEIoTCoreServer.DAL;
+    using VSEIoTCoreServer.DAL.Models;
+    using VSEIoTCoreServer.DAL.Models.Enums;
+    using VSEIoTCoreServer.WebApp;
+    using VSEIoTCoreServer.WebApp.ViewModels;
+    using Xunit;
+
     [Collection("Sequential")]
     public class GlobalIoTCoreAPITests : IDisposable
     {
+        private static int _testServerPort = 5050; // Using a different port for the test server in each test to allow parallel testing
+
         private readonly TestDeviceOptions _testDevice1;
         private readonly TestDeviceOptions _testDevice2;
         private readonly TestDeviceOptions _testDevice3;
@@ -33,10 +42,7 @@ namespace VSEIoTCoreServer.IntegrationTests
 
         private DeviceConfiguration _deviceConfig1;
         private DeviceConfiguration _deviceConfig2;
-        private DeviceConfiguration _deviceConfig3;
         private HttpClient _httpClient;
-        private static int _testServerPort = 5050; // Using a different port for the test server in each test to allow parallel testing
-
 
         public GlobalIoTCoreAPITests()
         {
@@ -48,7 +54,7 @@ namespace VSEIoTCoreServer.IntegrationTests
 
             var options = new IoTCoreOptions();
             configuration.GetSection(IoTCoreOptions.IoTCoreSettings).Bind(options);
-            _iotCoreOptions = Options.Create<IoTCoreOptions>(options);
+            _iotCoreOptions = Options.Create(options);
 
             _testDevice1 = new TestDeviceOptions();
             configuration.GetSection("TestDevices:TestDevice1").Bind(_testDevice1);
@@ -63,11 +69,9 @@ namespace VSEIoTCoreServer.IntegrationTests
         [Fact]
         public async Task Start_Test()
         {
-            // Arrange 
+            // Arrange
             _testServerPort++;
-            List<DeviceConfiguration> deviceConfigurations = new List<DeviceConfiguration>();
-            deviceConfigurations.Add(_deviceConfig1);
-            deviceConfigurations.Add(_deviceConfig2);
+            var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1, _deviceConfig2 };
             SetupTestServer(deviceConfigurations, _testServerPort);
 
             // Act
@@ -86,11 +90,9 @@ namespace VSEIoTCoreServer.IntegrationTests
         [Fact]
         public async Task Stop_Test()
         {
-            // Arrange 
+            // Arrange
             _testServerPort++;
-            List<DeviceConfiguration> deviceConfigurations = new List<DeviceConfiguration>();
-            deviceConfigurations.Add(_deviceConfig1);
-            deviceConfigurations.Add(_deviceConfig2);
+            var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1, _deviceConfig2 };
             SetupTestServer(deviceConfigurations, _testServerPort);
 
             var response = await WebAPI_Post_Start(_testServerPort);
@@ -108,11 +110,9 @@ namespace VSEIoTCoreServer.IntegrationTests
         [Fact]
         public async Task GetStatus_Stopped_Test()
         {
-            // Arrange 
+            // Arrange
             _testServerPort++;
-            List<DeviceConfiguration> deviceConfigurations = new List<DeviceConfiguration>();
-            deviceConfigurations.Add(_deviceConfig1);
-            deviceConfigurations.Add(_deviceConfig2);
+            var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1, _deviceConfig2 };
             SetupTestServer(deviceConfigurations, _testServerPort);
 
             var response = await WebAPI_Post_Start(_testServerPort);
@@ -135,13 +135,11 @@ namespace VSEIoTCoreServer.IntegrationTests
         [Fact]
         public async Task GetStatus_Started_Test()
         {
-            // Arrange 
+            // Arrange
             _testServerPort++;
-            List<DeviceConfiguration> deviceConfigurations = new List<DeviceConfiguration>();
-            deviceConfigurations.Add(_deviceConfig1);
-            deviceConfigurations.Add(_deviceConfig2);
+            var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1, _deviceConfig2 };
             SetupTestServer(deviceConfigurations, _testServerPort);
-            
+
             await WebAPI_Post_Start(_testServerPort);
             await AssertedGlobalIoTCoreStarted();
 
@@ -157,6 +155,13 @@ namespace VSEIoTCoreServer.IntegrationTests
             response = await WebAPI_Post_Stop(_testServerPort);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             await AssertedGlobalIoTCoreStopped();
+        }
+
+        public void Dispose()
+        {
+            _deviceConfig1 = null;
+            _deviceConfig2 = null;
+            _httpClient?.Dispose();
         }
 
         private async Task<HttpResponseMessage> WebAPI_Post_Start(int port)
@@ -180,14 +185,14 @@ namespace VSEIoTCoreServer.IntegrationTests
         private async Task AssertedGlobalIoTCoreStarted()
         {
             // Wait for the global IoTCore to start
-            bool started = await IoTCoreUtils.WaitUntilGlobalIoTCoreStarted(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort);
+            var started = await IoTCoreUtils.WaitUntilGlobalIoTCoreStarted(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort);
             Assert.True(started);
         }
 
         private async Task AssertedGlobalIoTCoreStopped()
         {
             // Wait for the global IoTCore to stop
-            bool stopped = await IoTCoreUtils.WaitUntilGlobalIoTCoreStopped(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort);
+            var stopped = await IoTCoreUtils.WaitUntilGlobalIoTCoreStopped(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort);
             Assert.True(stopped);
         }
 
@@ -199,7 +204,7 @@ namespace VSEIoTCoreServer.IntegrationTests
                 VseType = _testDevice1.VseType,
                 VseIpAddress = _testDevice1.VseIpAddress,
                 VsePort = _testDevice1.VsePort,
-                IoTCorePort = _testDevice1.IoTCorePort
+                IoTCorePort = _testDevice1.IoTCorePort,
             };
 
             _deviceConfig2 = new DeviceConfiguration()
@@ -208,17 +213,7 @@ namespace VSEIoTCoreServer.IntegrationTests
                 VseType = _testDevice2.VseType,
                 VseIpAddress = _testDevice2.VseIpAddress,
                 VsePort = _testDevice2.VsePort,
-                IoTCorePort = _testDevice2.IoTCorePort
-            };
-
-
-            _deviceConfig3 = new DeviceConfiguration()
-            {
-                Id = _testDevice3.Id,
-                VseType = _testDevice3.VseType,
-                VseIpAddress = _testDevice3.VseIpAddress,
-                VsePort = _testDevice3.VsePort,
-                IoTCorePort = _testDevice3.IoTCorePort
+                IoTCorePort = _testDevice2.IoTCorePort,
             };
         }
 
@@ -242,30 +237,21 @@ namespace VSEIoTCoreServer.IntegrationTests
 
                         var sp = services.BuildServiceProvider();
 
-                        using (var scope = sp.CreateScope())
+                        using var scope = sp.CreateScope();
+                        var scopedServices = scope.ServiceProvider;
+                        var db = scopedServices.GetRequiredService<SQLiteDbContext>();
+                        db.Database.EnsureCreated();
+                        foreach (var deviceConfig in deviceConfigurations)
                         {
-                            var scopedServices = scope.ServiceProvider;
-                            var db = scopedServices.GetRequiredService<SQLiteDbContext>();
-                            db.Database.EnsureCreated();
-                            foreach (var deviceConfig in deviceConfigurations)
-                            {
-                                db.DeviceConfigurations.Add(deviceConfig);
-                            }
-                            db.SaveChangesAsync();
+                            db.DeviceConfigurations.Add(deviceConfig);
                         }
+
+                        db.SaveChangesAsync();
                     });
                 });
 
             // Create HttpClient to access test server
             _httpClient = application.CreateClient();
-        }
-
-        public void Dispose()
-        {
-            _deviceConfig1 = null;
-            _deviceConfig2 = null;
-            _deviceConfig3 = null;
-            _httpClient?.Dispose();
         }
     }
 }

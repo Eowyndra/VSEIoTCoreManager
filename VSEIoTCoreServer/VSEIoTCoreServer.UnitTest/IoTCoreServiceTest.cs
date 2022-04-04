@@ -1,29 +1,36 @@
-﻿using Xunit;
-using Moq;
-using VSEIoTCoreServer.WebApp.Services;
-using System;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using VSEIoTCoreServer.WebApp;
-using AutoMapper;
-using System.Threading.Tasks;
-using VSEIoTCoreServer.CommonTestUtils;
-using VSEIoTCoreServer.DAL.Models;
-using Microsoft.Extensions.Logging.Abstractions;
-using VSEIoTCoreServer.DAL;
-using System.IO;
-using VSEIoTCoreServer.WebApp.ViewModels;
-using System.Collections.Generic;
-using System.Linq;
-using MockQueryable.Moq;
-using VSEIoTCoreServer.CommonUtils;
-using System.Net.Http;
-using VSEIoTCoreServer.DAL.Models.Enums;
-using VSEIoTCoreServer.WebApp.ExtensionMethods;
+﻿// ----------------------------------------------------------------------------
+// Filename: IoTCoreServiceTest.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.UnitTest
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Logging.Abstractions;
+    using Microsoft.Extensions.Options;
+    using MockQueryable.Moq;
+    using Moq;
+    using VSEIoTCoreServer.CommonTestUtils;
+    using VSEIoTCoreServer.CommonUtils;
+    using VSEIoTCoreServer.DAL;
+    using VSEIoTCoreServer.DAL.Models;
+    using VSEIoTCoreServer.DAL.Models.Enums;
+    using VSEIoTCoreServer.WebApp;
+    using VSEIoTCoreServer.WebApp.ExtensionMethods;
+    using VSEIoTCoreServer.WebApp.Services;
+    using VSEIoTCoreServer.WebApp.ViewModels;
+    using Xunit;
+
     [Collection("Sequential")]
     public class IoTCoreServiceTest : IDisposable
     {
@@ -54,7 +61,7 @@ namespace VSEIoTCoreServer.UnitTest
             var options = new IoTCoreOptions();
             configuration.GetSection(IoTCoreOptions.IoTCoreSettings).Bind(options);
 
-            _iotCoreOptions = Options.Create<IoTCoreOptions>(options);
+            _iotCoreOptions = Options.Create(options);
 
             _testDevice1 = new TestDeviceOptions();
             configuration.GetSection("TestDevices:TestDevice1").Bind(_testDevice1);
@@ -64,14 +71,14 @@ namespace VSEIoTCoreServer.UnitTest
             _mapperMock = new Mock<IMapper>().Object;
             _deviceConfiguratonServiceMock = new Mock<IDeviceConfigurationService>().Object;
             _loggerFactoryMock = new Mock<ILoggerFactory>().Object;
-            _iotCoreOptionsMock = Options.Create<IoTCoreOptions>(new IoTCoreOptions());
+            _iotCoreOptionsMock = Options.Create(new IoTCoreOptions());
         }
 
         [Fact]
         public void Ctor_Test()
         {
             Assert.NotNull(new IoTCoreService(
-                _mapperMock, 
+                _mapperMock,
                 _deviceConfiguratonServiceMock,
                 _loggerFactoryMock,
                 _iotCoreOptionsMock));
@@ -81,7 +88,7 @@ namespace VSEIoTCoreServer.UnitTest
         public void Ctor_Mapper_Null_Error_Test()
         {
             Assert.Throws<ArgumentNullException>("mapper", () => new IoTCoreService(
-                null, 
+                null,
                 _deviceConfiguratonServiceMock,
                 _loggerFactoryMock,
                 _iotCoreOptionsMock));
@@ -92,8 +99,8 @@ namespace VSEIoTCoreServer.UnitTest
         {
             Assert.Throws<ArgumentNullException>("deviceConfigurationService", () => new IoTCoreService(
                 _mapperMock,
-                null, 
-                _loggerFactoryMock, 
+                null,
+                _loggerFactoryMock,
                 _iotCoreOptionsMock));
         }
 
@@ -102,7 +109,7 @@ namespace VSEIoTCoreServer.UnitTest
         {
             Assert.Throws<ArgumentNullException>("loggerFactory", () => new IoTCoreService(
                 _mapperMock,
-                _deviceConfiguratonServiceMock, 
+                _deviceConfiguratonServiceMock,
                 null,
                 _iotCoreOptionsMock));
         }
@@ -112,7 +119,7 @@ namespace VSEIoTCoreServer.UnitTest
         {
             Assert.Throws<ArgumentNullException>("iotCoreOptions", () => new IoTCoreService(
                 _mapperMock,
-                _deviceConfiguratonServiceMock, 
+                _deviceConfiguratonServiceMock,
                 _loggerFactoryMock,
                 null));
         }
@@ -124,6 +131,7 @@ namespace VSEIoTCoreServer.UnitTest
             Arrange();
 
             var mockDeviceConfigurationService = new Mock<IDeviceConfigurationService>();
+
             mockDeviceConfigurationService.Setup(x => x.GetById(It.IsAny<int>()))
                 .Returns(Task.FromResult(new DeviceConfigurationViewModel()
                 {
@@ -131,9 +139,14 @@ namespace VSEIoTCoreServer.UnitTest
                     VseType = _deviceConfig1.VseType,
                     VseIpAddress = _deviceConfig1.VseIpAddress,
                     VsePort = _deviceConfig1.VsePort,
-                    IoTCorePort = _deviceConfig1.IoTCorePort
+                    IoTCorePort = _deviceConfig1.IoTCorePort,
                 }));
-            _iotCoreService = new IoTCoreService(_mapper, mockDeviceConfigurationService.Object, _nullLoggerFactory, _iotCoreOptions);
+
+            _iotCoreService = new IoTCoreService(
+                _mapper,
+                mockDeviceConfigurationService.Object,
+                _nullLoggerFactory,
+                _iotCoreOptions);
 
             // Act
             await AssertedStart(_iotCoreService, _deviceConfig1.Id, _iotCoreOptions.Value.IoTCoreURI, _deviceConfig1.IoTCorePort);
@@ -168,10 +181,10 @@ namespace VSEIoTCoreServer.UnitTest
                     VseType = _deviceConfig1.VseType,
                     VseIpAddress = _deviceConfig1.VseIpAddress,
                     VsePort = _deviceConfig1.VsePort,
-                    IoTCorePort = _deviceConfig1.IoTCorePort
+                    IoTCorePort = _deviceConfig1.IoTCorePort,
                 }));
             _iotCoreService = new IoTCoreService(_mapper, mockDeviceConfigurationService.Object, _nullLoggerFactory, _iotCoreOptions);
-            
+
             await AssertedStart(_iotCoreService, _deviceConfig1.Id, _iotCoreOptions.Value.IoTCoreURI, _deviceConfig1.IoTCorePort);
 
             using (var client = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig1.IoTCorePort))
@@ -208,7 +221,7 @@ namespace VSEIoTCoreServer.UnitTest
         [Fact]
         public async Task GetStatus_Started_Test()
         {
-            // Arrange 
+            // Arrange
             Arrange();
 
             // Act
@@ -228,11 +241,11 @@ namespace VSEIoTCoreServer.UnitTest
         [Fact]
         public async Task GetStatus_Stopped_Test()
         {
-            // Arrange 
+            // Arrange
             Arrange();
             await AssertedStart(_iotCoreService, _deviceConfig1.Id, _iotCoreOptions.Value.IoTCoreURI, _deviceConfig1.IoTCorePort);
 
-            // Act 
+            // Act
             await AssertedStop(_iotCoreService, _deviceConfig1.Id, _iotCoreOptions.Value.IoTCoreURI, _deviceConfig1.IoTCorePort);
 
             // Assert
@@ -241,66 +254,6 @@ namespace VSEIoTCoreServer.UnitTest
             Assert.NotNull(device1);
             Assert.Equal(IoTStatus.Stopped, device1.IoTStatus);
             Assert.Equal(DeviceStatus.Disconnected, device1.DeviceStatus);
-        }
-
-        private void Arrange()
-        {
-            _deviceConfig1 = new DeviceConfiguration()
-            {
-                Id = _testDevice1.Id,
-                VseType = _testDevice1.VseType,
-                VseIpAddress = _testDevice1.VseIpAddress,
-                VsePort = _testDevice1.VsePort,
-                IoTCorePort = _testDevice1.IoTCorePort
-            };
-
-            _deviceConfig2 = new DeviceConfiguration()
-            {
-                Id = _testDevice2.Id,
-                VseType = _testDevice2.VseType,
-                VseIpAddress = _testDevice2.VseIpAddress,
-                VsePort = _testDevice2.VsePort,
-                IoTCorePort = _testDevice2.IoTCorePort
-            };
-
-            var myProfile = new AutoMapperProfile();
-            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
-            _mapper = new Mapper(configuration);
-
-            _nullLoggerFactory = new NullLoggerFactory();
-
-            var deviceConfigurations = new List<DeviceConfiguration>()
-            {
-                _deviceConfig1,
-                _deviceConfig2
-            };
-
-            var mockDbSet = deviceConfigurations.AsQueryable().BuildMockDbSet();
-
-            _mockDbContext = new Mock<SQLiteDbContext>();
-            _mockDbContext.Setup(x => x.DeviceConfigurations).Returns(mockDbSet.Object);
-
-            _deviceConfigService = new DeviceConfigurationService(_mapper, _mockDbContext.Object, _nullLoggerFactory);
-
-            _iotCoreService = new IoTCoreService(_mapper, _deviceConfigService, _nullLoggerFactory, _iotCoreOptions);
-        }
-
-        private async Task AssertedStart(IIoTCoreService iotCoreService, int deviceId, string iotCoreUri, int iotCorePort)
-        {
-            await iotCoreService.Start(deviceId);
-
-            // Wait for the IoTCore to start
-            bool started = await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(iotCoreUri, iotCorePort);
-            Assert.True(started);
-        }
-
-        private async Task AssertedStop(IIoTCoreService iotCoreService, int deviceId, string iotCoreUri, int iotCorePort)
-        {
-            await iotCoreService.Stop(deviceId);
-
-            // Wait for the IoTCore to stop
-            bool stopped = await IoTCoreUtils.WaitUntilVSEIoTCoreStopped(iotCoreUri, iotCorePort);
-            Assert.True(stopped);
         }
 
         public async void Dispose()
@@ -314,6 +267,66 @@ namespace VSEIoTCoreServer.UnitTest
             _mockDbContext = null;
             _deviceConfigService = null;
             _iotCoreService = null;
+        }
+
+        private static async Task AssertedStart(IIoTCoreService iotCoreService, int deviceId, string iotCoreUri, int iotCorePort)
+        {
+            await iotCoreService.Start(deviceId);
+
+            // Wait for the IoTCore to start
+            var started = await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(iotCoreUri, iotCorePort);
+            Assert.True(started);
+        }
+
+        private static async Task AssertedStop(IIoTCoreService iotCoreService, int deviceId, string iotCoreUri, int iotCorePort)
+        {
+            await iotCoreService.Stop(deviceId);
+
+            // Wait for the IoTCore to stop
+            var stopped = await IoTCoreUtils.WaitUntilVSEIoTCoreStopped(iotCoreUri, iotCorePort);
+            Assert.True(stopped);
+        }
+
+        private void Arrange()
+        {
+            _deviceConfig1 = new DeviceConfiguration()
+            {
+                Id = _testDevice1.Id,
+                VseType = _testDevice1.VseType,
+                VseIpAddress = _testDevice1.VseIpAddress,
+                VsePort = _testDevice1.VsePort,
+                IoTCorePort = _testDevice1.IoTCorePort,
+            };
+
+            _deviceConfig2 = new DeviceConfiguration()
+            {
+                Id = _testDevice2.Id,
+                VseType = _testDevice2.VseType,
+                VseIpAddress = _testDevice2.VseIpAddress,
+                VsePort = _testDevice2.VsePort,
+                IoTCorePort = _testDevice2.IoTCorePort,
+            };
+
+            var myProfile = new AutoMapperProfile();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            _mapper = new Mapper(configuration);
+
+            _nullLoggerFactory = new NullLoggerFactory();
+
+            var deviceConfigurations = new List<DeviceConfiguration>()
+            {
+                _deviceConfig1,
+                _deviceConfig2,
+            };
+
+            var mockDbSet = deviceConfigurations.AsQueryable().BuildMockDbSet();
+
+            _mockDbContext = new Mock<SQLiteDbContext>();
+            _mockDbContext.Setup(x => x.DeviceConfigurations).Returns(mockDbSet.Object);
+
+            _deviceConfigService = new DeviceConfigurationService(_mapper, _mockDbContext.Object, _nullLoggerFactory);
+
+            _iotCoreService = new IoTCoreService(_mapper, _deviceConfigService, _nullLoggerFactory, _iotCoreOptions);
         }
     }
 }

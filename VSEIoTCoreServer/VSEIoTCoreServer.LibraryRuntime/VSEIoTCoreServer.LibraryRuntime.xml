@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>VSEIoTCoreServer.LibraryRuntime</name>
+    </assembly>
+    <members>
+        <member name="M:VSEIoTCoreServer.LibraryRuntime.IIoTCoreRuntime.Start(System.String,System.Int32)">
+            <summary>
+            Starts a global IoTCore instance.
+            </summary>
+            <param name="ipAddress">The IP-Address of the global IoTCore instance.</param>
+            <param name="port">The Port of the global IoTCore instance.</param>
+        </member>
+        <member name="M:VSEIoTCoreServer.LibraryRuntime.IIoTCoreRuntime.Stop">
+            <summary>
+            Stops the global IoTCore instance.
+            </summary>
+        </member>
+        <member name="M:VSEIoTCoreServer.LibraryRuntime.IIoTCoreRuntime.AddMirror(System.String,System.Int32)">
+            <summary>
+            Add a running VSEIoTCore to the global IoTCore via Mirroring.
+            </summary>
+            <param name="vseIoTCoreIpAddress">The IP-Address of the VSEIoTCore that shall be added to the global IoTCore.</param>
+            <param name="vseIoTCorePort">The Port of the VSEIoTCore that shall be added to the global IoTCore.</param>
+        </member>
+    </members>
+</doc>

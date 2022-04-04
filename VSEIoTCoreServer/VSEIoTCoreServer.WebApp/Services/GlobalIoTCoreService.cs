@@ -1,22 +1,30 @@
-﻿using Microsoft.Extensions.Options;
-using VSEIoTCoreServer.DAL.Models.Enums;
-using VSEIoTCoreServer.LibraryRuntime;
-using VSEIoTCoreServer.CommonUtils;
-using VSEIoTCoreServer.WebApp.ViewModels;
+﻿// ----------------------------------------------------------------------------
+// Filename: GlobalIoTCoreService.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.WebApp.Services
 {
+    using Microsoft.Extensions.Options;
+    using VSEIoTCoreServer.CommonUtils;
+    using VSEIoTCoreServer.DAL.Models.Enums;
+    using VSEIoTCoreServer.LibraryRuntime;
+    using VSEIoTCoreServer.WebApp.ViewModels;
+
     public class GlobalIoTCoreService : IGlobalIoTCoreService
     {
+        private static readonly GlobalIoTCoreStatusViewModel _globalIoTCoreStatus = new ();
         private readonly IDeviceConfigurationService _deviceConfigurationService;
         private readonly IIoTCoreService _iotCoreService;
         private readonly IIoTCoreRuntime _iotCoreRuntime;
         private readonly IoTCoreOptions _iotCoreOptions;
         private readonly ILogger<GlobalIoTCoreService> _logger;
         private readonly Uri _globalIoTCoreServerUri;
-        private static GlobalIoTCoreStatusViewModel _globalIoTCoreStatus = new GlobalIoTCoreStatusViewModel();
 
-        public GlobalIoTCoreService(IDeviceConfigurationService deviceConfigurationService,
+        public GlobalIoTCoreService(
+            IDeviceConfigurationService deviceConfigurationService,
             IIoTCoreService iotCoreService,
             IIoTCoreRuntime iotCoreRuntime,
             ILoggerFactory loggerFactory,
@@ -40,13 +48,13 @@ namespace VSEIoTCoreServer.WebApp.Services
             {
                 try
                 {
-                    _logger.LogInformation($"Mirroring VSEIoTCore {_iotCoreOptions.IoTCoreURI}:{deviceConfig.IoTCorePort} into global IoTCore {_globalIoTCoreServerUri} ...");
+                    _logger.LogInformation($"Adding VSEIoTCore {_iotCoreOptions.IoTCoreURI}:{deviceConfig.IoTCorePort} to global IoTCore");
                     _iotCoreRuntime.AddMirror(_iotCoreOptions.IoTCoreURI, deviceConfig.IoTCorePort);
-                    _logger.LogInformation($"Successfully mirrored VSEIoTCore {_iotCoreOptions.IoTCoreURI}:{deviceConfig.IoTCorePort} into global IoTCore {_globalIoTCoreServerUri}!");
+                    _logger.LogInformation($"Successfully added VSEIoTCore {_iotCoreOptions.IoTCoreURI}:{deviceConfig.IoTCorePort} to global IoTCore");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Error mirroring VSEIoTCores into global IoTCore: " + ex.Message);
+                    _logger.LogError($"Error mirroring VSEIoTCores into global IoTCore: {ex.Message}");
                     throw;
                 }
             });
@@ -54,29 +62,29 @@ namespace VSEIoTCoreServer.WebApp.Services
 
         public async Task Start()
         {
-            // start the global IoTCore instance
+            // Start the global IoTCore instance
             try
             {
-                _logger.LogInformation("Starting global IoTCore server... ");
+                _logger.LogInformation("Starting global IoTCore server");
                 _iotCoreRuntime.Start(_iotCoreOptions.IoTCoreURI, _iotCoreOptions.GlobalIoTCorePort);
                 _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.PartlyRunning;
-                _logger.LogInformation("Global IoTCore server started!");
+                _logger.LogInformation("Global IoTCore server started");
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error starting global IoTCore server: " + ex.Message);
+                _logger.LogError($"Error starting global IoTCore server: {ex.Message}");
                 throw;
             }
 
-            // read device configurations from DataBase
+            // Read device configurations from DataBase
             var deviceConfigurations = await _deviceConfigurationService.GetAll();
 
-            // start a VSEIoTCore instance for each device
+            // Start a VSEIoTCore instance for each device
             await StartVSEIoTCores(deviceConfigurations);
 
             // IoTCores are started asynchronous
-            // this call ensures they are started to avoid problems when adding them to the global IoTCore instance
-            bool started = await WaitUntilStarted(deviceConfigurations);
+            // this call ensures each VSEIoTCore is started to avoid problems when adding them to the global IoTCore instance
+            var started = await WaitUntilStarted(deviceConfigurations);
 
             if (!started)
             {
@@ -84,33 +92,31 @@ namespace VSEIoTCoreServer.WebApp.Services
                 throw new TimeoutException();
             }
 
-            // activate mirroring for every started VSEIoTCore
+            // Activate mirroring for every started VSEIoTCore
             await ActivateMirroring(deviceConfigurations);
             _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.Running;
-
         }
 
         public async Task Stop()
         {
-            // read device configurations from DataBase
+            // Read device configurations from DataBase
             var deviceConfigurations = await _deviceConfigurationService.GetAll();
 
-            // stop the VSEIoTCore instance for each device
+            // Stop the VSEIoTCore instance for each device
             await StopVSEIoTCores(deviceConfigurations);
             _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.PartlyRunning;
 
-            // stop the global IoTCore instance
-
+            // Stop the global IoTCore instance
             try
             {
-                _logger.LogInformation("Stopping global IoTCore server... ");
+                _logger.LogInformation("Stopping global IoTCore server");
                 _iotCoreRuntime.Stop();
                 _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.Stopped;
-                _logger.LogInformation("Global IoTCore server stopped!");
+                _logger.LogInformation("Global IoTCore server stopped");
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error stopping global IoTCore server: " + ex.Message);
+                _logger.LogError($"Error stopping global IoTCore server: {ex.Message}");
                 throw;
             }
         }
@@ -145,6 +151,7 @@ namespace VSEIoTCoreServer.WebApp.Services
             {
                 allStarted &= await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(_iotCoreOptions.IoTCoreURI, device.IoTCorePort, maxWaitInMilliseconds);
             }
+
             return allStarted;
         }
     }

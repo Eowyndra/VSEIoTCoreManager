@@ -1,22 +1,27 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using VSEIoTCoreServer.DAL;
-using VSEIoTCoreServer.DAL.Models;
-using VSEIoTCoreServer.DAL.Models.Enums;
-using VSEIoTCoreServer.CommonUtils;
-using VSEIoTCoreServer.WebApp.ViewModels;
+﻿// ----------------------------------------------------------------------------
+// Filename: DeviceConfigurationService.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.WebApp.Services
 {
+    using AutoMapper;
+    using Microsoft.EntityFrameworkCore;
+    using VSEIoTCoreServer.DAL;
+    using VSEIoTCoreServer.DAL.Models;
+    using VSEIoTCoreServer.WebApp.ViewModels;
+
     public class DeviceConfigurationService : IDeviceConfigurationService
     {
         private readonly IMapper _mapper;
         private readonly SQLiteDbContext _context;
         private readonly ILogger<DeviceConfigurationService> _logger;
 
-        public DeviceConfigurationService(IMapper mapper, 
-            SQLiteDbContext context, 
+        public DeviceConfigurationService(
+            IMapper mapper,
+            SQLiteDbContext context,
             ILoggerFactory loggerFactory)
         {
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -27,7 +32,7 @@ namespace VSEIoTCoreServer.WebApp.Services
 
         public async Task<List<DeviceConfigurationViewModel>> GetAll()
         {
-            List<DeviceConfiguration> deviceConfigurations = new List<DeviceConfiguration>();
+            var deviceConfigurations = new List<DeviceConfiguration>();
 
             try
             {
@@ -38,7 +43,7 @@ namespace VSEIoTCoreServer.WebApp.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error reading device configurations: " + ex.Message);
+                _logger.LogError($"Error reading device configurations: {ex.Message}");
                 throw;
             }
 
@@ -52,16 +57,20 @@ namespace VSEIoTCoreServer.WebApp.Services
             {
                 _logger.LogInformation($"Reading configuration of device {deviceId}");
                 deviceConfiguration = await _context.DeviceConfigurations.FirstOrDefaultAsync(device => device.Id == deviceId);
-                if (deviceConfiguration == null) throw new KeyNotFoundException();
+                if (deviceConfiguration == null)
+                {
+                    throw new KeyNotFoundException();
+                }
+
                 _logger.LogInformation($"Successfully read device configuration of device {deviceId}");
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogError($"Device {deviceId} not found: " + ex.Message);
+                _logger.LogError($"Device {deviceId} not found: {ex.Message}");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error reading device configuration of device {deviceId}: " + ex.Message);
+                _logger.LogError($"Error reading device configuration of device {deviceId}: {ex.Message}");
                 throw;
             }
 
@@ -70,13 +79,18 @@ namespace VSEIoTCoreServer.WebApp.Services
 
         public async Task<List<DeviceConfigurationViewModel>> AddDevices(List<AddDeviceViewModel> deviceModels)
         {
-            List<DeviceConfigurationViewModel> addedDevices = new List<DeviceConfigurationViewModel>();
+            if (deviceModels == null)
+            {
+                throw new ArgumentNullException(nameof(deviceModels));
+            }
+
+            var addedDevices = new List<DeviceConfigurationViewModel>();
 
             foreach (var deviceModel in deviceModels)
             {
                 var dbDevice = _mapper.Map<DeviceConfiguration>(deviceModel);
 
-                // Make sure that the device does not already exist in the database 
+                // Make sure that the device does not already exist in the database
                 await CheckIfDeviceAlreadyExists(dbDevice);
 
                 // Make sure the assigned IoTCore Port is still available
@@ -92,7 +106,7 @@ namespace VSEIoTCoreServer.WebApp.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Error adding device configuration: " + ex.Message);
+                    _logger.LogError($"Error adding device configuration: {ex.Message}");
                     throw;
                 }
 
@@ -125,7 +139,7 @@ namespace VSEIoTCoreServer.WebApp.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error updating device configuration: " + ex.Message);
+                _logger.LogError($"Error updating device configuration: {ex.Message}");
                 throw;
             }
         }

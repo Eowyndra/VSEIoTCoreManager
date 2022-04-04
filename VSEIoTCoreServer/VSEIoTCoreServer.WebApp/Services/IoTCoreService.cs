@@ -1,24 +1,31 @@
-﻿using Microsoft.Extensions.Options;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using VSEIoTCoreServer.DAL.Models.Enums;
-using VSEIoTCoreServer.WebApp.ExtensionMethods;
-using VSEIoTCoreServer.CommonUtils;
-using VSEIoTCoreServer.WebApp.ViewModels;
-using AutoMapper;
+﻿// ----------------------------------------------------------------------------
+// Filename: IoTCoreService.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.WebApp.Services
 {
+    using System.Collections.Concurrent;
+    using System.Diagnostics;
+    using AutoMapper;
+    using Microsoft.Extensions.Options;
+    using VSEIoTCoreServer.CommonUtils;
+    using VSEIoTCoreServer.DAL.Models.Enums;
+    using VSEIoTCoreServer.WebApp.ExtensionMethods;
+    using VSEIoTCoreServer.WebApp.ViewModels;
+
     public class IoTCoreService : IIoTCoreService
     {
+        private static readonly ConcurrentDictionary<int, Process> _iotCoreProcessForDeviceId = new ();
         private readonly IMapper _mapper;
         private readonly ILogger<IoTCoreService> _logger;
         private readonly IDeviceConfigurationService _deviceConfigurationService;
         private readonly IoTCoreOptions _iotCoreOptions;
-        private static ConcurrentDictionary<int, Process> _iotCoreProcessForDeviceId = new ConcurrentDictionary<int, Process>();
- 
 
-        public IoTCoreService(IMapper mapper, 
+        public IoTCoreService(
+            IMapper mapper,
             IDeviceConfigurationService deviceConfigurationService,
             ILoggerFactory loggerFactory,
             IOptions<IoTCoreOptions> iotCoreOptions)
@@ -43,7 +50,7 @@ namespace VSEIoTCoreServer.WebApp.Services
                     " --vse-port " + device.VsePort +
                     " --iotcore-uri " + _iotCoreOptions.IoTCoreURI + ":" + device.IoTCorePort +
                     " --iotcore-id " + device.Id;
-                _logger.LogInformation($"Starting VSEIoTCore for device {device.Id}... (IP-Address: {device.VseIpAddress}:{device.VsePort} on URI: {_iotCoreOptions.IoTCoreURI}:{device.IoTCorePort})");
+                _logger.LogInformation($"Starting VSEIoTCore for device {device.Id}");
 
                 try
                 {
@@ -52,20 +59,21 @@ namespace VSEIoTCoreServer.WebApp.Services
                     {
                         _iotCoreProcessForDeviceId[device.Id] = process;
                     }
-                    _logger.LogInformation($"Successfully started VSEIoTCore for device {device.Id}... (IP-Address: {device.VseIpAddress}:{device.VsePort} on URI: {_iotCoreOptions.IoTCoreURI}:{device.IoTCorePort})");
+
+                    _logger.LogInformation($"Successfully started VSEIoTCore for device {device.Id}");
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    _logger.LogError("Error starting VSEIotCore: " + e.Message);
+                    _logger.LogError($"Error starting VSEIotCore: {ex.Message}");
                     throw;
                 }
             });
 
             // If device has no device type, try to get device type from IoTCore and update entity in database
-            if (device.VseType == null || device.VseType == "")
+            if (device.VseType == null || device.VseType == string.Empty)
             {
                 var deviceType = await GetDeviceType(_iotCoreOptions.IoTCoreURI, device.IoTCorePort);
-                if (deviceType != "")
+                if (deviceType != string.Empty)
                 {
                     device.VseType = deviceType;
                     await _deviceConfigurationService.UpdateDevice(device);
@@ -78,25 +86,27 @@ namespace VSEIoTCoreServer.WebApp.Services
             await Task.Run(() =>
             {
                 // Stop VSEIoTCore specified by deviceId
-                Process process;
+                if (!_iotCoreProcessForDeviceId.TryGetValue(deviceId, out var process))
+                {
+                    return;
+                }
 
-                if (!_iotCoreProcessForDeviceId.TryGetValue(deviceId, out process)) return;
-                _logger.LogInformation($"Stopping VSEIoTCore for device with ID: {deviceId} ...");
+                _logger.LogInformation($"Stopping VSEIoTCore for device {deviceId}");
 
                 try
                 {
                     process?.Kill();
                     process?.WaitForExit();
 
-                    if (process.HasExited)
+                    if (process != null && process.HasExited)
                     {
                         _iotCoreProcessForDeviceId.TryRemove(deviceId, out _);
-                        _logger.LogInformation($"Successfully stopped VSEIoTCore for device with ID: {deviceId}.");
+                        _logger.LogInformation($"Successfully stopped VSEIoTCore for device {deviceId}");
                     }
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    _logger.LogError("Error stopping VSEIoTCore: " + e.Message);
+                    _logger.LogError($"Error stopping VSEIoTCore: {ex.Message}");
                     throw;
                 }
             });
@@ -108,7 +118,7 @@ namespace VSEIoTCoreServer.WebApp.Services
             var device = await _deviceConfigurationService.GetById(deviceId);
             if (device == null)
             {
-                _logger.LogInformation($"Device with Id={deviceId} not found!");
+                _logger.LogInformation($"Device {deviceId} not found!");
                 return null;
             }
 
@@ -118,12 +128,10 @@ namespace VSEIoTCoreServer.WebApp.Services
             // DeviceStatus: is the device reachable via IoTCore URI?
             try
             {
-                using (var client = new Client(_iotCoreOptions.IoTCoreURI + ":" + device.IoTCorePort))
-                {
-                    var result = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Status().GetData());
-                    var deviceStatusMessage = IoTCoreUtils.CreateResponseMessage(result);
-                    device.DeviceStatus = deviceStatusMessage.Data.GetDeviceStatus();
-                }
+                using var client = new Client(_iotCoreOptions.IoTCoreURI + ":" + device.IoTCorePort);
+                var result = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Status().GetData());
+                var deviceStatusMessage = IoTCoreUtils.CreateResponseMessage(result);
+                device.DeviceStatus = deviceStatusMessage.Data.GetDeviceStatus();
             }
             catch (HttpRequestException)
             {
@@ -136,24 +144,24 @@ namespace VSEIoTCoreServer.WebApp.Services
                 throw;
             }
 
-            var statusViewModel = _mapper.Map<StatusViewModel>(device); 
+            var statusViewModel = _mapper.Map<StatusViewModel>(device);
             return statusViewModel;
         }
 
-        private async Task<string> GetDeviceType(string ioTCoreURI, int ioTCorePort)
+        private static async Task<string> GetDeviceType(string ioTCoreURI, int ioTCorePort)
         {
-            var deviceType = "";
+            var deviceType = string.Empty;
             var started = await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(ioTCoreURI, ioTCorePort);
             if (started)
             {
-                //get device type from iotcore
-                using (var client = new Client(ioTCoreURI + ":" + ioTCorePort))
-                {
-                    var result = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().Type().GetData());
-                    var message = IoTCoreUtils.CreateResponseMessage(result);
-                    deviceType = message.Data.GetDeviceType();
-                }
+                // Get device type from iotcore
+                using var client = new Client(ioTCoreURI + ":" + ioTCorePort);
+                var result = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().Type().GetData());
+                var message = IoTCoreUtils.CreateResponseMessage(result);
+                var devType = message.Data.GetDeviceType();
+                deviceType = devType ?? string.Empty;
             }
+
             return deviceType;
         }
     }

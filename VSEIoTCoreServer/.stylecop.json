@@ -1,0 +1,24 @@
+﻿{
+  // ACTION REQUIRED: This file was automatically added to your project, but it
+  // will not take effect until additional steps are taken to enable it. See the
+  // following page for additional information:
+  //
+  // https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/EnableConfiguration.md
+
+  "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
+  "settings": {
+    "documentationRules": {
+      "companyName": "ifm diagnostic GmbH",
+      "documentInterfaces": false,
+      "documentExposedElements": false,
+      "documentInternalElements": false,
+      "documentPrivateElements": false,
+      "documentPrivateFields": false,
+      "xmlHeader": false,
+      "copyrightText": "----------------------------------------------------------------------------\nFilename: {fileName}\nCopyright (c) 2022 {companyName} - All rights reserved.\n----------------------------------------------------------------------------\nThis file is subject to the terms and conditions defined in\nfile '{licenseName}', which is part of this source code package.",
+      "variables": {
+        "licenseName": "LICENSE.txt"
+      }
+    }
+  }
+}

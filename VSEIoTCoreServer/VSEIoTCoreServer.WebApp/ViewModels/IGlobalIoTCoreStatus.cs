@@ -1,18 +1,16 @@
 ﻿// ----------------------------------------------------------------------------
-// Filename: IoTCoreOptions.cs
+// Filename: IGlobalIoTCoreStatus.cs
 // Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
 // ----------------------------------------------------------------------------
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace VSEIoTCoreServer.WebApp
+namespace VSEIoTCoreServer.WebApp.ViewModels
 {
-    public class IoTCoreOptions
-    {
-        public const string IoTCoreSettings = "IoTCoreSettings";
+    using VSEIoTCoreServer.DAL.Models.Enums;
 
-        public string AdapterLocation { get; set; } = string.Empty;
-        public string IoTCoreURI { get; set; } = string.Empty;
-        public int GlobalIoTCorePort { get; set; } = 0;
+    public interface IGlobalIoTCoreStatus
+    {
+        GlobalIoTCoreStatus Status { get; set; }
     }
 }

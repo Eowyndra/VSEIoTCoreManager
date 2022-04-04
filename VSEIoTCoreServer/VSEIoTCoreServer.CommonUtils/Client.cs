@@ -1,9 +1,16 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿// ----------------------------------------------------------------------------
+// Filename: Client.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.CommonUtils
 {
+    using System;
+    using System.Net.Http;
+    using System.Threading.Tasks;
+
     public class Client : IDisposable
     {
         private HttpClient _client = null;

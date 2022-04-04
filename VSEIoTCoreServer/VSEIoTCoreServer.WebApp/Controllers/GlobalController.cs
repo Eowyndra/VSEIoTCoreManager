@@ -1,9 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using VSEIoTCoreServer.WebApp.Services;
-using VSEIoTCoreServer.WebApp.ViewModels;
+﻿// ----------------------------------------------------------------------------
+// Filename: GlobalController.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.WebApp.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using VSEIoTCoreServer.WebApp.Services;
+    using VSEIoTCoreServer.WebApp.ViewModels;
+
     [ApiController]
     [Route("api/v1/[controller]")]
     public class GlobalController : ControllerBase
@@ -17,7 +24,6 @@ namespace VSEIoTCoreServer.WebApp.Controllers
             var factory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _logger = factory.CreateLogger<GlobalController>();
         }
-
 
         [ProducesResponseType(200)]
         [ProducesResponseType(500)]
@@ -81,6 +87,7 @@ namespace VSEIoTCoreServer.WebApp.Controllers
                 _logger.LogError("Internal Error: " + ex.Message);
                 result = StatusCode(500);
             }
+
             return result;
         }
     }

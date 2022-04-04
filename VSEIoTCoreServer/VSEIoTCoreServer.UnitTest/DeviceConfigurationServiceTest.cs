@@ -1,31 +1,39 @@
-﻿using Xunit;
-using Moq;
-using VSEIoTCoreServer.WebApp.Services;
-using System;
-using AutoMapper;
-using VSEIoTCoreServer.DAL;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using VSEIoTCoreServer.WebApp;
-using System.Threading.Tasks;
-using VSEIoTCoreServer.CommonTestUtils;
-using VSEIoTCoreServer.DAL.Models;
-using Microsoft.EntityFrameworkCore;
-using VSEIoTCoreServer.WebApp.ViewModels;
-using Microsoft.Extensions.Configuration;
-using System.IO;
-using Microsoft.Extensions.Logging.Abstractions;
-using System.Collections.Generic;
-using Xunit.Sdk;
+﻿// ----------------------------------------------------------------------------
+// Filename: DeviceConfigurationServiceTest.cs
+// Copyright (c) 2022 ifm diagnostic GmbH - All rights reserved.
+// ----------------------------------------------------------------------------
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
 
 namespace VSEIoTCoreServer.UnitTest
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Logging.Abstractions;
+    using Moq;
+    using VSEIoTCoreServer.CommonTestUtils;
+    using VSEIoTCoreServer.DAL;
+    using VSEIoTCoreServer.DAL.Models;
+    using VSEIoTCoreServer.WebApp.Services;
+    using VSEIoTCoreServer.WebApp.ViewModels;
+    using Xunit;
+
     [Collection("Sequential")]
-    public class DeviceConfigurationServiceTest
+    public class DeviceConfigurationServiceTest : IDisposable
     {
         private readonly TestDeviceOptions _testDevice1;
         private readonly TestDeviceOptions _testDevice2;
         private readonly TestDeviceOptions _testDevice3;
+        private readonly IMapper _mapperMock;
+        private readonly SQLiteDbContext _dbContextMock;
+        private readonly ILoggerFactory _loggerFactoryMock;
+
         private DeviceConfiguration _deviceConfig1;
         private DeviceConfiguration _deviceConfig2;
         private DeviceConfiguration _deviceConfig3;
@@ -33,10 +41,6 @@ namespace VSEIoTCoreServer.UnitTest
         private NullLoggerFactory _nullLoggerFactory;
         private SQLiteDbContext _dbContext;
         private DeviceConfigurationService _deviceConfigurationService;
-
-        private readonly IMapper _mapperMock;
-        private readonly SQLiteDbContext _dbContextMock;
-        private readonly ILoggerFactory _loggerFactoryMock;
 
         public DeviceConfigurationServiceTest()
         {
@@ -62,8 +66,8 @@ namespace VSEIoTCoreServer.UnitTest
         public void Ctor_Test()
         {
             Assert.NotNull(new DeviceConfigurationService(
-                _mapperMock, 
-                _dbContextMock, 
+                _mapperMock,
+                _dbContextMock,
                 _loggerFactoryMock));
         }
 
@@ -75,7 +79,6 @@ namespace VSEIoTCoreServer.UnitTest
                 _dbContextMock,
                 _loggerFactoryMock));
         }
-
 
         [Fact]
         public void Ctor_Context_Null_Error_Test()
@@ -122,7 +125,6 @@ namespace VSEIoTCoreServer.UnitTest
             Assert.Equal(_deviceConfig2.VseIpAddress, deviceConfig2.VseIpAddress);
             Assert.Equal(_deviceConfig2.VsePort, deviceConfig2.VsePort);
             Assert.Equal(_deviceConfig2.IoTCorePort, deviceConfig2.IoTCorePort);
-
         }
 
         [Fact]
@@ -178,10 +180,14 @@ namespace VSEIoTCoreServer.UnitTest
             // Arrange
             Arrange();
 
-            var newDevices = new List<AddDeviceViewModel>() { new AddDeviceViewModel() {
-                VseIpAddress = _deviceConfig3.VseIpAddress,
-                VsePort = _deviceConfig3.VsePort,
-                IoTCorePort = _deviceConfig3.IoTCorePort }
+            var newDevices = new List<AddDeviceViewModel>()
+            {
+                new AddDeviceViewModel()
+                {
+                    VseIpAddress = _deviceConfig3.VseIpAddress,
+                    VsePort = _deviceConfig3.VsePort,
+                    IoTCorePort = _deviceConfig3.IoTCorePort,
+                },
             };
 
             // Act
@@ -206,10 +212,14 @@ namespace VSEIoTCoreServer.UnitTest
             // Arrange
             Arrange();
 
-            var newDevices = new List<AddDeviceViewModel>() { new AddDeviceViewModel() {
-                VseIpAddress = _deviceConfig1.VseIpAddress,
-                VsePort = _deviceConfig1.VsePort,
-                IoTCorePort = _deviceConfig1.IoTCorePort }
+            var newDevices = new List<AddDeviceViewModel>()
+            {
+                new AddDeviceViewModel()
+                {
+                    VseIpAddress = _deviceConfig1.VseIpAddress,
+                    VsePort = _deviceConfig1.VsePort,
+                    IoTCorePort = _deviceConfig1.IoTCorePort,
+                },
             };
 
             try
@@ -223,7 +233,8 @@ namespace VSEIoTCoreServer.UnitTest
                 Assert.Equal("Device already exists!", ex.Message);
                 return;
             }
-            throw new XunitException("No Exception thrown");
+
+            Assert.True(false, "No Exception thrown");
         }
 
         [Fact]
@@ -232,10 +243,14 @@ namespace VSEIoTCoreServer.UnitTest
             // Arrange
             Arrange();
 
-            var newDevices = new List<AddDeviceViewModel>() { new AddDeviceViewModel() {
-                VseIpAddress = _deviceConfig3.VseIpAddress,
-                VsePort = _deviceConfig3.VsePort,
-                IoTCorePort = _deviceConfig1.IoTCorePort }
+            var newDevices = new List<AddDeviceViewModel>()
+            {
+                new AddDeviceViewModel()
+                {
+                    VseIpAddress = _deviceConfig3.VseIpAddress,
+                    VsePort = _deviceConfig3.VsePort,
+                    IoTCorePort = _deviceConfig1.IoTCorePort,
+                },
             };
 
             try
@@ -249,10 +264,31 @@ namespace VSEIoTCoreServer.UnitTest
                 Assert.Equal("IoTCore port already being used!", ex.Message);
                 return;
             }
-            throw new XunitException("No Exception thrown");
 
+            Assert.True(false, "No Exception thrown");
         }
 
+        public void Dispose()
+        {
+            _deviceConfig1 = null;
+            _deviceConfig2 = null;
+            _deviceConfig3 = null;
+            _mapper = null;
+            _nullLoggerFactory = null;
+            _dbContext = null;
+            _deviceConfigurationService = null;
+        }
+
+        private static async Task<SQLiteDbContext> GetInMemoryDatabaseContext_EmptyList()
+        {
+            var options = new DbContextOptionsBuilder<SQLiteDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
+            var databaseContext = new SQLiteDbContext(options);
+            databaseContext.Database.EnsureCreated();
+            await databaseContext.SaveChangesAsync();
+            return databaseContext;
+        }
 
         private void Arrange()
         {
@@ -262,7 +298,7 @@ namespace VSEIoTCoreServer.UnitTest
                 VseType = _testDevice1.VseType,
                 VseIpAddress = _testDevice1.VseIpAddress,
                 VsePort = _testDevice1.VsePort,
-                IoTCorePort = _testDevice1.IoTCorePort
+                IoTCorePort = _testDevice1.IoTCorePort,
             };
 
             _deviceConfig2 = new DeviceConfiguration()
@@ -271,9 +307,8 @@ namespace VSEIoTCoreServer.UnitTest
                 VseType = _testDevice2.VseType,
                 VseIpAddress = _testDevice2.VseIpAddress,
                 VsePort = _testDevice2.VsePort,
-                IoTCorePort = _testDevice2.IoTCorePort
+                IoTCorePort = _testDevice2.IoTCorePort,
             };
-
 
             _deviceConfig3 = new DeviceConfiguration()
             {
@@ -281,7 +316,7 @@ namespace VSEIoTCoreServer.UnitTest
                 VseType = _testDevice3.VseType,
                 VseIpAddress = _testDevice3.VseIpAddress,
                 VsePort = _testDevice3.VsePort,
-                IoTCorePort = _testDevice3.IoTCorePort
+                IoTCorePort = _testDevice3.IoTCorePort,
             };
 
             var myProfile = new AutoMapperProfile();
@@ -305,17 +340,7 @@ namespace VSEIoTCoreServer.UnitTest
                 databaseContext.DeviceConfigurations.Add(_deviceConfig2);
                 await databaseContext.SaveChangesAsync();
             }
-            return databaseContext;
-        }
 
-        private async Task<SQLiteDbContext> GetInMemoryDatabaseContext_EmptyList()
-        {
-            var options = new DbContextOptionsBuilder<SQLiteDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-            var databaseContext = new SQLiteDbContext(options);
-            databaseContext.Database.EnsureCreated();
-            await databaseContext.SaveChangesAsync();
             return databaseContext;
         }
     }
