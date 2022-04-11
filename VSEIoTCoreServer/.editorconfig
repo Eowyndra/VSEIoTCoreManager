@@ -185,3 +185,4 @@ dotnet_diagnostic.CA2254.severity = silent
 
 # CA1816: good reminder but not required since we do not use finalizers. therefore we disable it
 dotnet_diagnostic.CA1816.severity = silent
+dotnet_diagnostic.CA1816.severity = silent

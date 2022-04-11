@@ -8,12 +8,21 @@
 namespace VSEIoTCoreServer.WebApp.ViewModels
 {
     using System.ComponentModel.DataAnnotations;
+    using System.Text.RegularExpressions;
 
     public class AddDeviceViewModel
     {
+        public AddDeviceViewModel(string vseIpAddress, int vsePort, int iotCorePort)
+        {
+            VseIpAddress = vseIpAddress;
+            VsePort = vsePort;
+            IoTCorePort = iotCorePort;
+        }
+
+        public string? Name { get; set; }
         [Required]
         [RegularExpression(@"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", ErrorMessage = "IP-Address must be valid.")]
-        public string? VseIpAddress { get; set; }
+        public string VseIpAddress { get; set; }
         [Required]
         [Range(1, 65535)]
         public int VsePort { get; set; }

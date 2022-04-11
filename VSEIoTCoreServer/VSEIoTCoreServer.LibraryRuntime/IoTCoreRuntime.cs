@@ -52,9 +52,9 @@ namespace VSEIoTCoreServer.LibraryRuntime
 
         public void Stop()
         {
-            _httpServer.Stop();
-            _httpServer.Dispose();
-            _iotCore.Dispose();
+            _httpServer?.Stop();
+            _httpServer?.Dispose();
+            _iotCore?.Dispose();
             _globalIoTCoreStarted = false;
         }
     }

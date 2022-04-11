@@ -130,24 +130,6 @@ namespace VSEIoTCoreServer.UnitTest
             // Arrange
             Arrange();
 
-            var mockDeviceConfigurationService = new Mock<IDeviceConfigurationService>();
-
-            mockDeviceConfigurationService.Setup(x => x.GetById(It.IsAny<int>()))
-                .Returns(Task.FromResult(new DeviceConfigurationViewModel()
-                {
-                    Id = _deviceConfig1.Id,
-                    VseType = _deviceConfig1.VseType,
-                    VseIpAddress = _deviceConfig1.VseIpAddress,
-                    VsePort = _deviceConfig1.VsePort,
-                    IoTCorePort = _deviceConfig1.IoTCorePort,
-                }));
-
-            _iotCoreService = new IoTCoreService(
-                _mapper,
-                mockDeviceConfigurationService.Object,
-                _nullLoggerFactory,
-                _iotCoreOptions);
-
             // Act
             await AssertedStart(_iotCoreService, _deviceConfig1.Id, _iotCoreOptions.Value.IoTCoreURI, _deviceConfig1.IoTCorePort);
 
@@ -172,50 +154,25 @@ namespace VSEIoTCoreServer.UnitTest
         {
             // Arrange
             Arrange();
-
-            var mockDeviceConfigurationService = new Mock<IDeviceConfigurationService>();
-            mockDeviceConfigurationService.Setup(x => x.GetById(It.IsAny<int>()))
-                .Returns(Task.FromResult(new DeviceConfigurationViewModel()
-                {
-                    Id = _deviceConfig1.Id,
-                    VseType = _deviceConfig1.VseType,
-                    VseIpAddress = _deviceConfig1.VseIpAddress,
-                    VsePort = _deviceConfig1.VsePort,
-                    IoTCorePort = _deviceConfig1.IoTCorePort,
-                }));
-            _iotCoreService = new IoTCoreService(_mapper, mockDeviceConfigurationService.Object, _nullLoggerFactory, _iotCoreOptions);
-
             await AssertedStart(_iotCoreService, _deviceConfig1.Id, _iotCoreOptions.Value.IoTCoreURI, _deviceConfig1.IoTCorePort);
-
-            using (var client = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig1.IoTCorePort))
-            {
-                var result = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Status().GetData());
-                var message = IoTCoreUtils.CreateResponseMessage(result);
-                var deviceStatus = message.Data.GetDeviceStatus();
-                Assert.NotNull(message);
-                Assert.Equal(200, message.Code);
-                Assert.True(deviceStatus == DeviceStatus.Connected || deviceStatus == DeviceStatus.Connecting);
-            }
 
             // Act
             await AssertedStop(_iotCoreService, _deviceConfig1.Id, _iotCoreOptions.Value.IoTCoreURI, _deviceConfig1.IoTCorePort);
 
-            using (var client = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig1.IoTCorePort))
+            // Assert
+            using var client = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig1.IoTCorePort);
+            await Assert.ThrowsAsync<HttpRequestException>(async () =>
             {
-                // Assert
-                await Assert.ThrowsAsync<HttpRequestException>(async () =>
+                try
                 {
-                    try
-                    {
-                        var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Status().GetData());
-                    }
-                    catch (HttpRequestException ex)
-                    {
-                        Assert.Null(ex.StatusCode);
-                        throw ex;
-                    }
-                });
-            }
+                    var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Status().GetData());
+                }
+                catch (HttpRequestException ex)
+                {
+                    Assert.Null(ex.StatusCode);
+                    throw ex;
+                }
+            });
         }
 
         [Fact]
@@ -289,23 +246,8 @@ namespace VSEIoTCoreServer.UnitTest
 
         private void Arrange()
         {
-            _deviceConfig1 = new DeviceConfiguration()
-            {
-                Id = _testDevice1.Id,
-                VseType = _testDevice1.VseType,
-                VseIpAddress = _testDevice1.VseIpAddress,
-                VsePort = _testDevice1.VsePort,
-                IoTCorePort = _testDevice1.IoTCorePort,
-            };
-
-            _deviceConfig2 = new DeviceConfiguration()
-            {
-                Id = _testDevice2.Id,
-                VseType = _testDevice2.VseType,
-                VseIpAddress = _testDevice2.VseIpAddress,
-                VsePort = _testDevice2.VsePort,
-                IoTCorePort = _testDevice2.IoTCorePort,
-            };
+            _deviceConfig1 = TestUtils.GetDeviceConfiguration(_testDevice1);
+            _deviceConfig2 = TestUtils.GetDeviceConfiguration(_testDevice2);
 
             var myProfile = new AutoMapperProfile();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));

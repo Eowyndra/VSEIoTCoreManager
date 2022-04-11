@@ -47,5 +47,15 @@ namespace VSEIoTCoreServer.WebApp.ExtensionMethods
 
             return objectData["value"]?.ToString();
         }
+
+        public static int? GetCount(this JToken objectData)
+        {
+            if (objectData?["value"] == null)
+            {
+                return null;
+            }
+
+            return objectData["value"]?.ToList().Count;
+        }
     }
 }

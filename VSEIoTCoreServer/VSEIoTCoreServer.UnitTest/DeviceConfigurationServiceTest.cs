@@ -23,6 +23,7 @@ namespace VSEIoTCoreServer.UnitTest
     using VSEIoTCoreServer.WebApp.Services;
     using VSEIoTCoreServer.WebApp.ViewModels;
     using Xunit;
+    using Xunit.Sdk;
 
     [Collection("Sequential")]
     public class DeviceConfigurationServiceTest : IDisposable
@@ -113,15 +114,17 @@ namespace VSEIoTCoreServer.UnitTest
             Assert.Equal(2, devices.Count);
 
             var deviceConfig1 = devices[0];
-            Assert.Equal(_deviceConfig1.Id, deviceConfig1.Id);
             Assert.Equal(_deviceConfig1.VseType, deviceConfig1.VseType);
+            Assert.Equal(_deviceConfig1.Name, deviceConfig1.Name);
+            Assert.Equal(_deviceConfig1.Id, deviceConfig1.Id);
             Assert.Equal(_deviceConfig1.VseIpAddress, deviceConfig1.VseIpAddress);
             Assert.Equal(_deviceConfig1.VsePort, deviceConfig1.VsePort);
             Assert.Equal(_deviceConfig1.IoTCorePort, deviceConfig1.IoTCorePort);
 
             var deviceConfig2 = devices[1];
-            Assert.Equal(_deviceConfig2.Id, deviceConfig2.Id);
             Assert.Equal(_deviceConfig2.VseType, deviceConfig2.VseType);
+            Assert.Equal(_deviceConfig2.Name, deviceConfig2.Name);
+            Assert.Equal(_deviceConfig2.Id, deviceConfig2.Id);
             Assert.Equal(_deviceConfig2.VseIpAddress, deviceConfig2.VseIpAddress);
             Assert.Equal(_deviceConfig2.VsePort, deviceConfig2.VsePort);
             Assert.Equal(_deviceConfig2.IoTCorePort, deviceConfig2.IoTCorePort);
@@ -154,8 +157,9 @@ namespace VSEIoTCoreServer.UnitTest
 
             // Assert
             Assert.NotNull(device);
-            Assert.Equal(_deviceConfig1.Id, device.Id);
             Assert.Equal(_deviceConfig1.VseType, device.VseType);
+            Assert.Equal(_deviceConfig1.Name, device.Name);
+            Assert.Equal(_deviceConfig1.Id, device.Id);
             Assert.Equal(_deviceConfig1.VseIpAddress, device.VseIpAddress);
             Assert.Equal(_deviceConfig1.VsePort, device.VsePort);
             Assert.Equal(_deviceConfig1.IoTCorePort, device.IoTCorePort);
@@ -182,12 +186,7 @@ namespace VSEIoTCoreServer.UnitTest
 
             var newDevices = new List<AddDeviceViewModel>()
             {
-                new AddDeviceViewModel()
-                {
-                    VseIpAddress = _deviceConfig3.VseIpAddress,
-                    VsePort = _deviceConfig3.VsePort,
-                    IoTCorePort = _deviceConfig3.IoTCorePort,
-                },
+                new AddDeviceViewModel(_deviceConfig3.VseIpAddress, _deviceConfig3.VsePort, _deviceConfig3.IoTCorePort),
             };
 
             // Act
@@ -214,12 +213,7 @@ namespace VSEIoTCoreServer.UnitTest
 
             var newDevices = new List<AddDeviceViewModel>()
             {
-                new AddDeviceViewModel()
-                {
-                    VseIpAddress = _deviceConfig1.VseIpAddress,
-                    VsePort = _deviceConfig1.VsePort,
-                    IoTCorePort = _deviceConfig1.IoTCorePort,
-                },
+                new AddDeviceViewModel(_deviceConfig1.VseIpAddress, _deviceConfig1.VsePort, _deviceConfig1.IoTCorePort),
             };
 
             try
@@ -234,7 +228,7 @@ namespace VSEIoTCoreServer.UnitTest
                 return;
             }
 
-            Assert.True(false, "No Exception thrown");
+            throw new XunitException("No Exception thrown");
         }
 
         [Fact]
@@ -245,12 +239,7 @@ namespace VSEIoTCoreServer.UnitTest
 
             var newDevices = new List<AddDeviceViewModel>()
             {
-                new AddDeviceViewModel()
-                {
-                    VseIpAddress = _deviceConfig3.VseIpAddress,
-                    VsePort = _deviceConfig3.VsePort,
-                    IoTCorePort = _deviceConfig1.IoTCorePort,
-                },
+                new AddDeviceViewModel(_deviceConfig3.VseIpAddress, _deviceConfig3.VsePort, _deviceConfig1.IoTCorePort),
             };
 
             try
@@ -265,7 +254,7 @@ namespace VSEIoTCoreServer.UnitTest
                 return;
             }
 
-            Assert.True(false, "No Exception thrown");
+            throw new XunitException("No Exception thrown");
         }
 
         public void Dispose()
@@ -292,32 +281,9 @@ namespace VSEIoTCoreServer.UnitTest
 
         private void Arrange()
         {
-            _deviceConfig1 = new DeviceConfiguration()
-            {
-                Id = _testDevice1.Id,
-                VseType = _testDevice1.VseType,
-                VseIpAddress = _testDevice1.VseIpAddress,
-                VsePort = _testDevice1.VsePort,
-                IoTCorePort = _testDevice1.IoTCorePort,
-            };
-
-            _deviceConfig2 = new DeviceConfiguration()
-            {
-                Id = _testDevice2.Id,
-                VseType = _testDevice2.VseType,
-                VseIpAddress = _testDevice2.VseIpAddress,
-                VsePort = _testDevice2.VsePort,
-                IoTCorePort = _testDevice2.IoTCorePort,
-            };
-
-            _deviceConfig3 = new DeviceConfiguration()
-            {
-                Id = _testDevice3.Id,
-                VseType = _testDevice3.VseType,
-                VseIpAddress = _testDevice3.VseIpAddress,
-                VsePort = _testDevice3.VsePort,
-                IoTCorePort = _testDevice3.IoTCorePort,
-            };
+            _deviceConfig1 = TestUtils.GetDeviceConfiguration(_testDevice1);
+            _deviceConfig2 = TestUtils.GetDeviceConfiguration(_testDevice2);
+            _deviceConfig3 = TestUtils.GetDeviceConfiguration(_testDevice3);
 
             var myProfile = new AutoMapperProfile();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));

@@ -15,6 +15,7 @@ namespace VSEIoTCoreServer.UnitTest
     using System.Net.Http;
     using System.Threading.Tasks;
     using AutoMapper;
+    using ifmIoTCore.Messages;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
@@ -28,14 +29,17 @@ namespace VSEIoTCoreServer.UnitTest
     using VSEIoTCoreServer.DAL.Models.Enums;
     using VSEIoTCoreServer.LibraryRuntime;
     using VSEIoTCoreServer.WebApp;
+    using VSEIoTCoreServer.WebApp.ExtensionMethods;
     using VSEIoTCoreServer.WebApp.Services;
     using VSEIoTCoreServer.WebApp.ViewModels;
     using Xunit;
 
-    public class GlobalIoTCoreServiceTest : IDisposable
+    [Collection("Sequential")]
+    public class GlobalIoTCoreServiceTest : IAsyncDisposable
     {
         private readonly TestDeviceOptions _testDevice1;
         private readonly TestDeviceOptions _testDevice2;
+        private readonly TestDeviceOptions _testDevice3;
         private readonly IOptions<IoTCoreOptions> _iotCoreOptions;
         private readonly IDeviceConfigurationService _deviceConfigServiceMock;
         private readonly IIoTCoreService _iotCoreServiceMock;
@@ -44,6 +48,7 @@ namespace VSEIoTCoreServer.UnitTest
 
         private DeviceConfiguration _deviceConfig1;
         private DeviceConfiguration _deviceConfig2;
+        private DeviceConfiguration _deviceConfig3;
         private IMapper _mapper;
         private NullLoggerFactory _nullLoggerFactory;
         private Mock<SQLiteDbContext> _mockDbContext;
@@ -51,6 +56,7 @@ namespace VSEIoTCoreServer.UnitTest
         private IoTCoreService _iotCoreService;
         private GlobalIoTCoreService _globalIoTCoreService;
         private IIoTCoreRuntime _iotCoreRuntime;
+        private Process _iotCoreProcess;
 
         public GlobalIoTCoreServiceTest()
         {
@@ -68,6 +74,8 @@ namespace VSEIoTCoreServer.UnitTest
             configuration.GetSection("TestDevices:TestDevice1").Bind(_testDevice1);
             _testDevice2 = new TestDeviceOptions();
             configuration.GetSection("TestDevices:TestDevice2").Bind(_testDevice2);
+            _testDevice3 = new TestDeviceOptions();
+            configuration.GetSection("TestDevices:TestDevice3").Bind(_testDevice3);
 
             _deviceConfigServiceMock = new Mock<IDeviceConfigurationService>().Object;
             _iotCoreServiceMock = new Mock<IIoTCoreService>().Object;
@@ -159,40 +167,32 @@ namespace VSEIoTCoreServer.UnitTest
             using (var vseClient2 = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig2.IoTCorePort))
             {
                 // Request data from independent VSEIoTCore1
-                var deviceInfo1 = await vseClient1.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().GetData());
-                var deviceInfoMessage1 = IoTCoreUtils.CreateResponseMessage(deviceInfo1);
-                var objectData1 = await vseClient1.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Objects().Object(0).GetData());
-                var objectDataMessage1 = IoTCoreUtils.CreateResponseMessage(objectData1);
-                var counterData1 = await vseClient1.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Counters().Counter(0).GetData());
-                var counterDataMessage1 = IoTCoreUtils.CreateResponseMessage(counterData1);
+                var deviceInfoMessage1 = await GetDeviceInfoMessage(vseClient1);
+                var objectCount1 = await GetObjectCount(vseClient1);
+                var objectDataMessage1 = await GetObjectDataMessage(vseClient1, 0);
+                var counterCount1 = await GetCounterCount(vseClient1);
+                var counterDataMessage1 = await GetCounterDataMessage(vseClient1, 0);
 
                 // Request data from independent VSEIoTCore2
-                var deviceInfo2 = await vseClient2.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().GetData());
-                var deviceInfoMessage2 = IoTCoreUtils.CreateResponseMessage(deviceInfo2);
-                var objectData2 = await vseClient2.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Objects().Object(0).GetData());
-                var objectDataMessage2 = IoTCoreUtils.CreateResponseMessage(objectData2);
-                var counterData2 = await vseClient2.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Counters().Counter(0).GetData());
-                var counterDataMessage2 = IoTCoreUtils.CreateResponseMessage(counterData2);
+                var deviceInfoMessage2 = await GetDeviceInfoMessage(vseClient2);
+                var objectCount2 = await GetObjectCount(vseClient2);
+                var objectDataMessage2 = await GetObjectDataMessage(vseClient2, 0);
+                var counterCount2 = await GetCounterCount(vseClient2);
+                var counterDataMessage2 = await GetCounterDataMessage(vseClient2, 0);
 
                 // Request data from global IoTCore
                 var globalTree = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.GetTree());
                 var globalMessage = IoTCoreUtils.CreateResponseMessage(globalTree);
 
                 // Request data from VSEIoTCore1 via global IoTCore remote mirror
-                var remoteDeviceInfo1 = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(1).Device().Information().Device().GetData());
-                var remoteDeviceInfoMessage1 = IoTCoreUtils.CreateResponseMessage(remoteDeviceInfo1);
-                var remoteObjectData1 = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(1).Device().Objects().Object(0).GetData());
-                var remoteObjectDataMessage1 = IoTCoreUtils.CreateResponseMessage(remoteObjectData1);
-                var remoteCounterData1 = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(1).Device().Counters().Counter(0).GetData());
-                var remoteCounterDataMessage1 = IoTCoreUtils.CreateResponseMessage(remoteCounterData1);
+                var remoteDeviceInfoMessage1 = await GetRemoteDeviceInfoMessage(globalClient, 1);
+                var remoteObjectDataMessage1 = await GetRemoteObjectDataMessage(globalClient, 1, 0);
+                var remoteCounterDataMessage1 = await GetRemoteCounterDataMessage(globalClient, 1, 0);
 
                 // Request data from VSEIoTCore2 via global IoTCore remote mirror
-                var remoteDeviceInfo2 = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(2).Device().Information().Device().GetData());
-                var remoteDeviceInfoMessage2 = IoTCoreUtils.CreateResponseMessage(remoteDeviceInfo2);
-                var remoteObjectData2 = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(2).Device().Objects().Object(0).GetData());
-                var remoteObjectDataMessage2 = IoTCoreUtils.CreateResponseMessage(remoteObjectData2);
-                var remoteCounterData2 = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(2).Device().Counters().Counter(0).GetData());
-                var remoteCounterDataMessage2 = IoTCoreUtils.CreateResponseMessage(remoteCounterData2);
+                var remoteDeviceInfoMessage2 = await GetRemoteDeviceInfoMessage(globalClient, 2);
+                var remoteObjectDataMessage2 = await GetRemoteObjectDataMessage(globalClient, 2, 0);
+                var remoteCounterDataMessage2 = await GetRemoteCounterDataMessage(globalClient, 2, 0);
 
                 // Assert - VSEIoTCore1 is reachable
                 Assert.NotNull(deviceInfoMessage1);
@@ -229,42 +229,54 @@ namespace VSEIoTCoreServer.UnitTest
                 Assert.Equal(deviceInfoMessage2.Data["value"]["Firmware"], remoteDeviceInfoMessage2.Data["value"]["Firmware"]);
 
                 // Assert - object data of remote VSEIoTCore1 matches object data of VSEIoTCore1
-                Assert.Equal(objectDataMessage1.Data["value"]["Name"], remoteObjectDataMessage1.Data["value"]["Name"]);
-                Assert.Equal(objectDataMessage1.Data["value"]["Type"], remoteObjectDataMessage1.Data["value"]["Type"]);
-                Assert.Equal(objectDataMessage1.Data["value"]["ID"], remoteObjectDataMessage1.Data["value"]["ID"]);
-                Assert.Equal(objectDataMessage1.Data["value"]["Unit"], remoteObjectDataMessage1.Data["value"]["Unit"]);
-                Assert.Equal(objectDataMessage1.Data["value"]["State"], remoteObjectDataMessage1.Data["value"]["State"]);
-                Assert.Equal(objectDataMessage1.Data["value"]["Warning"], remoteObjectDataMessage1.Data["value"]["Warning"]);
-                Assert.Equal(objectDataMessage1.Data["value"]["BaseLine"], remoteObjectDataMessage1.Data["value"]["BaseLine"]);
-                Assert.Equal(objectDataMessage1.Data["value"]["Damage"], remoteObjectDataMessage1.Data["value"]["Damage"]);
-                Assert.Equal(objectDataMessage1.Data["value"]["InputID"], remoteObjectDataMessage1.Data["value"]["InputID"]);
-                Assert.Equal(objectDataMessage1.Data["value"]["InputType"], remoteObjectDataMessage1.Data["value"]["InputType"]);
+                if (objectCount1 >= 1)
+                {
+                    Assert.Equal(objectDataMessage1.Data["value"]["Name"], remoteObjectDataMessage1.Data["value"]["Name"]);
+                    Assert.Equal(objectDataMessage1.Data["value"]["Type"], remoteObjectDataMessage1.Data["value"]["Type"]);
+                    Assert.Equal(objectDataMessage1.Data["value"]["ID"], remoteObjectDataMessage1.Data["value"]["ID"]);
+                    Assert.Equal(objectDataMessage1.Data["value"]["Unit"], remoteObjectDataMessage1.Data["value"]["Unit"]);
+                    Assert.Equal(objectDataMessage1.Data["value"]["State"], remoteObjectDataMessage1.Data["value"]["State"]);
+                    Assert.Equal(objectDataMessage1.Data["value"]["Warning"], remoteObjectDataMessage1.Data["value"]["Warning"]);
+                    Assert.Equal(objectDataMessage1.Data["value"]["BaseLine"], remoteObjectDataMessage1.Data["value"]["BaseLine"]);
+                    Assert.Equal(objectDataMessage1.Data["value"]["Damage"], remoteObjectDataMessage1.Data["value"]["Damage"]);
+                    Assert.Equal(objectDataMessage1.Data["value"]["InputID"], remoteObjectDataMessage1.Data["value"]["InputID"]);
+                    Assert.Equal(objectDataMessage1.Data["value"]["InputType"], remoteObjectDataMessage1.Data["value"]["InputType"]);
+                }
 
                 // Assert - object data of remote VSEIoTCore2 matches object data of VSEIoTCore2
-                Assert.Equal(objectDataMessage2.Data["value"]["Name"], remoteObjectDataMessage2.Data["value"]["Name"]);
-                Assert.Equal(objectDataMessage2.Data["value"]["Type"], remoteObjectDataMessage2.Data["value"]["Type"]);
-                Assert.Equal(objectDataMessage2.Data["value"]["ID"], remoteObjectDataMessage2.Data["value"]["ID"]);
-                Assert.Equal(objectDataMessage2.Data["value"]["Unit"], remoteObjectDataMessage2.Data["value"]["Unit"]);
-                Assert.Equal(objectDataMessage2.Data["value"]["State"], remoteObjectDataMessage2.Data["value"]["State"]);
-                Assert.Equal(objectDataMessage2.Data["value"]["Warning"], remoteObjectDataMessage2.Data["value"]["Warning"]);
-                Assert.Equal(objectDataMessage2.Data["value"]["BaseLine"], remoteObjectDataMessage2.Data["value"]["BaseLine"]);
-                Assert.Equal(objectDataMessage2.Data["value"]["Damage"], remoteObjectDataMessage2.Data["value"]["Damage"]);
-                Assert.Equal(objectDataMessage2.Data["value"]["InputID"], remoteObjectDataMessage2.Data["value"]["InputID"]);
-                Assert.Equal(objectDataMessage2.Data["value"]["InputType"], remoteObjectDataMessage2.Data["value"]["InputType"]);
+                if (objectCount2 >= 1)
+                {
+                    Assert.Equal(objectDataMessage2.Data["value"]["Name"], remoteObjectDataMessage2.Data["value"]["Name"]);
+                    Assert.Equal(objectDataMessage2.Data["value"]["Type"], remoteObjectDataMessage2.Data["value"]["Type"]);
+                    Assert.Equal(objectDataMessage2.Data["value"]["ID"], remoteObjectDataMessage2.Data["value"]["ID"]);
+                    Assert.Equal(objectDataMessage2.Data["value"]["Unit"], remoteObjectDataMessage2.Data["value"]["Unit"]);
+                    Assert.Equal(objectDataMessage2.Data["value"]["State"], remoteObjectDataMessage2.Data["value"]["State"]);
+                    Assert.Equal(objectDataMessage2.Data["value"]["Warning"], remoteObjectDataMessage2.Data["value"]["Warning"]);
+                    Assert.Equal(objectDataMessage2.Data["value"]["BaseLine"], remoteObjectDataMessage2.Data["value"]["BaseLine"]);
+                    Assert.Equal(objectDataMessage2.Data["value"]["Damage"], remoteObjectDataMessage2.Data["value"]["Damage"]);
+                    Assert.Equal(objectDataMessage2.Data["value"]["InputID"], remoteObjectDataMessage2.Data["value"]["InputID"]);
+                    Assert.Equal(objectDataMessage2.Data["value"]["InputType"], remoteObjectDataMessage2.Data["value"]["InputType"]);
+                }
 
                 // Assert - counter data of remote VSEIoTCore1 matches object data of VSEIoTCore1
-                Assert.Equal(counterDataMessage1.Data["value"]["Name"], remoteCounterDataMessage1.Data["value"]["Name"]);
-                Assert.Equal(counterDataMessage1.Data["value"]["Type"], remoteCounterDataMessage1.Data["value"]["Type"]);
-                Assert.Equal(counterDataMessage1.Data["value"]["Unit"], remoteCounterDataMessage1.Data["value"]["Unit"]);
-                Assert.Equal(counterDataMessage1.Data["value"]["State"], remoteCounterDataMessage1.Data["value"]["State"]);
-                Assert.Equal(counterDataMessage1.Data["value"]["Limit"], remoteCounterDataMessage1.Data["value"]["Limit"]);
+                if (counterCount1 >= 1)
+                {
+                    Assert.Equal(counterDataMessage1.Data["value"]["Name"], remoteCounterDataMessage1.Data["value"]["Name"]);
+                    Assert.Equal(counterDataMessage1.Data["value"]["Type"], remoteCounterDataMessage1.Data["value"]["Type"]);
+                    Assert.Equal(counterDataMessage1.Data["value"]["Unit"], remoteCounterDataMessage1.Data["value"]["Unit"]);
+                    Assert.Equal(counterDataMessage1.Data["value"]["State"], remoteCounterDataMessage1.Data["value"]["State"]);
+                    Assert.Equal(counterDataMessage1.Data["value"]["Limit"], remoteCounterDataMessage1.Data["value"]["Limit"]);
+                }
 
                 // Assert - counter data of remote VSEIoTCore2 matches object data of VSEIoTCore2
-                Assert.Equal(counterDataMessage2.Data["value"]["Name"], remoteCounterDataMessage2.Data["value"]["Name"]);
-                Assert.Equal(counterDataMessage2.Data["value"]["Type"], remoteCounterDataMessage2.Data["value"]["Type"]);
-                Assert.Equal(counterDataMessage2.Data["value"]["Unit"], remoteCounterDataMessage2.Data["value"]["Unit"]);
-                Assert.Equal(counterDataMessage2.Data["value"]["State"], remoteCounterDataMessage2.Data["value"]["State"]);
-                Assert.Equal(counterDataMessage2.Data["value"]["Limit"], remoteCounterDataMessage2.Data["value"]["Limit"]);
+                if (counterCount2 >= 1)
+                {
+                    Assert.Equal(counterDataMessage2.Data["value"]["Name"], remoteCounterDataMessage2.Data["value"]["Name"]);
+                    Assert.Equal(counterDataMessage2.Data["value"]["Type"], remoteCounterDataMessage2.Data["value"]["Type"]);
+                    Assert.Equal(counterDataMessage2.Data["value"]["Unit"], remoteCounterDataMessage2.Data["value"]["Unit"]);
+                    Assert.Equal(counterDataMessage2.Data["value"]["State"], remoteCounterDataMessage2.Data["value"]["State"]);
+                    Assert.Equal(counterDataMessage2.Data["value"]["Limit"], remoteCounterDataMessage2.Data["value"]["Limit"]);
+                }
             }
 
             // Finally
@@ -335,32 +347,9 @@ namespace VSEIoTCoreServer.UnitTest
             // Arrange
             Arrange();
 
-            // Mock device configuration that only contains one configured device
-            var deviceConfigurations = new List<DeviceConfiguration>() { _deviceConfig1, };
+            // Start the global IoTCore and all configured VSEIoTCores
+            await AssertedStart(_globalIoTCoreService);
 
-            var mockDbSet = deviceConfigurations.AsQueryable().BuildMockDbSet();
-
-            var mockDbContext = new Mock<SQLiteDbContext>();
-            mockDbContext.Setup(x => x.DeviceConfigurations).Returns(mockDbSet.Object);
-
-            var deviceConfigurationService = new DeviceConfigurationService(
-                _mapper,
-                mockDbContext.Object,
-                _nullLoggerFactory);
-            var iotCoreService = new IoTCoreService(
-                _mapper,
-                deviceConfigurationService,
-                _nullLoggerFactory,
-                _iotCoreOptions);
-            var globalIoTCoreService = new GlobalIoTCoreService(
-                deviceConfigurationService,
-                iotCoreService,
-                _iotCoreRuntime,
-                _nullLoggerFactory,
-                _iotCoreOptions);
-
-            // Start the global IoTCore and all configured VSEIoTCores - in this case only one single VSEIoTCore1 should be started
-            await AssertedStart(globalIoTCoreService);
             using (var globalClient = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _iotCoreOptions.Value.GlobalIoTCorePort))
             {
                 // Global IoTCore is reachable
@@ -375,65 +364,63 @@ namespace VSEIoTCoreServer.UnitTest
                 Assert.NotNull(remoteMessage1);
                 Assert.Equal(200, remoteMessage1.Code);
 
-                // Remote VSEIoTCore2 is not found, because it has not been added yet
+                // Remote VSEIoTCore2 is reachable
                 var remote2 = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(2).GetTree());
                 var remoteMessage2 = IoTCoreUtils.CreateResponseMessage(remote2);
                 Assert.NotNull(remoteMessage2);
-                Assert.Equal(404, remoteMessage2.Code);
+                Assert.Equal(200, remoteMessage2.Code);
+
+                // Remote VSEIoTCore3 is not found, because it has not been added yet
+                var remote3 = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(3).GetTree());
+                var remoteMessage3 = IoTCoreUtils.CreateResponseMessage(remote3);
+                Assert.NotNull(remoteMessage3);
+                Assert.Equal(404, remoteMessage3.Code);
             }
 
             // Act
-            // Manually start VSEIoTCore2
-            Process process = null;
+            // Manually start VSEIoTCore3
             await Task.Run(() =>
             {
                 var startInfo = new ProcessStartInfo(_iotCoreOptions.Value.AdapterLocation);
-                startInfo.Arguments = "--vse-ip " + _deviceConfig2.VseIpAddress +
-                    " --vse-port " + _deviceConfig2.VsePort +
-                    " --iotcore-uri " + _iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig2.IoTCorePort +
-                    " --iotcore-id " + _deviceConfig2.Id;
-                process = Process.Start(startInfo);
+                startInfo.Arguments = "--vse-ip " + _deviceConfig3.VseIpAddress +
+                    " --vse-port " + _deviceConfig3.VsePort +
+                    " --iotcore-uri " + _iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig3.IoTCorePort +
+                    " --iotcore-id " + _deviceConfig3.Id;
+                _iotCoreProcess = Process.Start(startInfo);
             });
 
-            // Wait for the IoTCore to start
-            var started = await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(_iotCoreOptions.Value.IoTCoreURI, _deviceConfig2.IoTCorePort);
+            // Wait for VSEIoTCore3 to start
+            var started = await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(_iotCoreOptions.Value.IoTCoreURI, _deviceConfig3.IoTCorePort);
             Assert.True(started);
-
-            // Independent VSEIoTCore2 is reachable
-            using (var vseClient = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig2.IoTCorePort))
-            {
-                var vseIoTCoreTree = await vseClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.GetTree());
-                var vseIoTCoreMessage = IoTCoreUtils.CreateResponseMessage(vseIoTCoreTree);
-                Assert.NotNull(vseIoTCoreMessage);
-                Assert.Equal(200, vseIoTCoreMessage.Code);
-            }
 
             // Act
             // Add VSEIoTCore2 remote mirror to the global IoTCore
-            await globalIoTCoreService.AddMirror(new DeviceConfigurationViewModel()
+            await _globalIoTCoreService.AddMirror(new DeviceConfigurationViewModel(
+                _deviceConfig3.VseIpAddress,
+                _deviceConfig3.VsePort,
+                _deviceConfig3.IoTCorePort)
             {
-                Id = _deviceConfig2.Id,
-                VseType = _deviceConfig2.VseType,
-                VseIpAddress = _deviceConfig2.VseIpAddress,
-                VsePort = _deviceConfig2.VsePort,
-                IoTCorePort = _deviceConfig2.IoTCorePort,
+                Id = _deviceConfig3.Id,
+                Name = _deviceConfig3.Name,
+                VseType = _deviceConfig3.VseType,
             });
 
             // Assert
             // Newly added remote mirror VSEIoTCore2 is reachable
             using (var globalClient = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _iotCoreOptions.Value.GlobalIoTCorePort))
             {
-                var remote2 = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(2).GetTree());
-                var remoteMessage2 = IoTCoreUtils.CreateResponseMessage(remote2);
-                Assert.NotNull(remoteMessage2);
-                Assert.Equal(200, remoteMessage2.Code);
+                var remote3 = await globalClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(3).GetTree());
+                var remoteMessage3 = IoTCoreUtils.CreateResponseMessage(remote3);
+                Assert.NotNull(remoteMessage3);
+                Assert.Equal(200, remoteMessage3.Code);
             }
 
             // Finally
             // Stop the global IoTCore and all instances of VSEIoTCore and stop manually started VSEIoTCore2
-            await AssertedStop(globalIoTCoreService);
-            process?.Kill();
-            process?.Dispose();
+            await AssertedStop(_globalIoTCoreService);
+            _iotCoreProcess?.Kill();
+            _iotCoreProcess?.WaitForExit();
+            Assert.True(_iotCoreProcess.HasExited);
         }
 
         [Fact]
@@ -470,9 +457,14 @@ namespace VSEIoTCoreServer.UnitTest
             await AssertedStop(_globalIoTCoreService);
         }
 
-        public async void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            await AssertedStop(_globalIoTCoreService);
+            _iotCoreProcess?.Kill();
+            _iotCoreProcess?.WaitForExit();
+            _iotCoreProcess?.Dispose();
+            await _globalIoTCoreService.Stop();
+
+            _iotCoreProcess = null;
             _mapper = null;
             _nullLoggerFactory = null;
             _mockDbContext = null;
@@ -484,25 +476,69 @@ namespace VSEIoTCoreServer.UnitTest
             _deviceConfig2 = null;
         }
 
+        private static async Task<int> GetObjectCount(Client vseClient)
+        {
+            var result = await vseClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Objects().GetData());
+            var message = IoTCoreUtils.CreateResponseMessage(result);
+            var objectCount = message.Data.GetCount() ?? -1;
+            return objectCount;
+        }
+
+        private static async Task<int> GetCounterCount(Client vseClient)
+        {
+            var result = await vseClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Counters().GetData());
+            var message = IoTCoreUtils.CreateResponseMessage(result);
+            var counterCount = message.Data.GetCount() ?? -1;
+            return counterCount;
+        }
+
+        private static async Task<ResponseMessage> GetObjectDataMessage(Client vseClient, int objectId)
+        {
+            var objectData = await vseClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Objects().Object(objectId).GetData());
+            var objectDataMessage = IoTCoreUtils.CreateResponseMessage(objectData);
+            return objectDataMessage;
+        }
+
+        private static async Task<ResponseMessage> GetCounterDataMessage(Client vseClient, int counterId)
+        {
+            var counterData = await vseClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Counters().Counter(counterId).GetData());
+            var counterDataMessage = IoTCoreUtils.CreateResponseMessage(counterData);
+            return counterDataMessage;
+        }
+
+        private static async Task<ResponseMessage> GetDeviceInfoMessage(Client vseClient)
+        {
+            var deviceInfo = await vseClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().GetData());
+            var deviceInfoMessage = IoTCoreUtils.CreateResponseMessage(deviceInfo);
+            return deviceInfoMessage;
+        }
+
+        private static async Task<ResponseMessage> GetRemoteObjectDataMessage(Client vseClient, int remoteId, int objectId)
+        {
+            var remoteObjectData = await vseClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(remoteId).Device().Objects().Object(objectId).GetData());
+            var remoteObjectDataMessage = IoTCoreUtils.CreateResponseMessage(remoteObjectData);
+            return remoteObjectDataMessage;
+        }
+
+        private static async Task<ResponseMessage> GetRemoteCounterDataMessage(Client vseClient, int remoteId, int counterId)
+        {
+            var remoteCounterData = await vseClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(remoteId).Device().Counters().Counter(counterId).GetData());
+            var remoteCounterDataMessage = IoTCoreUtils.CreateResponseMessage(remoteCounterData);
+            return remoteCounterDataMessage;
+        }
+
+        private static async Task<ResponseMessage> GetRemoteDeviceInfoMessage(Client vseClient, int remoteId)
+        {
+            var remoteDeviceInfo = await vseClient.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(remoteId).Device().Information().Device().GetData());
+            var remoteDeviceInfoMessage = IoTCoreUtils.CreateResponseMessage(remoteDeviceInfo);
+            return remoteDeviceInfoMessage;
+        }
+
         private void Arrange()
         {
-            _deviceConfig1 = new DeviceConfiguration()
-            {
-                Id = _testDevice1.Id,
-                VseType = _testDevice1.VseType,
-                VseIpAddress = _testDevice1.VseIpAddress,
-                VsePort = _testDevice1.VsePort,
-                IoTCorePort = _testDevice1.IoTCorePort,
-            };
-
-            _deviceConfig2 = new DeviceConfiguration()
-            {
-                Id = _testDevice2.Id,
-                VseType = _testDevice2.VseType,
-                VseIpAddress = _testDevice2.VseIpAddress,
-                VsePort = _testDevice2.VsePort,
-                IoTCorePort = _testDevice2.IoTCorePort,
-            };
+            _deviceConfig1 = TestUtils.GetDeviceConfiguration(_testDevice1);
+            _deviceConfig2 = TestUtils.GetDeviceConfiguration(_testDevice2);
+            _deviceConfig3 = TestUtils.GetDeviceConfiguration(_testDevice3);
 
             var myProfile = new AutoMapperProfile();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
