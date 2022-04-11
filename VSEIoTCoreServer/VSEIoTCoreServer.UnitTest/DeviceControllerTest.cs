@@ -16,6 +16,7 @@ namespace VSEIoTCoreServer.UnitTest
     using VSEIoTCoreServer.WebApp.Services;
     using Xunit;
 
+    [Collection("Sequential")]
     public class DeviceControllerTest : IDisposable
     {
         private readonly IDeviceConfigurationService _deviceConfigurationServiceMock;

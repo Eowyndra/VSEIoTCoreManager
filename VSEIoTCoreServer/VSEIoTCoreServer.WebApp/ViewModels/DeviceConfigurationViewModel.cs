@@ -11,11 +11,19 @@ namespace VSEIoTCoreServer.WebApp.ViewModels
 
     public class DeviceConfigurationViewModel : StatusViewModel
     {
+        public DeviceConfigurationViewModel(string vseIpAddress, int vsePort, int ioTCorePort)
+        {
+            VseIpAddress = vseIpAddress;
+            VsePort = vsePort;
+            IoTCorePort = ioTCorePort;
+        }
+
         [Required]
         public int Id { get; set; }
+        public string? Name { get; set; }
         public string? VseType { get; set; }
         [Required]
-        public string? VseIpAddress { get; set; }
+        public string VseIpAddress { get; set; }
         [Required]
         [Range(1, 65535)]
         public int VsePort { get; set; }

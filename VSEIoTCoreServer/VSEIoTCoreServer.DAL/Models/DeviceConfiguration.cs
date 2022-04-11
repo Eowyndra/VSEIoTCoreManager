@@ -13,6 +13,7 @@ namespace VSEIoTCoreServer.DAL.Models
     {
         [Required]
         public int Id { get; set; }
+        public string Name { get; set; }
         public string VseType { get; set; }
         [Required]
         public string VseIpAddress { get; set; }

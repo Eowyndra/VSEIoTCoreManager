@@ -14,6 +14,7 @@ namespace VSEIoTCoreServer.UnitTest
     using VSEIoTCoreServer.WebApp.ViewModels;
     using Xunit;
 
+    [Collection("Sequential")]
     public class DeviceConfigurationViewModelTest : IDisposable
     {
         private readonly TestDeviceOptions _testDevice1;
@@ -34,17 +35,19 @@ namespace VSEIoTCoreServer.UnitTest
         public void ViewModelTest()
         {
             // Act
-            var deviceConfigurationViewModel = new DeviceConfigurationViewModel()
+            var deviceConfigurationViewModel = new DeviceConfigurationViewModel(
+                _testDevice1.VseIpAddress,
+                _testDevice1.VsePort,
+                _testDevice1.IoTCorePort)
             {
                 Id = _testDevice1.Id,
+                Name = _testDevice1.Name,
                 VseType = _testDevice1.VseType,
-                VseIpAddress = _testDevice1.VseIpAddress,
-                VsePort = _testDevice1.VsePort,
-                IoTCorePort = _testDevice1.IoTCorePort,
             };
 
             // Assert
             Assert.Equal(_testDevice1.Id, deviceConfigurationViewModel.Id);
+            Assert.Equal(_testDevice1.Name, deviceConfigurationViewModel.Name);
             Assert.Equal(_testDevice1.VseType, deviceConfigurationViewModel.VseType);
             Assert.Equal(_testDevice1.VseIpAddress, deviceConfigurationViewModel.VseIpAddress);
             Assert.Equal(_testDevice1.VsePort, deviceConfigurationViewModel.VsePort);

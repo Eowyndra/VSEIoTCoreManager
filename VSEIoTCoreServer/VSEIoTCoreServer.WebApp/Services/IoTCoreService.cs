@@ -70,10 +70,10 @@ namespace VSEIoTCoreServer.WebApp.Services
             });
 
             // If device has no device type, try to get device type from IoTCore and update entity in database
-            if (device.VseType == null || device.VseType == string.Empty)
+            if (string.IsNullOrEmpty(device.VseType))
             {
                 var deviceType = await GetDeviceType(_iotCoreOptions.IoTCoreURI, device.IoTCorePort);
-                if (deviceType != string.Empty)
+                if (!string.IsNullOrEmpty(deviceType))
                 {
                     device.VseType = deviceType;
                     await _deviceConfigurationService.UpdateDevice(device);

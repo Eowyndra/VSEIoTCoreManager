@@ -14,6 +14,7 @@ namespace VSEIoTCoreServer.CommonTestUtils
         public const string TestDevice3 = "TestDevice3";
 
         public int Id { get; set; } = 0;
+        public string Name { get; set; } = string.Empty;
         public string VseType { get; set; } = string.Empty;
         public string VseIpAddress { get; set; } = string.Empty;
         public int VsePort { get; set; } = 0;

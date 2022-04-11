@@ -14,6 +14,7 @@ namespace VSEIoTCoreServer.UnitTest
     using VSEIoTCoreServer.WebApp.Services;
     using Xunit;
 
+    [Collection("Sequential")]
     public class GlobalControllerTest : IDisposable
     {
         [Fact]
