@@ -23,7 +23,8 @@
     }
   },
   "sidebar": {
-    "serverStatus": "Server status"
+    "serverStatus": "Server status",
+    "dataSources": "VSE devices"
   },
   "server-status": {
     "title": "Server status",
@@ -34,5 +35,22 @@
     "Running": "Running",
     "PartlyRunning": "Partly running",
     "undefined": "Unreachable"
+  },
+  "data-sources": {
+    "title": "VSE devices",
+    "table": {
+      "name": "Name",
+      "vsetype": "Type",
+      "vseipaddress": "IP",
+      "vseport": "VSE Port",
+      "iotcoreport": "IoT Port",
+      "iotstatus": "IoT Status",
+      "iotstatus.stopped": "Stopped",
+      "iotstatus.running": "Running",
+      "devicestatus": "VSE Status",
+      "devicestatus.connecting": "Connecting",
+      "devicestatus.connected": "Connected",
+      "devicestatus.disconnected": "Disconnected"
+    }
   }
 }

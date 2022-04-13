@@ -8,7 +8,6 @@
 namespace VSEIoTCoreServer.WebApp.ViewModels
 {
     using System.ComponentModel.DataAnnotations;
-    using System.Text.RegularExpressions;
 
     public class AddDeviceViewModel
     {

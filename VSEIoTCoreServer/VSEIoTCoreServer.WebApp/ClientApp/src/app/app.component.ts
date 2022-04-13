@@ -1,5 +1,6 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ConfigurationService } from './services/device-config.service';
 
 import { ServerService } from './services/server.service';
 
@@ -11,7 +12,8 @@ import { ServerService } from './services/server.service';
 export class AppComponent implements OnInit {
   constructor(
     private location: Location,
-    private readonly serverService: ServerService
+    private readonly serverService: ServerService,
+    readonly configurationService: ConfigurationService
   ) { }
 
   ngOnInit(): void {

@@ -9,8 +9,9 @@ import { RequestBuilder } from '../request-builder';
 import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
+import { AddDeviceViewModel } from '../models/add-device-view-model';
 import { DeviceConfigurationViewModel } from '../models/device-configuration-view-model';
-import { IStatus } from '../models/i-status';
+import { StatusViewModel } from '../models/status-view-model';
 
 @Injectable({
   providedIn: 'root',
@@ -105,21 +106,67 @@ export class DeviceService extends BaseService {
   }
 
   /**
-   * Path part for operation apiV1DeviceDeviceIdStatusGet
+   * Path part for operation apiV1DevicePost
    */
-  static readonly ApiV1DeviceDeviceIdStatusGetPath = '/api/v1/Device/device/{id}/status';
+  static readonly ApiV1DevicePostPath = '/api/v1/Device';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `apiV1DeviceDeviceIdStatusGet$Plain()` instead.
+   * To access only the response body, use `apiV1DevicePost()` instead.
+   *
+   * This method sends `application/*+json` and handles request body of type `application/*+json`.
+   */
+  apiV1DevicePost$Response(params?: {
+    body?: Array<AddDeviceViewModel>
+  }): Observable<StrictHttpResponse<void>> {
+
+    const rb = new RequestBuilder(this.rootUrl, DeviceService.ApiV1DevicePostPath, 'post');
+    if (params) {
+      rb.body(params.body, 'application/*+json');
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'text',
+      accept: '*/*'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return (r as HttpResponse<any>).clone({ body: undefined }) as StrictHttpResponse<void>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `apiV1DevicePost$Response()` instead.
+   *
+   * This method sends `application/*+json` and handles request body of type `application/*+json`.
+   */
+  apiV1DevicePost(params?: {
+    body?: Array<AddDeviceViewModel>
+  }): Observable<void> {
+
+    return this.apiV1DevicePost$Response(params).pipe(
+      map((r: StrictHttpResponse<void>) => r.body as void)
+    );
+  }
+
+  /**
+   * Path part for operation apiV1DeviceIdStatusGet
+   */
+  static readonly ApiV1DeviceIdStatusGetPath = '/api/v1/Device/{id}/status';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `apiV1DeviceIdStatusGet$Plain()` instead.
    *
    * This method doesn't expect any request body.
    */
-  apiV1DeviceDeviceIdStatusGet$Plain$Response(params: {
+  apiV1DeviceIdStatusGet$Plain$Response(params: {
     id: number;
-  }): Observable<StrictHttpResponse<IStatus>> {
+  }): Observable<StrictHttpResponse<StatusViewModel>> {
 
-    const rb = new RequestBuilder(this.rootUrl, DeviceService.ApiV1DeviceDeviceIdStatusGetPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, DeviceService.ApiV1DeviceIdStatusGetPath, 'get');
     if (params) {
       rb.path('id', params.id, {});
     }
@@ -130,37 +177,37 @@ export class DeviceService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<IStatus>;
+        return r as StrictHttpResponse<StatusViewModel>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `apiV1DeviceDeviceIdStatusGet$Plain$Response()` instead.
+   * To access the full response (for headers, for example), `apiV1DeviceIdStatusGet$Plain$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  apiV1DeviceDeviceIdStatusGet$Plain(params: {
+  apiV1DeviceIdStatusGet$Plain(params: {
     id: number;
-  }): Observable<IStatus> {
+  }): Observable<StatusViewModel> {
 
-    return this.apiV1DeviceDeviceIdStatusGet$Plain$Response(params).pipe(
-      map((r: StrictHttpResponse<IStatus>) => r.body as IStatus)
+    return this.apiV1DeviceIdStatusGet$Plain$Response(params).pipe(
+      map((r: StrictHttpResponse<StatusViewModel>) => r.body as StatusViewModel)
     );
   }
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `apiV1DeviceDeviceIdStatusGet$Json()` instead.
+   * To access only the response body, use `apiV1DeviceIdStatusGet$Json()` instead.
    *
    * This method doesn't expect any request body.
    */
-  apiV1DeviceDeviceIdStatusGet$Json$Response(params: {
+  apiV1DeviceIdStatusGet$Json$Response(params: {
     id: number;
-  }): Observable<StrictHttpResponse<IStatus>> {
+  }): Observable<StrictHttpResponse<StatusViewModel>> {
 
-    const rb = new RequestBuilder(this.rootUrl, DeviceService.ApiV1DeviceDeviceIdStatusGetPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, DeviceService.ApiV1DeviceIdStatusGetPath, 'get');
     if (params) {
       rb.path('id', params.id, {});
     }
@@ -171,23 +218,23 @@ export class DeviceService extends BaseService {
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<IStatus>;
+        return r as StrictHttpResponse<StatusViewModel>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `apiV1DeviceDeviceIdStatusGet$Json$Response()` instead.
+   * To access the full response (for headers, for example), `apiV1DeviceIdStatusGet$Json$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  apiV1DeviceDeviceIdStatusGet$Json(params: {
+  apiV1DeviceIdStatusGet$Json(params: {
     id: number;
-  }): Observable<IStatus> {
+  }): Observable<StatusViewModel> {
 
-    return this.apiV1DeviceDeviceIdStatusGet$Json$Response(params).pipe(
-      map((r: StrictHttpResponse<IStatus>) => r.body as IStatus)
+    return this.apiV1DeviceIdStatusGet$Json$Response(params).pipe(
+      map((r: StrictHttpResponse<StatusViewModel>) => r.body as StatusViewModel)
     );
   }
 

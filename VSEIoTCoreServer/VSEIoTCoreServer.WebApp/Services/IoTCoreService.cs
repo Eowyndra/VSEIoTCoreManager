@@ -122,30 +122,43 @@ namespace VSEIoTCoreServer.WebApp.Services
                 return null;
             }
 
-            // IoTStatus: has the VSEIoTCore process been started?
-            device.IoTStatus = _iotCoreProcessForDeviceId.ContainsKey(deviceId) ? IoTStatus.Running : IoTStatus.Stopped;
+            // Check if the VSEIoTCore process is started
+            device.IoTStatus = GetIoTStatus(deviceId);
 
-            // DeviceStatus: is the device reachable via IoTCore URI?
+            // Check if the device is reachable
+            device.DeviceStatus = await GetDeviceStatus(_iotCoreOptions.IoTCoreURI, device.IoTCorePort);
+
+            return _mapper.Map<StatusViewModel>(device);
+        }
+
+        public async Task<DeviceStatus> GetDeviceStatus(string iotCoreUrl, int iotCorePort)
+        {
+            var deviceStatus = DeviceStatus.Disconnected;
+
             try
             {
-                using var client = new Client(_iotCoreOptions.IoTCoreURI + ":" + device.IoTCorePort);
+                using var client = new Client(iotCoreUrl + ":" + iotCorePort);
                 var result = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Status().GetData());
                 var deviceStatusMessage = IoTCoreUtils.CreateResponseMessage(result);
-                device.DeviceStatus = deviceStatusMessage.Data.GetDeviceStatus();
+                deviceStatus = deviceStatusMessage.Data.GetDeviceStatus();
             }
             catch (HttpRequestException)
             {
                 // IoTCore has not been started and/or is not reachable, set status to disconnected
-                device.DeviceStatus = DeviceStatus.Disconnected;
+                deviceStatus = DeviceStatus.Disconnected;
             }
             catch (Exception e)
             {
-                _logger.LogError("Error getting VSEIoTCore status: " + e.Message);
+                _logger.LogError("Error getting device status: " + e.Message);
                 throw;
             }
 
-            var statusViewModel = _mapper.Map<StatusViewModel>(device);
-            return statusViewModel;
+            return deviceStatus;
+        }
+
+        public IoTStatus GetIoTStatus(int deviceId)
+        {
+            return _iotCoreProcessForDeviceId.ContainsKey(deviceId) ? IoTStatus.Running : IoTStatus.Stopped;
         }
 
         private static async Task<string> GetDeviceType(string ioTCoreURI, int ioTCorePort)

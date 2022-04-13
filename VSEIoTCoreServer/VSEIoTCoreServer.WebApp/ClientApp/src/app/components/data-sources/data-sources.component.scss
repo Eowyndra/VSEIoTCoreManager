@@ -1,0 +1,92 @@
+form {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .buttons {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .search {
+    display: flex;
+    flex-direction: row;
+    background: var(--ifm-content-background-color);
+    margin: 1px 1px 0 1px;
+    padding: 0 6px;
+  }
+  
+  .search-box {
+    width: 100%;
+  }
+  
+  
+  :host::ng-deep .search {
+  
+    mat-form-field {
+      width: 100% !important;
+    }
+  
+    .mat-form-field-wrapper {
+      padding: 0 !important;
+      margin: 10px 16px;
+    }
+  
+    .mat-form-field-flex {
+      border: 1px solid var(--ifm-border-color) !important;
+    }
+  
+    .mat-form-field-infix {
+      padding: 0;
+      border: 0 !important;
+    }
+  
+    .mat-form-field-underline {
+      display: none;
+    }
+  }
+  
+  table {
+    th {
+      border-top: 0;
+    }
+  }
+  
+  .status-container {
+    width: 160px;
+    padding: 5px;
+    text-align: center
+  }
+  
+  //fix for mat paginator selector; to be removed once it's fixed in ifm components
+  :host::ng-deep mat-paginator {
+    .mat-form-field-infix {
+      padding: 2px 0 8px !important;
+      min-width: 44px !important;
+    }
+  }
+  
+  .action-button {
+    background: transparent;
+    border: 0;
+  }
+  
+  .align-center {
+    align-self: center;
+  }
+  
+  .table-container {
+    height: calc(100vh - 350px);
+    display: flex;
+  }
+  
+  .table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  
+    .licenses {
+      margin-left: 1em;
+    }
+  }
+  

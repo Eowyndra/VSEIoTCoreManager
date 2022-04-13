@@ -21,24 +21,5 @@
       "publisher": "Publisher",
       "button-close": "Close"
     }
-  },
-  "sidebar": {
-    "serverStatus": "Server status"
-  },
-  "server-status": {
-    "title": "Server status",
-    "current-status": "Current status",
-    "button-start": "Start server",
-    "button-stop": "Stop server"
-  },
-  "service-status": {
-    "Stopped": "Stopped",
-    "StartPending": "Start pending",
-    "StopPending": "Stop pending",
-    "Running": "Running",
-    "ContinuePending": "Continue pending",
-    "PausePending": "Pause pending",
-    "Paused": "Paused",
-    "undefined": "Unreachable"
   }
 }
