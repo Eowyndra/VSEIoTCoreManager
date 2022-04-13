@@ -103,4 +103,6 @@
       </ResolvedFileToPublish>
     </ItemGroup>
   </Target>
+  
+  <ProjectExtensions><VisualStudio><UserProperties clientapp_4openapi_1json__JsonSchema="https://json.schemastore.org/global.json" /></VisualStudio></ProjectExtensions>
 </Project>

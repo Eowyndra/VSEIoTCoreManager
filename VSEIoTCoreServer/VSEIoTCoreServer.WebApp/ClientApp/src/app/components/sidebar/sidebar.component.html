@@ -12,4 +12,7 @@
       </ifm-font-icon>
     </div>
   </ifm-master-list-item>
+  <ifm-master-list-item #e2="routerLinkActive" [active]="e2.isActive" routerLink="data-sources" routerLinkActive>
+    {{ 'vseiot.sidebar.dataSources' | transloco }}
+  </ifm-master-list-item>
 </ifm-master-list>

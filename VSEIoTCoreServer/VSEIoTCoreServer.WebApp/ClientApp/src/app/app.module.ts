@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -13,6 +13,7 @@ import { HelpCentreComponent } from './components/header/help-centre/help-centre
 import { ServerStatusComponent } from './components/server-status/server-status.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { AppRoutingModule } from './app-routing.module';
+import { DataSourcesComponent } from './components/data-sources/data-sources.component';
 
 //Services
 import { UtilitiesService } from './services/utilities.service';
@@ -20,17 +21,25 @@ import { UtilitiesService } from './services/utilities.service';
 //Material
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatTableModule } from '@angular/material/table';
+import { MatInputModule } from '@angular/material/input';
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 //ifm
 import {
   IfmActionBarModule,
   IfmButtonModule,
   IfmCardModule,
+  IfmCheckboxModule,
   IfmIconModule,
   IfmLinkModule,
   IfmMenuModule,
   IfmScrollPanelModule,
-  IfmTemplateModule
+  IfmTemplateModule,
+  IfmFormModel,
+  IfmFormModule
 } from '@ifm/components';
 import { IfmLoggingService, IfmLogLevel, IfmStateModule, IfmStateService, IfmTransModule, SetIfmLogLevel } from '@ifm/sdk';
 import { IfmInfoDialogModule, IfmMasterDetailModule } from 'ifm-ui-components';
@@ -62,6 +71,10 @@ const availableLanguages = ['en-GB'];
 
     //Sidebar
     SidebarComponent,
+
+    //Data Sources Page
+    DataSourcesComponent,
+    
   ],
   imports: [
     //Routing & Standard Modules
@@ -70,11 +83,13 @@ const availableLanguages = ['en-GB'];
     BrowserModule,
     HttpClientModule,
     FormsModule,
+    ReactiveFormsModule,
 
     //ifm UI Modules
     IfmActionBarModule,
     IfmButtonModule,
     IfmCardModule,
+    IfmCheckboxModule,
     IfmIconModule,
     IfmInfoDialogModule,
     IfmLinkModule,
@@ -82,10 +97,16 @@ const availableLanguages = ['en-GB'];
     IfmTemplateModule,
     IfmScrollPanelModule,
     IfmMasterDetailModule,
+    IfmFormModule,
 
     //Material
     MatToolbarModule,
     MatDialogModule,
+    MatTableModule,
+    MatInputModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatProgressSpinnerModule,
 
     //Libs
     IfmStateModule.forRoot(),

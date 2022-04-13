@@ -7,6 +7,7 @@
 
 namespace VSEIoTCoreServer.WebApp.Controllers
 {
+    using System.Collections.Concurrent;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Options;
     using VSEIoTCoreServer.CommonUtils;
@@ -48,7 +49,13 @@ namespace VSEIoTCoreServer.WebApp.Controllers
         {
             try
             {
-                var deviceConfigurations = await _deviceConfigurationService.GetAll();
+                // Get DeviceStatus and IoTStatus for each configured device
+                var deviceConfigurations = new ConcurrentBag<DeviceConfigurationViewModel>(await _deviceConfigurationService.GetAll());
+                await Parallel.ForEachAsync(deviceConfigurations, async (device, cancelationToken) =>
+                {
+                    device.DeviceStatus = await _iotCoreService.GetDeviceStatus(_iotCoreOptions.IoTCoreURI, device.IoTCorePort);
+                    device.IoTStatus = _iotCoreService.GetIoTStatus(device.Id);
+                });
 
                 return Ok(deviceConfigurations);
             }

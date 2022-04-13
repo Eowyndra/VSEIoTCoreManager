@@ -71,5 +71,20 @@
             <param name="deviceId">The ID of the device.</param>
             <returns>The StatusViewModel containing the IoTStatus and DeviceStatus of the device.</returns>
         </member>
+        <member name="M:VSEIoTCoreServer.WebApp.Services.IIoTCoreService.GetDeviceStatus(System.String,System.Int32)">
+            <summary>
+            Get the status of the device with the given url and port.
+            </summary>
+            <param name="iotCoreUrl">The URL of the device.</param>
+            <param name="iotCorePort">The Port of the device.</param>
+            <returns>The DeviceStatus of the device.</returns>
+        </member>
+        <member name="M:VSEIoTCoreServer.WebApp.Services.IIoTCoreService.GetIoTStatus(System.Int32)">
+            <summary>
+            Get the status of the IoTCore process for the device with the given deviceId.
+            </summary>
+            <param name="deviceId">The ID of the device.</param>
+            <returns>The IoTStatus of the device.</returns>
+        </member>
     </members>
 </doc>

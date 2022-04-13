@@ -7,7 +7,8 @@ export interface DeviceConfigurationViewModel {
   id: number;
   ioTCorePort: number;
   ioTStatus?: IoTStatus;
+  name?: null | string;
   vseIpAddress: string;
   vsePort: number;
-  vseType: string;
+  vseType?: null | string;
 }
