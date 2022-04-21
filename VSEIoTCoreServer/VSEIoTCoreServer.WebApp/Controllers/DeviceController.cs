@@ -51,9 +51,8 @@ namespace VSEIoTCoreServer.WebApp.Controllers
             {
                 // Get DeviceStatus and IoTStatus for each configured device
                 var deviceConfigurations = new ConcurrentBag<DeviceConfigurationViewModel>(await _deviceConfigurationService.GetAll());
-                await Parallel.ForEachAsync(deviceConfigurations, async (device, cancelationToken) =>
+                Parallel.ForEach(deviceConfigurations, (device, cancelationToken) =>
                 {
-                    device.DeviceStatus = await _iotCoreService.GetDeviceStatus(_iotCoreOptions.IoTCoreURI, device.IoTCorePort);
                     device.IoTStatus = _iotCoreService.GetIoTStatus(device.Id);
                 });
 

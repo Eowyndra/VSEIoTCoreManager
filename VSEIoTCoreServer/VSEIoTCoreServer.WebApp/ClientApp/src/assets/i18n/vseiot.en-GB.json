@@ -38,6 +38,7 @@
   },
   "data-sources": {
     "title": "VSE devices",
+    "button-add-device": "Device",
     "table": {
       "name": "Name",
       "vsetype": "Type",
@@ -51,6 +52,37 @@
       "devicestatus.connecting": "Connecting",
       "devicestatus.connected": "Connected",
       "devicestatus.disconnected": "Disconnected"
+    },
+    "add-device": {
+      "title": "Add VSE device",
+      "scan-network": "Scan Network",
+      "specific": "Specific",
+      "tooltip-specific": "Specific IP Address will be added to the list. No scan will be performed - it will not be approved by scan if the device can really be found",
+      "range": "Range",
+      "tooltip-range": "For the whole indicated IP range devices will be added to the list - No scans will be performed - it will not be approved by scan which of the devices can be really found",
+      "ip-address": "IP Address",
+      "invalid-ip": "Invalid IP",
+      "ip-end": "IP end",
+      "vseport": "VSE Port",
+      "iotcoreport": "IoTCore Port",
+      "scan": "Scan",
+      "add-to-list": "Add to list",
+      "table": {
+        "ip": "IP",
+        "vseport": "VSE Port",
+        "iotcoreport": "IoT Core Port"
+      },
+      "button-scan": "Scan",
+      "button-add-to-list": "Add to list",
+      "button-add": "ADD DEVICES",
+      "button-cancel": "CANCEL",
+      "devices-found": "devices found"
     }
+  },
+  "validation": {
+    "required": "Required",
+    "min": "Min = {{ min }}",
+    "max": "Max = {{ max }}",
+    "already-used": "Already used"
   }
 }

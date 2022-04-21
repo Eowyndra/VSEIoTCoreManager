@@ -9,6 +9,7 @@ namespace VSEIoTCoreServer.DAL.Models.Enums
 {
     public enum DeviceStatus
     {
+        Pending,
         Disconnected,
         Connecting,
         Connected,

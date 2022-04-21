@@ -421,6 +421,7 @@
       },
       "DeviceStatus": {
         "enum": [
+          "Pending",
           "Disconnected",
           "Connecting",
           "Connected"

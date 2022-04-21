@@ -1,103 +1,123 @@
 <form [formGroup]="form">
-    <h1>{{'vseiot.data-sources.title' | transloco}}</h1>
-    <div class="form-container">
-      <!--Table-->
-      <div class="table-container">
-        <ifm-scroll-panel allowVertical="true" flex="true">
-  
-          <table (matSortChange)="handleSortEvent()" [dataSource]="dataSource" class="ifm-table-w-interactive-rows" mat-table matSort>
-  
-            <!--Checkbox-->
-            <ng-container matColumnDef="checkbox">
-              <th *matHeaderCellDef mat-header-cell>
-                <ifm-checkbox (onChange)="$event ? masterToggle() : null"
-                              [checked]="selection.hasValue() && isAllSelected()"
-                              [indeterminate]="selection.hasValue() && !isAllSelected()">
-                </ifm-checkbox>
-              </th>
-              <td *matCellDef="let row" mat-cell>
-                <ifm-checkbox (click)="$event.stopPropagation()"
-                              (onChange)="$event ? selection.toggle(row) : null"
-                              [checked]="selection.isSelected(row)">
-                </ifm-checkbox>
-              </td>
-            </ng-container>
+  <h1>{{'vseiot.data-sources.title' | transloco}}</h1>
+  <div class="form-container">
 
-            <!--Name-->
-            <ng-container matColumnDef="name">
-              <th *matHeaderCellDef mat-header-cell mat-sort-header>{{'vseiot.data-sources.table.name' | transloco}}</th>
-              <td *matCellDef="let row" mat-cell>{{ row.name }}</td>
-            </ng-container>
-  
-            <!--VseType-->
-            <ng-container matColumnDef="vseType">
-              <th *matHeaderCellDef mat-header-cell mat-sort-header>{{'vseiot.data-sources.table.vsetype' | transloco}}</th>
-              <td *matCellDef="let row" mat-cell>{{ row.vseType }}</td>
-            </ng-container>
+    <!--Add device-->
+    <div class="buttons">
+      <button (click)="addDevice()" fontIcon="add" ifm-standard-button
+        label="{{'vseiot.data-sources.button-add-device' | transloco}}">
+      </button>
+    </div>
 
-            <!--VseIPAddress-->
-            <ng-container matColumnDef="vseIpAddress">
-              <th *matHeaderCellDef mat-header-cell mat-sort-header>{{'vseiot.data-sources.table.vseipaddress' | transloco}}</th>
-              <td *matCellDef="let row" mat-cell>{{ row.vseIpAddress }}</td>
-            </ng-container>
 
-            <!--VsePort-->
-            <ng-container matColumnDef="vsePort">
-              <th *matHeaderCellDef mat-header-cell mat-sort-header>{{'vseiot.data-sources.table.vseport' | transloco}}</th>
-              <td *matCellDef="let row" mat-cell>{{ row.vsePort }}</td>
-            </ng-container>
+    <!--Table-->
+    <div class="table-container">
+      <ifm-scroll-panel allowVertical="true" flex="true">
 
-            <!--IoTCorePort-->
-            <ng-container matColumnDef="ioTCorePort">
-              <th *matHeaderCellDef mat-header-cell mat-sort-header>{{'vseiot.data-sources.table.iotcoreport' | transloco}}</th>
-              <td *matCellDef="let row" mat-cell>{{ row.ioTCorePort }}</td>
-            </ng-container>
-  
-            <!--IoTStatus-->
-            <ng-container matColumnDef="ioTStatus">
-              <th *matHeaderCellDef mat-header-cell>{{'vseiot.data-sources.table.iotstatus' | transloco}}</th>
-              <td *matCellDef="let row" mat-cell>
-                <div [ngClass]="{
+        <table (matSortChange)="handleSortEvent()" [dataSource]="dataSource" class="ifm-table-w-interactive-rows"
+          mat-table matSort>
+
+          <!--Checkbox-->
+          <ng-container matColumnDef="checkbox">
+            <th *matHeaderCellDef mat-header-cell>
+              <ifm-checkbox (onChange)="$event ? masterToggle() : null"
+                [checked]="selection.hasValue() && isAllSelected()"
+                [indeterminate]="selection.hasValue() && !isAllSelected()">
+              </ifm-checkbox>
+            </th>
+            <td *matCellDef="let row" mat-cell>
+              <ifm-checkbox (click)="$event.stopPropagation()" (onChange)="$event ? selection.toggle(row) : null"
+                [checked]="selection.isSelected(row)">
+              </ifm-checkbox>
+            </td>
+          </ng-container>
+
+          <!--Name-->
+          <ng-container matColumnDef="name">
+            <th *matHeaderCellDef mat-header-cell mat-sort-header>{{'vseiot.data-sources.table.name' | transloco}}</th>
+            <td *matCellDef="let row" mat-cell>{{ row.name }}</td>
+          </ng-container>
+
+          <!--VseType-->
+          <ng-container matColumnDef="vseType">
+            <th *matHeaderCellDef mat-header-cell mat-sort-header>{{'vseiot.data-sources.table.vsetype' | transloco}}
+            </th>
+            <td *matCellDef="let row" mat-cell>{{ row.vseType }}</td>
+          </ng-container>
+
+          <!--VseIPAddress-->
+          <ng-container matColumnDef="vseIpAddress">
+            <th *matHeaderCellDef mat-header-cell mat-sort-header>{{'vseiot.data-sources.table.vseipaddress' |
+              transloco}}</th>
+            <td *matCellDef="let row" mat-cell>{{ row.vseIpAddress }}</td>
+          </ng-container>
+
+          <!--VsePort-->
+          <ng-container matColumnDef="vsePort">
+            <th *matHeaderCellDef mat-header-cell mat-sort-header>{{'vseiot.data-sources.table.vseport' | transloco}}
+            </th>
+            <td *matCellDef="let row" mat-cell>{{ row.vsePort }}</td>
+          </ng-container>
+
+          <!--IoTCorePort-->
+          <ng-container matColumnDef="ioTCorePort">
+            <th *matHeaderCellDef mat-header-cell mat-sort-header>{{'vseiot.data-sources.table.iotcoreport' |
+              transloco}}</th>
+            <td *matCellDef="let row" mat-cell>{{ row.ioTCorePort }}</td>
+          </ng-container>
+
+          <!--IoTStatus-->
+          <ng-container matColumnDef="ioTStatus">
+            <th *matHeaderCellDef mat-header-cell>{{'vseiot.data-sources.table.iotstatus' | transloco}}</th>
+            <td *matCellDef="let row" mat-cell>
+              <div [ngClass]="{
                 'color-back-running': row.ioTStatus === IoTStatus.Running,
                 'color-back-stopped ': row.ioTStatus === IoTStatus.Stopped
-                }"
-                     class="status-container">
-                  <ng-template [ngIf]="row.ioTStatus === IoTStatus.Running ||  row.ioTStatus === IoTStatus.Stopped">
-                    {{ 'vseiot.data-sources.table.iotstatus.' + row.ioTStatus | lowercase | transloco  }}
-                  </ng-template>
-                  <ng-template [ngIf]="row.ioTStatus === undefined">
-                    <mat-spinner diameter="30" strokeWidth="6"></mat-spinner>
-                  </ng-template>
-                </div>
-              </td>
-            </ng-container>
+                }" class="status-container">
+                <ng-template [ngIf]="row.ioTStatus === IoTStatus.Running ||  row.ioTStatus === IoTStatus.Stopped">
+                  {{ 'vseiot.data-sources.table.iotstatus.' + row.ioTStatus | lowercase | transloco }}
+                </ng-template>
+                <ng-template [ngIf]="row.ioTStatus === undefined">
+                  <mat-spinner diameter="30" strokeWidth="6"></mat-spinner>
+                </ng-template>
+              </div>
+            </td>
+          </ng-container>
 
-            <!--DeviceStatus-->
-            <ng-container matColumnDef="deviceStatus">
-              <th *matHeaderCellDef mat-header-cell>{{'vseiot.data-sources.table.devicestatus' | transloco}}</th>
-              <td *matCellDef="let row" mat-cell>
-                <div [ngClass]="{
-                'color-back-running': row.deviceStatus === DeviceStatus.Connected,
-                'color-back-partly-running': row.deviceStatus === DeviceStatus.Connecting,
-                'color-back-stopped ': row.deviceStatus === DeviceStatus.Disconnected
-                }"
-                      class="status-container">
-                    <ng-template [ngIf]="row.deviceStatus === DeviceStatus.Connected ||  row.deviceStatus === DeviceStatus.Connecting || row.deviceStatus === DeviceStatus.Disconnected">
-                      {{ 'vseiot.data-sources.table.devicestatus.' + row.deviceStatus | lowercase | transloco  }}
-                    </ng-template>
-                    <ng-template [ngIf]="row.deviceStatus === undefined">
-                      <mat-spinner diameter="30" strokeWidth="6"></mat-spinner>
-                    </ng-template>
-                  </div>
-                </td>
-            </ng-container>
-  
-            <tr *matHeaderRowDef="columns; sticky: true" mat-header-row></tr>
-            <tr *matRowDef="let row; columns: columns" class="pointer-on-hover" mat-row></tr>
-          </table>
-  
-        </ifm-scroll-panel>
+          <!--DeviceStatus-->
+          <ng-container matColumnDef="deviceStatus">
+            <th *matHeaderCellDef mat-header-cell>{{'vseiot.data-sources.table.devicestatus' | transloco}}</th>
+            <td *matCellDef="let row" mat-cell>
+              <div [ngClass]="{
+                            'color-back-running': row.deviceStatus === DeviceStatus.Connected,
+                            'color-back-partly-running': row.deviceStatus === DeviceStatus.Connecting,
+                            'color-back-stopped ': row.deviceStatus === DeviceStatus.Disconnected
+                            }" class="status-container">
+                <ng-template
+                  [ngIf]="row.deviceStatus === DeviceStatus.Connected ||  row.deviceStatus === DeviceStatus.Connecting || row.deviceStatus === DeviceStatus.Disconnected">
+                  {{ 'vseiot.data-sources.table.devicestatus.' + row.deviceStatus | lowercase | transloco }}
+                </ng-template>
+                <ng-template [ngIf]="row.deviceStatus === DeviceStatus.Pending">
+                  <mat-spinner diameter="30" strokeWidth="6"></mat-spinner>
+                </ng-template>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr *matHeaderRowDef="columns; sticky: true" mat-header-row></tr>
+          <tr *matRowDef="let row; columns: columns" class="pointer-on-hover" mat-row></tr>
+        </table>
+
+      </ifm-scroll-panel>
+    </div>
+
+    <div class="table-footer">
+      <div class="pagination">
+        <mat-paginator (page)="handlePageEvent()"
+                       [pageSizeOptions]="[10, 25, 50]"
+                       [pageSize]="10">
+        </mat-paginator>
       </div>
     </div>
+  </div>
 </form>
-  

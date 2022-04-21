@@ -133,7 +133,7 @@ namespace VSEIoTCoreServer.WebApp.Services
 
         public async Task<DeviceStatus> GetDeviceStatus(string iotCoreUrl, int iotCorePort)
         {
-            var deviceStatus = DeviceStatus.Disconnected;
+            var deviceStatus = DeviceStatus.Pending;
 
             try
             {
@@ -163,18 +163,7 @@ namespace VSEIoTCoreServer.WebApp.Services
 
         private static async Task<string> GetDeviceType(string ioTCoreURI, int ioTCorePort)
         {
-            var deviceType = string.Empty;
-            var started = await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(ioTCoreURI, ioTCorePort);
-            if (started)
-            {
-                // Get device type from iotcore
-                using var client = new Client(ioTCoreURI + ":" + ioTCorePort);
-                var result = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().Type().GetData());
-                var message = IoTCoreUtils.CreateResponseMessage(result);
-                var devType = message.Data.GetDeviceType();
-                deviceType = devType ?? string.Empty;
-            }
-
+            var deviceType = await IoTCoreUtils.WaitForDeviceType(ioTCoreURI, ioTCorePort);
             return deviceType;
         }
     }

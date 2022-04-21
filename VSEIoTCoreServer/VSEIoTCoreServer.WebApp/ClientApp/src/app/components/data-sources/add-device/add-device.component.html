@@ -1,0 +1,274 @@
+<form [formGroup]="form" autocomplete="off">
+
+    <div class="modal-container">
+
+        <!--Header text-->
+        <div class="title">
+            <h2>{{'vseiot.data-sources.add-device.title' | transloco}}</h2>
+        </div>
+
+        <!--Filter zone-->
+        <div class="type">
+            <div class="column-radio">
+                <div class="cell">
+                    <div class="inline">
+                        <ifm-radio (onChange)="typeChanged()" [value]="ScanType.ScanNetwork" formControlName="scanType"
+                            inputName="scanTypeGroup"
+                            label="{{'vseiot.data-sources.add-device.scan-network' | transloco}}" [disabled]="true">
+                        </ifm-radio>
+                    </div>
+                </div>
+                <div class="cell">
+                    <div class="inline">
+                        <ifm-radio (onChange)="typeChanged()" [value]="ScanType.Specific" formControlName="scanType"
+                            inputName="scanTypeGroup" label="{{'vseiot.data-sources.add-device.specific' | transloco}}" [(ngModel)]="defaultScanType">
+                        </ifm-radio>
+                        <ifm-font-icon class="tooltip-info" icon="info"
+                            ifm-tooltip="{{'vseiot.data-sources.add-device.tooltip-specific' | transloco}}"
+                            showArrow="true" tooltipMaxWidth="400px">
+                        </ifm-font-icon>
+                    </div>
+                </div>
+                <div class="cell">
+                    <div class="inline">
+                        <ifm-radio (onChange)="typeChanged()" [value]="ScanType.Range" formControlName="scanType"
+                            inputName="scanTypeGroup" label="{{'vseiot.data-sources.add-device.range' | transloco}}"
+                            [disabled]="true">
+                        </ifm-radio>
+                        <ifm-font-icon class="tooltip-info" icon="info"
+                            ifm-tooltip="{{'vseiot.data-sources.add-device.tooltip-range' | transloco}}"
+                            showArrow="true" tooltipMaxWidth="400px">
+                        </ifm-font-icon>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IP -->
+            <div class="column-ip">
+                <!-- Line 1 - Scan Network -->
+                <div class="cell"></div>
+                <!-- Line 2 - Specific -->
+                <div class="cell">
+                    <div [ngClass]="{'ip-disabled': scanType.value !== ScanType.Specific}" class="ip-zone">
+                        <ifm-input 
+                            [formControl]="vseIpAddress"
+                            class="ip-input"
+                            label="{{'vseiot.data-sources.add-device.ip-address' | transloco  }}" 
+                            type="text">
+                            <ng-template ifm-template="required" type="error">
+                                {{'vseiot.validation.required' | transloco }}
+                            </ng-template>
+                            <ng-template ifm-template="pattern" let-error type="error">
+                                {{'vseiot.data-sources.add-device.invalid-ip' | transloco }}
+                            </ng-template>
+                        </ifm-input>
+
+                        <ifm-input
+                            [formControl]="vsePort"
+                            class="port-input"
+                            placeholder="3321"
+                            label="{{'vseiot.data-sources.add-device.vseport' | transloco  }}" 
+                            type="number">
+                            <ng-template ifm-template="required" type="error">
+                                {{'vseiot.validation.required' | transloco }}
+                            </ng-template>
+                            <ng-template ifm-template="min" let-error type="error">
+                                {{'vseiot.validation.min' | transloco : { min: error.min } }}
+                            </ng-template>
+                            <ng-template ifm-template="max" let-error type="error">
+                                {{'vseiot.validation.max' | transloco : { max: error.max } }}
+                            </ng-template>
+                        </ifm-input>
+
+                        <ifm-input
+                            [formControl]="ioTCorePort" 
+                            class="port-input"
+                            [placeholder]="findFreePort()"
+                            label="{{'vseiot.data-sources.add-device.iotcoreport' | transloco  }}"
+                            type="number">
+                            <ng-template ifm-template="required" type="error">
+                                {{'vseiot.validation.required' | transloco }}
+                            </ng-template>
+                            <ng-template ifm-template="min" let-error type="error">
+                                {{'vseiot.validation.min' | transloco : { min: error.min } }}
+                            </ng-template>
+                            <ng-template ifm-template="max" let-error type="error">
+                                {{'vseiot.validation.max' | transloco : { max: error.max } }}
+                            </ng-template>
+                            <ng-template ifm-template="alreadyUsed" let-error type="error">
+                                {{'vseiot.validation.already-used' | transloco }}
+                            </ng-template>
+                        </ifm-input>
+                    </div>
+                </div>
+                <!-- Line 3 - Range -->
+                <div class="cell">
+                    <div [ngClass]="{'ip-disabled': scanType.value !== ScanType.Range}" class="ip-zone">
+                        <ifm-input 
+                            class="ip-input"
+                            formControlName="rangeIp"
+                            label="{{'vseiot.data-sources.add-device.ip-address' | transloco  }}"
+                            type="text">
+                            <ng-template ifm-template="required" type="error">
+                                {{'vseiot.validation.required' | transloco }}
+                            </ng-template>
+                            <ng-template ifm-template="pattern" type="error">
+                                {{'vseiot.data-sources.add-device.invalid-ip' | transloco }}
+                            </ng-template>
+                        </ifm-input>
+                        <div class="ip-separator">-</div>
+                        <ifm-input 
+                            class="ip-end-input"
+                            formControlName="rangeIp_end"
+                            label="{{'vseiot.data-sources.add-device.ip-end' | transloco  }}"
+                            type="number">
+                            <ng-template ifm-template="required" type="error">
+                                {{'vseiot.validation.required' | transloco }}
+                            </ng-template>
+                            <ng-template ifm-template="min" let-error type="error">
+                                {{'vseiot.validation.min' | transloco : { min: error.min } }}
+                            </ng-template>
+                            <ng-template ifm-template="max" let-error type="error">
+                                {{'vseiot.validation.max' | transloco : { max: error.max } }}
+                            </ng-template>
+                        </ifm-input>
+                        <ifm-input 
+                            class="port-input"
+                            formControlName="rangePort"
+                            label="{{'vseiot.data-sources.add-device.vseport' | transloco  }}"
+                            type="number">
+                            <ng-template ifm-template="required" type="error">
+                                {{'vseiot.validation.required' | transloco }}
+                            </ng-template>
+                            <ng-template ifm-template="min" let-error type="error">
+                                {{'vseiot.validation.min' | transloco : { min: error.min } }}
+                            </ng-template>
+                            <ng-template ifm-template="max" let-error type="error">
+                                {{'vseiot.validation.max' | transloco : { max: error.max } }}
+                            </ng-template>
+                        </ifm-input>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="column-buttons">
+                <div class="cell">
+                    <button 
+                        class="top"
+                        (click)="scanNetwork()"
+                        [disabled]="isLoading || scanType.value !== ScanType.ScanNetwork"
+                        ifm-standard-button
+                        label="{{'vseiot.data-sources.add-device.button-scan' | transloco}}">
+                    </button>
+                </div>
+                <div class="cell">
+                    <button 
+                        class="top"
+                        (click)="specific()"
+                        [disabled]="isLoading || scanType.value !== ScanType.Specific || !vseIpAddress.valid || !vsePort.valid || !ioTCorePort.valid"
+                        ifm-standard-button
+                        label="{{'vseiot.data-sources.add-device.button-add-to-list' | transloco}}">
+                    </button>
+                </div>
+                <div class="cell">
+                    <button
+                        class="top"
+                        (click)="range()"
+                        [disabled]="isLoading || scanType.value !== ScanType.Range || !rangeIp.valid || !rangeIp_end.valid || !rangePort.valid"
+                        ifm-standard-button
+                        label="{{'vseiot.data-sources.add-device.button-add-to-list' | transloco}}">
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!--Content-->
+        <div class="center-content">
+
+            <!--Spinner-->
+            <ng-template [ngIf]="isLoading">
+                <mat-spinner diameter="160" strokeWidth="6"></mat-spinner>
+            </ng-template>
+
+            <!--No data-->
+            <ng-template [ngIf]="!isLoading && dataSource.data.length === 0">
+                <div class="disabled">
+                    <ng-template [ngIf]="searched">
+                        No VSE devices found
+                    </ng-template>
+                    <ng-template [ngIf]="!searched">
+                        Scan network or search for specific IP to find devices to add
+                    </ng-template>
+                </div>
+            </ng-template>
+
+            <!--Table with data-->
+            <div [ngClass]="{'is-hidden': isLoading || dataSource.data.length === 0}" class="table-container">
+                <ifm-scroll-panel allowVertical="true" flex="true">
+
+                    <table [dataSource]="dataSource" class="ifm-table-w-interactive-rows" mat-table matSort>
+
+                        <!--Checkbox-->
+                        <ng-container matColumnDef="checkbox">
+                            <th *matHeaderCellDef mat-header-cell>
+                                <ifm-checkbox (onChange)="$event ? masterToggle() : null"
+                                    [checked]="selection.hasValue() && isAllSelected()"
+                                    [disabled]="selectableRows() === 0"
+                                    [indeterminate]="selection.hasValue() && !isAllSelected()">
+                                </ifm-checkbox>
+                            </th>
+                            <td *matCellDef="let row" mat-cell>
+                                <ifm-checkbox (click)="$event.stopPropagation()"
+                                    (onChange)="$event ? selection.toggle(row) : null"
+                                    [checked]="selection.isSelected(row)"
+                                    [disabled]="row.onboardStatus === true || (!selection.isSelected(row) && isAllSelected())">
+                                </ifm-checkbox>
+                            </td>
+                        </ng-container>
+
+                        <!--IP-->
+                        <ng-container matColumnDef="vseIpAddress">
+                            <th *matHeaderCellDef mat-header-cell mat-sort-header>
+                                {{'vseiot.data-sources.add-device.table.ip' | transloco}}</th>
+                            <td *matCellDef="let row" [ngClass]="{'disabled': false}" mat-cell>{{ row.vseIpAddress }}
+                            </td>
+                        </ng-container>
+
+                        <!--VsePort-->
+                        <ng-container matColumnDef="vsePort">
+                            <th *matHeaderCellDef mat-header-cell mat-sort-header>
+                                {{'vseiot.data-sources.add-device.table.vseport' | transloco}}</th>
+                            <td *matCellDef="let row" [ngClass]="{'disabled': false}" mat-cell>{{ row.vsePort }}
+                            </td>
+                        </ng-container>
+
+                        <!--IoTCorePort-->
+                        <ng-container matColumnDef="ioTCorePort">
+                            <th *matHeaderCellDef mat-header-cell mat-sort-header>
+                                {{'vseiot.data-sources.add-device.table.iotcoreport' | transloco}}</th>
+                            <td *matCellDef="let row" [ngClass]="{'disabled': false}" mat-cell>{{ row.ioTCorePort }}
+                            </td>
+                        </ng-container>
+
+                        <tr *matHeaderRowDef="columns; sticky: true" mat-header-row></tr>
+                        <tr *matRowDef="let row; columns: columns" class="pointer-on-hover" mat-row></tr>
+                    </table>
+
+                </ifm-scroll-panel>
+            </div>
+        </div>
+
+        <!--Footer buttons-->
+        <div class="buttons">
+            <mat-dialog-actions>
+                <button [disabled]="!selection.hasValue() || isLoading" [mat-dialog-close]="selection"
+                    ifm-standard-button label="{{'vseiot.data-sources.add-device.button-add' | transloco}}">
+                </button>
+                <button [disabled]="isLoading" class="margin-left-20" ifm-standard-button
+                    label="{{'vseiot.data-sources.add-device.button-cancel' | transloco}}" mat-dialog-close>
+                </button>
+            </mat-dialog-actions>
+        </div>
+    </div>
+</form>
