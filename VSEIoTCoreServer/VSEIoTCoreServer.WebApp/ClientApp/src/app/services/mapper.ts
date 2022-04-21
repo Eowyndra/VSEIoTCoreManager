@@ -1,7 +1,8 @@
 import { createMapper, fromValue, mapFrom } from '@automapper/core';
 import { createMetadataMap, pojos } from '@automapper/pojos';
+import { AddDeviceUI } from '../models/add-device';
 import { DeviceConfigurationUI } from '../models/device-configuration';
-import { DeviceConfigurationViewModel } from './../api/models';
+import { AddDeviceViewModel, DeviceConfigurationViewModel } from './../api/models';
 
 export const mapper = createMapper({
   name: 'vseiotMapper',
@@ -22,6 +23,13 @@ export function createMetadata(): void {
     vseType: String
   });
 
+  createMetadataMap<AddDeviceViewModel>('AddDeviceViewModel', {
+    ioTCorePort: Number,
+    name: String,
+    vseIpAddress: String,
+    vsePort: Number
+  });
+
   // FrontEnd
   createMetadataMap<DeviceConfigurationUI>('DeviceConfigurationUI', {
     name: String,
@@ -32,12 +40,21 @@ export function createMetadata(): void {
     ioTStatus: 'IoTStatus',
     deviceStatus: 'DeviceStatus'
   });
+
+  createMetadataMap<AddDeviceUI>('AddDeviceUI', {
+    name: String,
+    vseIpAddress: String,
+    vsePort: Number,
+    ioTCorePort: Number
+  });
 }
 
 createMetadata();
 
 // FrontEnd <=> BackEnd ViewModel
 mapper.createMap<DeviceConfigurationUI, DeviceConfigurationViewModel>('DeviceConfigurationUI', 'DeviceConfigurationViewModel');
+mapper.createMap<AddDeviceUI, AddDeviceViewModel>('AddDeviceUI', 'AddDeviceViewModel');
 
 // BackEnd ViewModel <=> FrontEnd
 mapper.createMap<DeviceConfigurationViewModel, DeviceConfigurationUI>('DeviceConfigurationViewModel', 'DeviceConfigurationUI');
+mapper.createMap<AddDeviceViewModel, AddDeviceUI>('AddDeviceViewModel', 'AddDeviceUI');

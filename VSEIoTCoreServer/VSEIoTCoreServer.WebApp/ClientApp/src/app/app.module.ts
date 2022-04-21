@@ -14,6 +14,7 @@ import { ServerStatusComponent } from './components/server-status/server-status.
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { AppRoutingModule } from './app-routing.module';
 import { DataSourcesComponent } from './components/data-sources/data-sources.component';
+import { AddDeviceComponent } from './components/data-sources/add-device/add-device.component';
 
 //Services
 import { UtilitiesService } from './services/utilities.service';
@@ -33,11 +34,15 @@ import {
   IfmButtonModule,
   IfmCardModule,
   IfmCheckboxModule,
+  IfmDialogModule,
   IfmIconModule,
+  IfmInputModule,
   IfmLinkModule,
   IfmMenuModule,
+  IfmRadioModule,
   IfmScrollPanelModule,
   IfmTemplateModule,
+  IfmTooltipModule,
   IfmFormModel,
   IfmFormModule
 } from '@ifm/components';
@@ -47,6 +52,7 @@ import { IfmInfoDialogModule, IfmMasterDetailModule } from 'ifm-ui-components';
 //Third Party
 import { getBrowserCultureLang } from '@ngneat/transloco';
 import { first } from 'rxjs/operators';
+
 
 
 if (environment.production) {
@@ -74,6 +80,7 @@ const availableLanguages = ['en-GB'];
 
     //Data Sources Page
     DataSourcesComponent,
+    AddDeviceComponent,
     
   ],
   imports: [
@@ -90,11 +97,15 @@ const availableLanguages = ['en-GB'];
     IfmButtonModule,
     IfmCardModule,
     IfmCheckboxModule,
+    IfmDialogModule,
     IfmIconModule,
+    IfmInputModule,
     IfmInfoDialogModule,
     IfmLinkModule,
     IfmMenuModule,
+    IfmRadioModule,
     IfmTemplateModule,
+    IfmTooltipModule,
     IfmScrollPanelModule,
     IfmMasterDetailModule,
     IfmFormModule,

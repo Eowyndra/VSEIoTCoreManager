@@ -6,44 +6,7 @@ form {
   .buttons {
     display: flex;
     justify-content: flex-end;
-  }
-  
-  .search {
-    display: flex;
-    flex-direction: row;
-    background: var(--ifm-content-background-color);
-    margin: 1px 1px 0 1px;
-    padding: 0 6px;
-  }
-  
-  .search-box {
-    width: 100%;
-  }
-  
-  
-  :host::ng-deep .search {
-  
-    mat-form-field {
-      width: 100% !important;
-    }
-  
-    .mat-form-field-wrapper {
-      padding: 0 !important;
-      margin: 10px 16px;
-    }
-  
-    .mat-form-field-flex {
-      border: 1px solid var(--ifm-border-color) !important;
-    }
-  
-    .mat-form-field-infix {
-      padding: 0;
-      border: 0 !important;
-    }
-  
-    .mat-form-field-underline {
-      display: none;
-    }
+    padding-bottom: 1em;
   }
   
   table {
@@ -53,7 +16,7 @@ form {
   }
   
   .status-container {
-    width: 160px;
+    width: 10em;
     padding: 5px;
     text-align: center
   }
@@ -62,13 +25,8 @@ form {
   :host::ng-deep mat-paginator {
     .mat-form-field-infix {
       padding: 2px 0 8px !important;
-      min-width: 44px !important;
+      min-width: 3.5em !important;
     }
-  }
-  
-  .action-button {
-    background: transparent;
-    border: 0;
   }
   
   .align-center {
@@ -76,7 +34,7 @@ form {
   }
   
   .table-container {
-    height: calc(100vh - 350px);
+    height: 70vh;
     display: flex;
   }
   
@@ -84,9 +42,5 @@ form {
     display: flex;
     justify-content: space-between;
     align-items: center;
-  
-    .licenses {
-      margin-left: 1em;
-    }
   }
   

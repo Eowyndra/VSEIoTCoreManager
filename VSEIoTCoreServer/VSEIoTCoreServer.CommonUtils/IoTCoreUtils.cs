@@ -117,5 +117,31 @@ namespace VSEIoTCoreServer.CommonUtils
 
             return result;
         }
+
+        public static async Task<string> WaitForDeviceType(string iotCoreUri, int iotCorePort, int maxWaitInMilliseconds = 60_000)
+        {
+            var deviceType = string.Empty;
+            using var client = new Client(iotCoreUri + ":" + iotCorePort);
+            while (maxWaitInMilliseconds > 0)
+            {
+                try
+                {
+                    var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().Type().GetData());
+                    var msg = CreateResponseMessage(response);
+                    if (msg.Code == 200)
+                    {
+                        deviceType = msg.Data?["value"]?.ToString() ?? string.Empty;
+                        break;
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    Thread.Sleep(500); // waiting 500 ms, then re-checking
+                    maxWaitInMilliseconds -= 500;
+                }
+            }
+
+            return deviceType;
+        }
     }
 }

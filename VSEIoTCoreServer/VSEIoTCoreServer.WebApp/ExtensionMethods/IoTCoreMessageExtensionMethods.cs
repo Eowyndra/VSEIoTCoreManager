@@ -34,7 +34,7 @@ namespace VSEIoTCoreServer.WebApp.ExtensionMethods
                 case "connected":
                     return DeviceStatus.Connected;
                 default:
-                    return DeviceStatus.Disconnected;
+                    return DeviceStatus.Pending;
             }
         }
 

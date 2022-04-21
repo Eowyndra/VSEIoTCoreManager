@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { IfmLoggingService } from '@ifm/sdk';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
-import { DeviceConfigurationViewModel, StatusViewModel } from '../api/models';
+import { AddDeviceViewModel, DeviceConfigurationViewModel, StatusViewModel } from '../api/models';
 import { DeviceService } from '../api/services';
-import { DeviceConfigurationUI } from '../models/device-configuration';
+import { AddDeviceUI } from '../models/add-device';
 import { mapper } from './mapper';
 
 @Injectable({
@@ -24,36 +24,32 @@ export class ConfigurationService {
 
   getDevices(): Observable<DeviceConfigurationViewModel[]> {
     return this.deviceApi.apiV1DeviceGet$Json()
-               .pipe(
-                 filter((result) => result !== undefined),
-                 take(1),
-                 map((result) => {
-                   return result;
-                 })
-               );
-  }
-
-  getDevicesUI(): Observable<DeviceConfigurationUI[]> {
-    return this.deviceApi.apiV1DeviceGet$Json()
-               .pipe(
-                 filter((result) => result !== undefined),
-                 take(1),
-                 map((result) => {
-                   return result.map((s) =>
-                     mapper.map<DeviceConfigurationViewModel, DeviceConfigurationUI>(s, 'DeviceConfigurationUI', 'DeviceConfigurationViewModel')
-                   );
-                 })
-               );
+      .pipe(
+        filter((result) => result !== undefined),
+        take(1),
+        map((result) => {
+          return result;
+        })
+      );
   }
 
   getDeviceStatus(id: number): Observable<StatusViewModel> {
     return this.deviceApi.apiV1DeviceIdStatusGet$Json({ id })
-    .pipe(
-      filter((result) => result !== undefined),
-      take(1),
-      map((result) => {
-        return result;
-      })
-    );
+      .pipe(
+        filter((result) => result !== undefined),
+        take(1),
+        map((result) => {
+          return result;
+        })
+      );
+  }
+
+  addDevices(addDevices: AddDeviceUI[]): Observable<void> {
+    var addDevicesModel = new Array<AddDeviceViewModel>();
+    addDevices.forEach(device => {
+      var addDeviceModel = mapper.map<AddDeviceUI, AddDeviceViewModel>(device, 'AddDeviceViewModel', 'AddDeviceUI');
+      addDevicesModel.push(addDeviceModel);
+    });
+    return this.deviceApi.apiV1DevicePost({ body: addDevicesModel });
   }
 }

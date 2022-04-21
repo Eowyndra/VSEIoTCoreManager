@@ -13,6 +13,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { interval } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';
 import { DeviceConfigurationViewModel, DeviceStatus, IoTStatus, StatusViewModel } from 'src/app/api/models';
+import { AddDeviceComponent } from './add-device/add-device.component';
+import { mapper } from 'src/app/services/mapper';
 
 @Component({
   selector: 'app-data-sources',
@@ -46,7 +48,7 @@ export class DataSourcesComponent extends ConfigPageDirective implements OnInit,
     public dialog: MatDialog,
     private cd: ChangeDetectorRef,
     private readonly ifmDialog: IfmDialogService
-  ) { 
+  ) {
     super();
   }
 
@@ -56,8 +58,7 @@ export class DataSourcesComponent extends ConfigPageDirective implements OnInit,
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
-    if (this.paginator)
-    {
+    if (this.paginator) {
       this.dataSource.paginator = this.paginator;
     }
     // tslint:disable-next-line:no-shadowed-variable
@@ -65,8 +66,81 @@ export class DataSourcesComponent extends ConfigPageDirective implements OnInit,
     this.cd.detectChanges();
   }
 
-  public updateChanges(): void {
-    this.cd.detectChanges();
+  public loadDeviceList(): void {
+    this.configurationService.getDevices()
+      .pipe(
+        filter(devices => devices !== undefined),
+        takeUntil(this.destroyed$)
+      )
+      .subscribe(devices => {
+        this.deviceList = devices;
+        var devicesUI = new Array<DeviceConfigurationUI>();
+        devices.forEach(device => {
+          var deviceUI = mapper.map<DeviceConfigurationViewModel, DeviceConfigurationUI>(device, 'DeviceConfigurationUI', 'DeviceConfigurationViewModel');
+          devicesUI.push(deviceUI);
+        });
+        this.dataSource.data = devicesUI;
+      }
+      );
+  }
+
+  addDevice(): void {
+    const dialogRef = this.dialog.open(AddDeviceComponent, {
+      autoFocus: false,
+      disableClose: true
+    });
+
+    dialogRef.componentInstance.deviceList = this.deviceList;
+
+    dialogRef.afterClosed()
+      .subscribe(newDevices => {
+        if (newDevices._selected?.length > 0) {
+          this.configurationService.addDevices(newDevices._selected).subscribe(
+            () => {
+              this.logger.debug('Devices added successfully.');
+              this.loadDeviceList();
+            },
+            (error) => {
+              console.log("error adding device: " + error);
+              this.logger.error('Error adding devices: ', error);
+            });
+        }
+      });
+  }
+
+  private initializeSubscriptions(): void {
+    this.loadDeviceList();
+    //call api every second to get devices status
+    interval(1000)
+      .pipe(takeUntil(this.destroyed$))
+      .subscribe(_ => {
+        this.refreshStatus();
+      }
+      );
+  }
+
+  private refreshStatus(): void {
+    this.deviceList?.forEach(device => {
+      this.configurationService.getDeviceStatus(device.id)
+        .pipe(
+          take(1),
+          takeUntil(this.destroyed$)
+        )
+        .subscribe((status: StatusViewModel) => {
+          const dev = this.dataSource.data.find(s => s.vseIpAddress === device.vseIpAddress && s.ioTCorePort === device.ioTCorePort);
+          if (dev !== undefined) {
+            dev.deviceStatus = status.deviceStatus ?? DeviceStatus.Disconnected;
+            dev.ioTStatus = status.ioTStatus ?? IoTStatus.Stopped;
+          }
+        },
+          (error) => {
+            this.logger.error('Error getting device status: ', error.error);
+          });
+    });
+  }
+
+  private getPageData(): DeviceConfigurationUI[] {
+    return this.dataSource._pageData(this.dataSource._orderData(this.dataSource.filteredData));
   }
 
   isAllSelected(): boolean {
@@ -77,88 +151,11 @@ export class DataSourcesComponent extends ConfigPageDirective implements OnInit,
     this.isAllSelected() ? this.selection.clear() : this.selection.select(...this.getPageData());
   }
 
-  onChange(value: string): void {
-    this.dataSource.filter = value.trim().toLowerCase();
-
-    if (value === '') {
-      this.onClear();
-    } else {
-      this.selection.clear();
-    }
-  }
-
-  onSearch(value: string): void {
-    this.dataSource.filter = value.trim().toLowerCase();
-    this.selection.clear();
-  }
-
-  onClear(): void {
-    this.dataSource.filter = '';
-    this.selection.clear();
-  }
-
   handlePageEvent(): void {
     this.selection.clear();
   }
 
   handleSortEvent(): void {
     this.selection.clear();
-  }
-
-  private initializeSubscriptions(): void {
-    //get a list of devices for local storage
-    this.configurationService.getDevices()
-        .pipe(
-          filter(devices => devices !== undefined),
-          takeUntil(this.destroyed$)
-        )
-        .subscribe(devices => {
-          this.deviceList = devices;
-          }
-        );
-
-    //get a list of device UIs to populate the table
-    this.configurationService.getDevicesUI()
-        .pipe(
-          filter(config => config !== undefined),
-          takeUntil(this.destroyed$)
-        )
-        .subscribe(config => {
-          this.dataSource.data = config;
-          this.ngAfterViewInit();
-          }
-        );
-
-    //call api every second to get devices status
-    interval(1000)
-      .pipe(takeUntil(this.destroyed$))
-      .subscribe(_ => {
-        this.refreshStatus();
-         }
-      );
-  }
-
-  private getPageData(): DeviceConfigurationUI[] {
-    return this.dataSource._pageData(this.dataSource._orderData(this.dataSource.filteredData));
-  }
-
-  private refreshStatus(): void {
-    this.deviceList?.forEach(device => {
-      this.configurationService.getDeviceStatus(device.id)
-          .pipe(
-            take(1),
-            takeUntil(this.destroyed$)
-          )
-          .subscribe((status: StatusViewModel) => {
-            const dev = this.dataSource.data.find(s => s.vseIpAddress === device.vseIpAddress && s.ioTCorePort === device.ioTCorePort);
-            if (dev !== undefined) {
-              dev.deviceStatus = status.deviceStatus ?? DeviceStatus.Disconnected;
-              dev.ioTStatus = status.ioTStatus ?? IoTStatus.Stopped;
-            }
-          },
-          (error) => {
-            this.logger.error('Error getting device status: ', error.error);
-          });
-    });
   }
 }

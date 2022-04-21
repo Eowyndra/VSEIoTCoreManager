@@ -25,8 +25,6 @@ export abstract class ConfigPageDirective implements OnInit, OnDestroy {
     this.destroyed$.next();
     this.destroyed$.complete();
   }
-
-  public abstract updateChanges(): void;
 }
 
 export type FormModel<T> = {
