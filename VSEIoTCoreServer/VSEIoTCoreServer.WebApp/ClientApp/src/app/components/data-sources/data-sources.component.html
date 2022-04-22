@@ -91,10 +91,11 @@
               <div [ngClass]="{
                             'color-back-running': row.deviceStatus === DeviceStatus.Connected,
                             'color-back-partly-running': row.deviceStatus === DeviceStatus.Connecting,
-                            'color-back-stopped ': row.deviceStatus === DeviceStatus.Disconnected
+                            'color-back-stopped': row.deviceStatus === DeviceStatus.Disconnected,
+                            'color-back-timeout': row.deviceStatus === DeviceStatus.Timeout
                             }" class="status-container">
                 <ng-template
-                  [ngIf]="row.deviceStatus === DeviceStatus.Connected ||  row.deviceStatus === DeviceStatus.Connecting || row.deviceStatus === DeviceStatus.Disconnected">
+                [ngIf]="row.deviceStatus === DeviceStatus.Connected ||  row.deviceStatus === DeviceStatus.Connecting || row.deviceStatus === DeviceStatus.Disconnected || row.deviceStatus === DeviceStatus.Timeout">
                   {{ 'vseiot.data-sources.table.devicestatus.' + row.deviceStatus | lowercase | transloco }}
                 </ng-template>
                 <ng-template [ngIf]="row.deviceStatus === DeviceStatus.Pending">

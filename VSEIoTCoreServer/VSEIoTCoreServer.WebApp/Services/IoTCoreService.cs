@@ -19,6 +19,8 @@ namespace VSEIoTCoreServer.WebApp.Services
     public class IoTCoreService : IIoTCoreService
     {
         private static readonly ConcurrentDictionary<int, Process> _iotCoreProcessForDeviceId = new ();
+        private static readonly ConcurrentDictionary<string, DateTime> _deviceConnectingSince = new ();
+        private static readonly int _connectingTimeoutSeconds = 10;
         private readonly IMapper _mapper;
         private readonly ILogger<IoTCoreService> _logger;
         private readonly IDeviceConfigurationService _deviceConfigurationService;
@@ -134,10 +136,11 @@ namespace VSEIoTCoreServer.WebApp.Services
         public async Task<DeviceStatus> GetDeviceStatus(string iotCoreUrl, int iotCorePort)
         {
             var deviceStatus = DeviceStatus.Pending;
+            var iotAddress = iotCoreUrl + ":" + iotCorePort;
 
             try
             {
-                using var client = new Client(iotCoreUrl + ":" + iotCorePort);
+                using var client = new Client(iotAddress);
                 var result = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Status().GetData());
                 var deviceStatusMessage = IoTCoreUtils.CreateResponseMessage(result);
                 deviceStatus = deviceStatusMessage.Data.GetDeviceStatus();
@@ -151,6 +154,19 @@ namespace VSEIoTCoreServer.WebApp.Services
             {
                 _logger.LogError("Error getting device status: " + e.Message);
                 throw;
+            }
+
+            if (deviceStatus == DeviceStatus.Connecting)
+            {
+                // If the device is stuck in status "Connecting" for more than _connectingTimeoutSeconds, set the status to "Timeout"
+                if (_deviceConnectingSince.TryGetValue(iotAddress, out var timeoutSince))
+                {
+                    deviceStatus = (DateTime.Now >= timeoutSince.AddSeconds(_connectingTimeoutSeconds)) ? DeviceStatus.Timeout : DeviceStatus.Connecting;
+                }
+                else
+                {
+                    _deviceConnectingSince[iotAddress] = DateTime.Now;
+                }
             }
 
             return deviceStatus;

@@ -51,7 +51,8 @@
       "devicestatus": "VSE Status",
       "devicestatus.connecting": "Connecting",
       "devicestatus.connected": "Connected",
-      "devicestatus.disconnected": "Disconnected"
+      "devicestatus.disconnected": "Disconnected",
+      "devicestatus.timeout": "Timeout"
     },
     "add-device": {
       "title": "Add VSE device",

@@ -4,5 +4,6 @@ export enum DeviceStatus {
   Pending = 'Pending',
   Disconnected = 'Disconnected',
   Connecting = 'Connecting',
-  Connected = 'Connected'
+  Connected = 'Connected',
+  Timeout = 'Timeout'
 }

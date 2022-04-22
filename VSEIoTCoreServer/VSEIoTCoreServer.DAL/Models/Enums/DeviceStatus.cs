@@ -13,5 +13,6 @@ namespace VSEIoTCoreServer.DAL.Models.Enums
         Disconnected,
         Connecting,
         Connected,
+        Timeout,
     }
 }
