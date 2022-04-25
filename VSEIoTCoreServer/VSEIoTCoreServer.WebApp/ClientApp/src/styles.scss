@@ -49,8 +49,16 @@ body {
 
 }
 
-.color-running {
+.color-started {
   color: var(--ifm-accent-04);
+}
+
+.color-starting {
+  color: var(--ifm-warning-color);
+}
+
+.color-stopping {
+  color: var(--ifm-warning-color);
 }
 
 .color-partly-running {
@@ -61,8 +69,16 @@ body {
   color: var(--ifm-alarm-color);
 }
 
-.color-back-running {
+.color-back-started {
   background-color: var(--ifm-accent-04);
+}
+
+.color-back-starting {
+  background-color: var(--ifm-warning-color);
+}
+
+.color-back-stopping {
+  background-color: var(--ifm-warning-color);
 }
 
 .color-back-partly-running {

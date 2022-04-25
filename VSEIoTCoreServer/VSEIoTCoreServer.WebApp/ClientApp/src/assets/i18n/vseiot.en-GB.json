@@ -31,9 +31,11 @@
     "current-status": "Current status",
     "button-start": "Start server",
     "button-stop": "Stop server",
-    "Stopped": "Stopped",
-    "Running": "Running",
-    "PartlyRunning": "Partly running",
+    "stopped": "Stopped",
+    "started": "Started",
+    "partlyrunning": "Partly running",
+    "starting": "Starting...",
+    "stopping": "Stopping...",
     "undefined": "Unreachable"
   },
   "data-sources": {
@@ -47,7 +49,7 @@
       "iotcoreport": "IoT Port",
       "iotstatus": "IoT Status",
       "iotstatus.stopped": "Stopped",
-      "iotstatus.running": "Running",
+      "iotstatus.started": "Started",
       "devicestatus": "VSE Status",
       "devicestatus.connecting": "Connecting",
       "devicestatus.connected": "Connected",

@@ -188,7 +188,7 @@ namespace VSEIoTCoreServer.UnitTest
             var device1 = await _iotCoreService.Status(_deviceConfig1.Id);
 
             Assert.NotNull(device1);
-            Assert.Equal(IoTStatus.Running, device1.IoTStatus);
+            Assert.Equal(IoTStatus.Started, device1.IoTStatus);
             Assert.True(device1.DeviceStatus == DeviceStatus.Connected || device1.DeviceStatus == DeviceStatus.Connecting);
 
             // Finally

@@ -247,6 +247,26 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Server Error"
           }
@@ -433,7 +453,9 @@
         "enum": [
           "Stopped",
           "PartlyRunning",
-          "Running"
+          "Started",
+          "Starting",
+          "Stopping"
         ],
         "type": "string"
       },
@@ -449,7 +471,7 @@
       "IoTStatus": {
         "enum": [
           "Stopped",
-          "Running"
+          "Started"
         ],
         "type": "string"
       },

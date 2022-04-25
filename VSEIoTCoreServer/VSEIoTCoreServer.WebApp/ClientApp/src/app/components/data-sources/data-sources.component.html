@@ -71,10 +71,10 @@
             <th *matHeaderCellDef mat-header-cell>{{'vseiot.data-sources.table.iotstatus' | transloco}}</th>
             <td *matCellDef="let row" mat-cell>
               <div [ngClass]="{
-                'color-back-running': row.ioTStatus === IoTStatus.Running,
+                'color-back-started': row.ioTStatus === IoTStatus.Started,
                 'color-back-stopped ': row.ioTStatus === IoTStatus.Stopped
                 }" class="status-container">
-                <ng-template [ngIf]="row.ioTStatus === IoTStatus.Running ||  row.ioTStatus === IoTStatus.Stopped">
+                <ng-template [ngIf]="row.ioTStatus === IoTStatus.Started ||  row.ioTStatus === IoTStatus.Stopped">
                   {{ 'vseiot.data-sources.table.iotstatus.' + row.ioTStatus | lowercase | transloco }}
                 </ng-template>
                 <ng-template [ngIf]="row.ioTStatus === undefined">
@@ -89,7 +89,7 @@
             <th *matHeaderCellDef mat-header-cell>{{'vseiot.data-sources.table.devicestatus' | transloco}}</th>
             <td *matCellDef="let row" mat-cell>
               <div [ngClass]="{
-                            'color-back-running': row.deviceStatus === DeviceStatus.Connected,
+                            'color-back-started': row.deviceStatus === DeviceStatus.Connected,
                             'color-back-partly-running': row.deviceStatus === DeviceStatus.Connecting,
                             'color-back-stopped': row.deviceStatus === DeviceStatus.Disconnected,
                             'color-back-timeout': row.deviceStatus === DeviceStatus.Timeout

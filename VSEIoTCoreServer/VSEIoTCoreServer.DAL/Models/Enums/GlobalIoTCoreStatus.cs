@@ -11,6 +11,8 @@ namespace VSEIoTCoreServer.DAL.Models.Enums
     {
         Stopped,
         PartlyRunning,
-        Running,
+        Started,
+        Starting,
+        Stopping,
     }
 }

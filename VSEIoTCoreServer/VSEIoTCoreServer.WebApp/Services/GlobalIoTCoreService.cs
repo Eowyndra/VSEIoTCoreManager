@@ -59,12 +59,17 @@ namespace VSEIoTCoreServer.WebApp.Services
 
         public async Task Start()
         {
+            if (_globalIoTCoreStatus.Status != GlobalIoTCoreStatus.Stopped)
+            {
+                throw new InvalidOperationException("Already running");
+            }
+
             // Start the global IoTCore instance
             try
             {
                 _logger.LogInformation("Starting global IoTCore server");
                 _iotCoreRuntime.Start(_iotCoreOptions.IoTCoreURI, _iotCoreOptions.GlobalIoTCorePort);
-                _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.PartlyRunning;
+                _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.Starting;
                 _logger.LogInformation("Global IoTCore server started");
             }
             catch (Exception ex)
@@ -79,29 +84,29 @@ namespace VSEIoTCoreServer.WebApp.Services
             // Start a VSEIoTCore instance for each device
             await StartVSEIoTCores(deviceConfigurations);
 
-            // IoTCores are started asynchronous
-            // this call ensures each VSEIoTCore is started to avoid problems when adding them to the global IoTCore instance
-            var started = await WaitUntilStarted(deviceConfigurations);
-
-            if (!started)
-            {
-                _logger.LogError("Error: VSEIoTCores are not started");
-                throw new TimeoutException();
-            }
+            // Only VSEIoTCore instances that have been started successfully can be added to the global IoT Core instance
+            var startedDevices = await GetStartedDevices(deviceConfigurations);
 
             // Activate mirroring for every started VSEIoTCore
-            await ActivateMirroring(deviceConfigurations);
-            _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.Running;
+            await ActivateMirroring(startedDevices);
+
+            _globalIoTCoreStatus.Status = startedDevices.Count < deviceConfigurations.Count ? GlobalIoTCoreStatus.PartlyRunning : GlobalIoTCoreStatus.Started;
         }
 
         public async Task Stop()
         {
+            if (_globalIoTCoreStatus.Status != GlobalIoTCoreStatus.Started && _globalIoTCoreStatus.Status != GlobalIoTCoreStatus.PartlyRunning)
+            {
+                throw new InvalidOperationException("Not started");
+            }
+
+            _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.Stopping;
+
             // Read device configurations from DataBase
             var deviceConfigurations = await _deviceConfigurationService.GetAll();
 
             // Stop the VSEIoTCore instance for each device
             await StopVSEIoTCores(deviceConfigurations);
-            _globalIoTCoreStatus.Status = GlobalIoTCoreStatus.PartlyRunning;
 
             // IoTCores are stopped asynchronous
             // this call ensures each VSEIoTCore is stopped to avoid problems when stopping the global IoTCore instance
@@ -151,15 +156,19 @@ namespace VSEIoTCoreServer.WebApp.Services
             return Task.WhenAll(deviceConfigurations.Select(device => _iotCoreService.Stop(device.Id)));
         }
 
-        private async Task<bool> WaitUntilStarted(List<DeviceConfigurationViewModel> deviceConfigurations, int maxWaitInMilliseconds = 60_000)
+        private async Task<List<DeviceConfigurationViewModel>> GetStartedDevices(List<DeviceConfigurationViewModel> deviceConfigurations, int maxWaitInMilliseconds = 60_000)
         {
-            var allStarted = true;
+            var startedDevices = new List<DeviceConfigurationViewModel>();
             foreach (var device in deviceConfigurations)
             {
-                allStarted &= await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(_iotCoreOptions.IoTCoreURI, device.IoTCorePort, maxWaitInMilliseconds);
+                var started = await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(_iotCoreOptions.IoTCoreURI, device.IoTCorePort, maxWaitInMilliseconds);
+                if (started)
+                {
+                    startedDevices.Add(device);
+                }
             }
 
-            return allStarted;
+            return startedDevices;
         }
 
         private async Task<bool> WaitUntilStopped(List<DeviceConfigurationViewModel> deviceConfigurations, int maxWaitInMilliseconds = 60_000)
