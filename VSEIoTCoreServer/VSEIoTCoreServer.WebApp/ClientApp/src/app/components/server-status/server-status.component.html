@@ -6,12 +6,14 @@
     <ifm-card
       class="width-full"
       [ngClass]="{
-        'color-back-running': globalStatus === GlobalStatusEnum.Running,
+        'color-back-started': globalStatus === GlobalStatusEnum.Started,
+        'color-back-starting': globalStatus === GlobalStatusEnum.Starting,
         'color-back-partly-running': globalStatus === GlobalStatusEnum.PartlyRunning,
+        'color-back-stopping': globalStatus === GlobalStatusEnum.Stopping,
         'color-back-stopped': globalStatus === GlobalStatusEnum.Stopped
       }">
       <div class="text-center text-large">
-        {{ 'vseiot.server-status.' + globalStatus | transloco }}
+        {{ 'vseiot.server-status.' + globalStatus | lowercase | transloco }}
       </div>
     </ifm-card>
 
@@ -30,7 +32,7 @@
     <button
       class="button-standard width-full"
       (click)="stopServer()"
-      [disabled]="globalStatus === GlobalStatusEnum.Running ? null : true"
+      [disabled]="(globalStatus === GlobalStatusEnum.Started || globalStatus === GlobalStatusEnum.PartlyRunning) ? null : true"
       fontIcon="stopped"
       ifm-standard-button
       label="{{ 'vseiot.server-status.button-stop' | transloco }}"></button>

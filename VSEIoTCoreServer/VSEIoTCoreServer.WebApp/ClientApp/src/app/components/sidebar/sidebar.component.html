@@ -1,10 +1,12 @@
 <ifm-master-list>
   <ifm-master-list-item #e1="routerLinkActive" [active]="e1.isActive" class="server-status" routerLink="server-status" routerLinkActive>
-    {{ 'vseiot.sidebar.serverStatus' | transloco }} - {{ 'vseiot.server-status.' + globalStatus | transloco }}
+    {{ 'vseiot.sidebar.serverStatus' | transloco }} - {{ 'vseiot.server-status.' + globalStatus | lowercase | transloco }}
     <div class="status-icons">
       <ifm-font-icon [ngClass]="{
-          'color-running': globalStatus === GlobalStatusEnum.Running,
+          'color-started': globalStatus === GlobalStatusEnum.Started,
+          'color-starting': globalStatus === GlobalStatusEnum.Starting,
           'color-partly-running': globalStatus === GlobalStatusEnum.PartlyRunning,
+          'color-stopping': globalStatus === GlobalStatusEnum.Stopping,
           'color-stopped': globalStatus === GlobalStatusEnum.Stopped
         }"
                      class="server-status-icon"

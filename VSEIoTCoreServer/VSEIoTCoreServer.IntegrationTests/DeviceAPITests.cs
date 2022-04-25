@@ -14,6 +14,7 @@ namespace VSEIoTCoreServer.IntegrationTests
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
@@ -85,24 +86,24 @@ namespace VSEIoTCoreServer.IntegrationTests
             Assert.NotEmpty(devices);
             Assert.Equal(2, devices.Count);
 
-            var deviceConfig1 = devices[0];
+            var deviceConfig1 = devices.FirstOrDefault(device => device.Id == _deviceConfig1.Id);
             Assert.Equal(_deviceConfig1.Id, deviceConfig1.Id);
             Assert.Equal(_deviceConfig1.Name, deviceConfig1.Name);
             Assert.Equal(_deviceConfig1.VseType, deviceConfig1.VseType);
             Assert.Equal(_deviceConfig1.VseIpAddress, deviceConfig1.VseIpAddress);
             Assert.Equal(_deviceConfig1.VsePort, deviceConfig1.VsePort);
             Assert.Equal(_deviceConfig1.IoTCorePort, deviceConfig1.IoTCorePort);
-            Assert.Equal(DeviceStatus.Disconnected, deviceConfig1.DeviceStatus);
+            Assert.Equal(DeviceStatus.Pending, deviceConfig1.DeviceStatus);
             Assert.Equal(IoTStatus.Stopped, deviceConfig1.IoTStatus);
 
-            var deviceConfig2 = devices[1];
+            var deviceConfig2 = devices.FirstOrDefault(device => device.Id == _deviceConfig2.Id);
             Assert.Equal(_deviceConfig2.Id, deviceConfig2.Id);
             Assert.Equal(_deviceConfig2.Name, deviceConfig2.Name);
             Assert.Equal(_deviceConfig2.VseType, deviceConfig2.VseType);
             Assert.Equal(_deviceConfig2.VseIpAddress, deviceConfig2.VseIpAddress);
             Assert.Equal(_deviceConfig2.VsePort, deviceConfig2.VsePort);
             Assert.Equal(_deviceConfig2.IoTCorePort, deviceConfig2.IoTCorePort);
-            Assert.Equal(DeviceStatus.Disconnected, deviceConfig2.DeviceStatus);
+            Assert.Equal(DeviceStatus.Pending, deviceConfig2.DeviceStatus);
             Assert.Equal(IoTStatus.Stopped, deviceConfig2.IoTStatus);
         }
 
@@ -123,15 +124,48 @@ namespace VSEIoTCoreServer.IntegrationTests
         }
 
         [Fact]
+        public async Task GetStatus_Timeout_Test()
+        {
+            // Arrange
+            var testServerPort = 5114;
+            var timeoutDevice = _deviceConfig1;
+            timeoutDevice.VseIpAddress = "123.123.123.123";
+
+            var deviceConfigurations = new List<DeviceConfiguration>() { timeoutDevice };
+            SetupTestServer(deviceConfigurations, testServerPort);
+
+            var response = await WebAPI_Post_Start(testServerPort);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            await AssertedGlobalIoTCoreStarted();
+
+            // Act
+            var status = await WebAPI_Get_Status(timeoutDevice.Id, testServerPort);
+
+            // Assert
+            Assert.NotNull(status);
+            Assert.Equal(IoTStatus.Started, status.IoTStatus);
+            Assert.True(status.DeviceStatus == DeviceStatus.Connecting);
+
+            // Wait 10 seconds for the device to time out
+            Thread.Sleep(10000);
+
+            status = await WebAPI_Get_Status(timeoutDevice.Id, testServerPort);
+            Assert.NotNull(status);
+            Assert.Equal(IoTStatus.Started, status.IoTStatus);
+            Assert.True(status.DeviceStatus == DeviceStatus.Timeout);
+
+            response = await WebAPI_Post_Stop(testServerPort);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            await AssertedGlobalIoTCoreStopped();
+        }
+
+        [Fact]
         public async Task GetStatus_Stopped_Test()
         {
             // Arrange
             var testServerPort = 5103;
             var deviceConfigurations = new List<DeviceConfiguration>() { _deviceConfig1 };
             SetupTestServer(deviceConfigurations, testServerPort);
-
-            var response = await WebAPI_Post_Stop(testServerPort);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             await AssertedGlobalIoTCoreStopped();
 
             // Act
@@ -160,8 +194,12 @@ namespace VSEIoTCoreServer.IntegrationTests
 
             // Assert
             Assert.NotNull(status);
-            Assert.Equal(IoTStatus.Running, status.IoTStatus);
+            Assert.Equal(IoTStatus.Started, status.IoTStatus);
             Assert.True(status.DeviceStatus == DeviceStatus.Connecting || status.DeviceStatus == DeviceStatus.Connected);
+
+            response = await WebAPI_Post_Stop(testServerPort);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            await AssertedGlobalIoTCoreStopped();
         }
 
         [Fact]
@@ -216,17 +254,17 @@ namespace VSEIoTCoreServer.IntegrationTests
             Assert.NotNull(devices);
             Assert.Equal(3, devices.Count);
 
-            var deviceConfig1 = devices[0];
+            var deviceConfig1 = devices.FirstOrDefault(device => device.Id == _deviceConfig1.Id);
             Assert.Equal(_deviceConfig1.VseIpAddress, deviceConfig1.VseIpAddress);
             Assert.Equal(_deviceConfig1.VsePort, deviceConfig1.VsePort);
             Assert.Equal(_deviceConfig1.IoTCorePort, deviceConfig1.IoTCorePort);
 
-            var deviceConfig2 = devices[1];
+            var deviceConfig2 = devices.FirstOrDefault(device => device.Id == _deviceConfig2.Id);
             Assert.Equal(_deviceConfig2.VseIpAddress, deviceConfig2.VseIpAddress);
             Assert.Equal(_deviceConfig2.VsePort, deviceConfig2.VsePort);
             Assert.Equal(_deviceConfig2.IoTCorePort, deviceConfig2.IoTCorePort);
 
-            var deviceConfig3 = devices[2];
+            var deviceConfig3 = devices.FirstOrDefault(device => device.Id == _deviceConfig3.Id);
             Assert.Equal(_deviceConfig3.VseIpAddress, deviceConfig3.VseIpAddress);
             Assert.Equal(_deviceConfig3.VsePort, deviceConfig3.VsePort);
             Assert.Equal(_deviceConfig3.IoTCorePort, deviceConfig3.IoTCorePort);

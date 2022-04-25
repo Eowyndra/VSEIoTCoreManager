@@ -40,7 +40,7 @@ export class ServerService {
 
   stopServer(): void {
     this.logger.info('Stopping...');
-    if (this.serverStore.state?.globalStatus === GlobalIoTCoreStatus.Running) {
+    if (this.serverStore.state?.globalStatus === GlobalIoTCoreStatus.Started || this.serverStore.state?.globalStatus === GlobalIoTCoreStatus.PartlyRunning) {
       this.apiService.apiV1GlobalStopPost().subscribe(
         () => {
           this.logger.info('Stopped successfully.');
@@ -56,7 +56,7 @@ export class ServerService {
 
   restartServer(): void {
     this.logger.info('Restarting...');
-    if (this.serverStore.state?.globalStatus === GlobalIoTCoreStatus.Running) {
+    if (this.serverStore.state?.globalStatus === GlobalIoTCoreStatus.Started) {
       this.apiService
         .apiV1GlobalStopPost()
         .pipe(take(1))

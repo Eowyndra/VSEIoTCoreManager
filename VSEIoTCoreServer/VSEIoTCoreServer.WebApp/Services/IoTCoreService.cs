@@ -174,12 +174,12 @@ namespace VSEIoTCoreServer.WebApp.Services
 
         public IoTStatus GetIoTStatus(int deviceId)
         {
-            return _iotCoreProcessForDeviceId.ContainsKey(deviceId) ? IoTStatus.Running : IoTStatus.Stopped;
+            return _iotCoreProcessForDeviceId.ContainsKey(deviceId) ? IoTStatus.Started : IoTStatus.Stopped;
         }
 
         private static async Task<string> GetDeviceType(string ioTCoreURI, int ioTCorePort)
         {
-            var deviceType = await IoTCoreUtils.WaitForDeviceType(ioTCoreURI, ioTCorePort);
+            var deviceType = await IoTCoreUtils.WaitForDeviceType(ioTCoreURI, ioTCorePort, 10_000);
             return deviceType;
         }
     }

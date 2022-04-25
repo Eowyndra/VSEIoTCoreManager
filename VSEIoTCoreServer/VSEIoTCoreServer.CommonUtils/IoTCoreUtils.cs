@@ -61,9 +61,11 @@ namespace VSEIoTCoreServer.CommonUtils
                 }
                 catch (HttpRequestException)
                 {
-                    Thread.Sleep(500); // waiting 500 ms, then re-checking
-                    maxWaitInMilliseconds -= 500;
+                    // Do nothing
                 }
+
+                Thread.Sleep(500); // waiting 500 ms, then re-checking
+                maxWaitInMilliseconds -= 500;
             }
 
             return result;
@@ -110,9 +112,11 @@ namespace VSEIoTCoreServer.CommonUtils
                 }
                 catch (HttpRequestException)
                 {
-                    Thread.Sleep(500); // waiting 500 ms, then re-checking
-                    maxWaitInMilliseconds -= 500;
+                    // Do nothing
                 }
+
+                Thread.Sleep(500); // waiting 500 ms, then re-checking
+                maxWaitInMilliseconds -= 500;
             }
 
             return result;
@@ -136,9 +140,11 @@ namespace VSEIoTCoreServer.CommonUtils
                 }
                 catch (HttpRequestException)
                 {
-                    Thread.Sleep(500); // waiting 500 ms, then re-checking
-                    maxWaitInMilliseconds -= 500;
+                   // Do nothing
                 }
+
+                Thread.Sleep(500); // waiting 500 ms, then re-checking
+                maxWaitInMilliseconds -= 500;
             }
 
             return deviceType;

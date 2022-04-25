@@ -28,6 +28,7 @@ namespace VSEIoTCoreServer.WebApp.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(409)]
         [HttpPost("start")]
         public async Task<IActionResult> Start()
         {
@@ -37,6 +38,11 @@ namespace VSEIoTCoreServer.WebApp.Controllers
                 await _globalIoTCoreService.Start();
 
                 result = Ok();
+            }
+            catch (InvalidOperationException e)
+            {
+                _logger.LogError("Error starting global IoTCore instance: " + e.Message);
+                result = StatusCode(409);
             }
             catch (Exception e)
             {

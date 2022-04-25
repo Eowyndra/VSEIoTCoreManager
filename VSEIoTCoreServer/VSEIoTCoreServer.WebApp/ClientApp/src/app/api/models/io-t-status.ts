@@ -2,5 +2,5 @@
 /* eslint-disable */
 export enum IoTStatus {
   Stopped = 'Stopped',
-  Running = 'Running'
+  Started = 'Started'
 }

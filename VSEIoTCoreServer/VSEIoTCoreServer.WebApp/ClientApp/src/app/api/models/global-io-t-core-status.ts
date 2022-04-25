@@ -3,5 +3,7 @@
 export enum GlobalIoTCoreStatus {
   Stopped = 'Stopped',
   PartlyRunning = 'PartlyRunning',
-  Running = 'Running'
+  Started = 'Started',
+  Starting = 'Starting',
+  Stopping = 'Stopping'
 }

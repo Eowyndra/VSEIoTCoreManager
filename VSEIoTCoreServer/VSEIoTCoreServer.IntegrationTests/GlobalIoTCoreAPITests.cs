@@ -145,7 +145,7 @@ namespace VSEIoTCoreServer.IntegrationTests
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.True(globalIoTCoreStatus.Status == GlobalIoTCoreStatus.Running || globalIoTCoreStatus.Status == GlobalIoTCoreStatus.PartlyRunning);
+            Assert.True(globalIoTCoreStatus.Status == GlobalIoTCoreStatus.Started || globalIoTCoreStatus.Status == GlobalIoTCoreStatus.PartlyRunning);
 
             // Finally
             response = await WebAPI_Post_Stop(testServerPort);
