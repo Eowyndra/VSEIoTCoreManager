@@ -17,12 +17,12 @@
             <param name="deviceId">The ID of the device.</param>
             <returns>The device configuration for the device specified by deviceId.</returns>
         </member>
-        <member name="M:VSEIoTCoreServer.WebApp.Services.IDeviceConfigurationService.AddDevices(System.Collections.Generic.List{VSEIoTCoreServer.WebApp.ViewModels.AddDeviceViewModel})">
+        <member name="M:VSEIoTCoreServer.WebApp.Services.IDeviceConfigurationService.AddDevice(VSEIoTCoreServer.WebApp.ViewModels.AddDeviceViewModel)">
             <summary>
-            Add a list of new device configurations to the database.
+            Add a device configuration to the database.
             </summary>
-            <param name="deviceModels">A list of devices that shall be added.</param>
-            <returns>A list of devices that have been added to the database.</returns>
+            <param name="deviceModel">The device configuration that shall be added.</param>
+            <returns>The view model of the device configuration that has been added to the database.</returns>
         </member>
         <member name="M:VSEIoTCoreServer.WebApp.Services.IDeviceConfigurationService.UpdateDevice(VSEIoTCoreServer.WebApp.ViewModels.DeviceConfigurationViewModel)">
             <summary>

@@ -38,10 +38,10 @@ namespace VSEIoTCoreServer.UnitTest
             var deviceConfigurationViewModel = new DeviceConfigurationViewModel(
                 _testDevice1.VseIpAddress,
                 _testDevice1.VsePort,
-                _testDevice1.IoTCorePort)
+                _testDevice1.IoTCorePort,
+                _testDevice1.Name)
             {
                 Id = _testDevice1.Id,
-                Name = _testDevice1.Name,
                 VseType = _testDevice1.VseType,
             };
 

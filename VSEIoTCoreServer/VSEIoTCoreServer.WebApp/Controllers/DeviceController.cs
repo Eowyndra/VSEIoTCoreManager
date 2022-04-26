@@ -95,7 +95,7 @@ namespace VSEIoTCoreServer.WebApp.Controllers
         public async Task<IActionResult> AddDevices([FromBody] List<AddDeviceViewModel> deviceModels)
         {
             // Validate model
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || deviceModels == null)
             {
                 return UnprocessableEntity(ModelState);
             }
@@ -103,16 +103,16 @@ namespace VSEIoTCoreServer.WebApp.Controllers
             StatusCodeResult result;
             try
             {
-                // Add new devices to database
-                var addedDeviceViewModels = await _deviceConfigurationService.AddDevices(deviceModels);
-
-                // If global IoTCore instance is running, start and mirror new devices
-                var globalIoTCoreStatus = await _globalIoTCoreService.GetStatus();
-                if (globalIoTCoreStatus.Status != GlobalIoTCoreStatus.Stopped)
+                foreach (var deviceModel in deviceModels)
                 {
-                    // Start VSEIoTCore for each added device
-                    foreach (var addedDeviceViewModel in addedDeviceViewModels)
+                    // Add new device to database
+                    var addedDeviceViewModel = await _deviceConfigurationService.AddDevice(deviceModel);
+
+                    // If global IoTCore instance is running, start and mirror new devices
+                    var globalIoTCoreStatus = await _globalIoTCoreService.GetStatus();
+                    if (globalIoTCoreStatus.Status != GlobalIoTCoreStatus.Stopped)
                     {
+                        // Start VSEIoTCore for the added device
                         await _iotCoreService.Start(addedDeviceViewModel.Id);
                         var addedDeviceIsStarted = await IoTCoreUtils.WaitUntilVSEIoTCoreStarted(_iotCoreOptions.IoTCoreURI, addedDeviceViewModel.IoTCorePort);
 

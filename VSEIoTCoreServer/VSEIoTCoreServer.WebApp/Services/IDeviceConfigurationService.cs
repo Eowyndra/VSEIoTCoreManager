@@ -25,11 +25,11 @@ namespace VSEIoTCoreServer.WebApp.Services
         Task<DeviceConfigurationViewModel> GetById(int deviceId);
 
         /// <summary>
-        /// Add a list of new device configurations to the database.
+        /// Add a device configuration to the database.
         /// </summary>
-        /// <param name="deviceModels">A list of devices that shall be added.</param>
-        /// <returns>A list of devices that have been added to the database.</returns>
-        Task<List<DeviceConfigurationViewModel>> AddDevices(List<AddDeviceViewModel> deviceModels);
+        /// <param name="deviceModel">The device configuration that shall be added.</param>
+        /// <returns>The view model of the device configuration that has been added to the database.</returns>
+        Task<DeviceConfigurationViewModel> AddDevice(AddDeviceViewModel deviceModel);
 
         /// <summary>
         /// Update an existing device configuration in the database.
