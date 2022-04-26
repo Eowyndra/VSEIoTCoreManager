@@ -8,8 +8,8 @@
 namespace VSEIoTCoreServer.UnitTest
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
     using Microsoft.EntityFrameworkCore;
@@ -179,47 +179,58 @@ namespace VSEIoTCoreServer.UnitTest
         }
 
         [Fact]
-        public async Task AddDevices_Test()
+        public async Task AddDevice_Test()
         {
             // Arrange
             Arrange();
-
-            var newDevices = new List<AddDeviceViewModel>()
-            {
-                new AddDeviceViewModel(_deviceConfig3.VseIpAddress, _deviceConfig3.VsePort, _deviceConfig3.IoTCorePort),
-            };
+            var newDevice = new AddDeviceViewModel(_deviceConfig3.VseIpAddress, _deviceConfig3.VsePort, _deviceConfig3.IoTCorePort);
 
             // Act
-            var addedDevices = await _deviceConfigurationService.AddDevices(newDevices);
+            var addedDevice = await _deviceConfigurationService.AddDevice(newDevice);
             var devices = await _deviceConfigurationService.GetAll();
 
             // Assert
-            Assert.NotNull(addedDevices);
-            Assert.Single(addedDevices);
+            Assert.NotNull(addedDevice);
             Assert.NotNull(devices);
             Assert.Equal(3, devices.Count);
 
-            var deviceConfig3 = devices[2];
+            var deviceConfig3 = devices.FirstOrDefault(device => device.Id == _deviceConfig3.Id);
             Assert.Equal(_deviceConfig3.VseIpAddress, deviceConfig3.VseIpAddress);
             Assert.Equal(_deviceConfig3.VsePort, deviceConfig3.VsePort);
             Assert.Equal(_deviceConfig3.IoTCorePort, deviceConfig3.IoTCorePort);
         }
 
         [Fact]
-        public async Task AddDevices_AlreadyExists_Test()
+        public async Task AddDevice_GenerateName_Test()
         {
             // Arrange
             Arrange();
+            var newDevice = new AddDeviceViewModel(_deviceConfig3.VseIpAddress, _deviceConfig3.VsePort, _deviceConfig3.IoTCorePort);
 
-            var newDevices = new List<AddDeviceViewModel>()
-            {
-                new AddDeviceViewModel(_deviceConfig1.VseIpAddress, _deviceConfig1.VsePort, _deviceConfig1.IoTCorePort),
-            };
+            // Act
+            var addedDevice = await _deviceConfigurationService.AddDevice(newDevice);
+            var devices = await _deviceConfigurationService.GetAll();
+
+            // Assert
+            Assert.NotNull(addedDevice);
+            Assert.NotNull(devices);
+            Assert.Equal(3, devices.Count);
+
+            var deviceConfig3 = devices.FirstOrDefault(device => device.Id == _deviceConfig3.Id);
+            Assert.Equal("Device_001", deviceConfig3.Name);
+        }
+
+        [Fact]
+        public async Task AddDevice_AlreadyExists_Test()
+        {
+            // Arrange
+            Arrange();
+            var newDevice = new AddDeviceViewModel(_deviceConfig1.VseIpAddress, _deviceConfig1.VsePort, _deviceConfig1.IoTCorePort);
 
             try
             {
                 // Act
-                var addedDevice = await _deviceConfigurationService.AddDevices(newDevices);
+                var addedDevice = await _deviceConfigurationService.AddDevice(newDevice);
             }
             catch (ArgumentException ex)
             {
@@ -232,20 +243,16 @@ namespace VSEIoTCoreServer.UnitTest
         }
 
         [Fact]
-        public async Task AddDevices_IoTCorePortAlreadyUsed_Test()
+        public async Task AddDevice_IoTCorePortAlreadyUsed_Test()
         {
             // Arrange
             Arrange();
-
-            var newDevices = new List<AddDeviceViewModel>()
-            {
-                new AddDeviceViewModel(_deviceConfig3.VseIpAddress, _deviceConfig3.VsePort, _deviceConfig1.IoTCorePort),
-            };
+            var newDevice = new AddDeviceViewModel(_deviceConfig3.VseIpAddress, _deviceConfig3.VsePort, _deviceConfig1.IoTCorePort);
 
             try
             {
                 // Act
-                var addedDevice = await _deviceConfigurationService.AddDevices(newDevices);
+                var addedDevice = await _deviceConfigurationService.AddDevice(newDevice);
             }
             catch (ArgumentException ex)
             {

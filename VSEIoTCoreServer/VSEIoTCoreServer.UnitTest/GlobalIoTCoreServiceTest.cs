@@ -417,10 +417,10 @@ namespace VSEIoTCoreServer.UnitTest
             await _globalIoTCoreService.AddMirror(new DeviceConfigurationViewModel(
                 _deviceConfig3.VseIpAddress,
                 _deviceConfig3.VsePort,
-                _deviceConfig3.IoTCorePort)
+                _deviceConfig3.IoTCorePort,
+                _deviceConfig3.Name)
             {
                 Id = _deviceConfig3.Id,
-                Name = _deviceConfig3.Name,
                 VseType = _deviceConfig3.VseType,
             });
 

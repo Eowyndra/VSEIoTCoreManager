@@ -77,43 +77,39 @@ namespace VSEIoTCoreServer.WebApp.Services
             return _mapper.Map<DeviceConfigurationViewModel>(deviceConfiguration);
         }
 
-        public async Task<List<DeviceConfigurationViewModel>> AddDevices(List<AddDeviceViewModel> deviceModels)
+        public async Task<DeviceConfigurationViewModel> AddDevice(AddDeviceViewModel deviceModel)
         {
-            if (deviceModels == null)
+            if (deviceModel == null)
             {
-                throw new ArgumentNullException(nameof(deviceModels));
+                throw new ArgumentNullException(nameof(deviceModel));
             }
 
-            var addedDevices = new List<DeviceConfigurationViewModel>();
+            var dbDevice = _mapper.Map<DeviceConfiguration>(deviceModel);
 
-            foreach (var deviceModel in deviceModels)
+            // Make sure that the device has a name
+            await CheckDeviceName(dbDevice);
+
+            // Make sure that the device does not already exist in the database
+            await CheckIfDeviceAlreadyExists(dbDevice);
+
+            // Make sure the assigned IoTCore Port is still available
+            await IsIoTCorePortAvailable(dbDevice);
+
+            // Add the new device to the database
+            try
             {
-                var dbDevice = _mapper.Map<DeviceConfiguration>(deviceModel);
-
-                // Make sure that the device does not already exist in the database
-                await CheckIfDeviceAlreadyExists(dbDevice);
-
-                // Make sure the assigned IoTCore Port is still available
-                await IsIoTCorePortAvailable(dbDevice);
-
-                // Add the new device to the database
-                try
-                {
-                    var entity = _context.DeviceConfigurations.Add(dbDevice);
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation($"Successfully added device {dbDevice.VseIpAddress}:{dbDevice.VsePort}");
-                    dbDevice = entity.Entity;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Error adding device configuration: {ex.Message}");
-                    throw;
-                }
-
-                addedDevices.Add(_mapper.Map<DeviceConfigurationViewModel>(dbDevice));
+                var entity = _context.DeviceConfigurations.Add(dbDevice);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation($"Successfully added device {dbDevice.VseIpAddress}:{dbDevice.VsePort}");
+                dbDevice = entity.Entity;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error adding device configuration: {ex.Message}");
+                throw;
             }
 
-            return addedDevices;
+            return _mapper.Map<DeviceConfigurationViewModel>(dbDevice);
         }
 
         public async Task UpdateDevice(DeviceConfigurationViewModel deviceModel)
@@ -142,6 +138,36 @@ namespace VSEIoTCoreServer.WebApp.Services
                 _logger.LogError($"Error updating device configuration: {ex.Message}");
                 throw;
             }
+        }
+
+        private async Task CheckDeviceName(DeviceConfiguration device)
+        {
+            if (string.IsNullOrEmpty(device.Name))
+            {
+                device.Name = await GetDefaultVseName();
+            }
+        }
+
+        private async Task<string> GetDefaultVseName()
+        {
+            var number = 1;
+            var newName = "Device_" + number.ToString("D3");
+            var nameAlreadyUsed = await CheckIfNameAlreadyUsed(newName);
+
+            while (nameAlreadyUsed && number <= 999)
+            {
+                number++;
+                newName = "Device_" + number.ToString("D3");
+                nameAlreadyUsed = await CheckIfNameAlreadyUsed(newName);
+            }
+
+            return newName;
+        }
+
+        private async Task<bool> CheckIfNameAlreadyUsed(string name)
+        {
+            var nameAlreadyUsed = await _context.DeviceConfigurations.FirstOrDefaultAsync(device => device.Name == name);
+            return nameAlreadyUsed != null;
         }
 
         private async Task IsIoTCorePortAvailable(DeviceConfiguration deviceToBeAdded)
