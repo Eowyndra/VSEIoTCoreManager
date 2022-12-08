@@ -7,6 +7,7 @@
 
 namespace VSEIoTCoreServer.CommonTestUtils
 {
+    using System.Net;
     using System.Net.Http.Headers;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
@@ -41,6 +42,31 @@ namespace VSEIoTCoreServer.CommonTestUtils
             return deviceConfig;
         }
 
+        public static GlobalConfiguration GetGlobalConfiguration()
+        {
+            var globalConfig = new GlobalConfiguration()
+            {
+                GlobalIoTCorePort = 8090,
+            };
+
+            return globalConfig;
+        }
+
+        public static GlobalConfigurationViewModel GetGlobalConfigurationViewModel(GlobalConfiguration globalConfiguration)
+        {
+            if (globalConfiguration == null)
+            {
+                throw new ArgumentNullException(nameof(globalConfiguration));
+            }
+
+            var globalConfigViewModel = new GlobalConfigurationViewModel();
+
+            globalConfigViewModel.Id = globalConfiguration.Id;
+            globalConfigViewModel.GlobalIoTCorePort = globalConfiguration.GlobalIoTCorePort;
+
+            return globalConfigViewModel;
+        }
+
         public static DeviceConfigurationViewModel GetDeviceConfigurationViewModel(TestDeviceOptions testDevice)
         {
             if (testDevice == null)
@@ -55,6 +81,42 @@ namespace VSEIoTCoreServer.CommonTestUtils
             };
 
             return deviceConfigViewModel;
+        }
+
+        public static async Task<HttpResponseMessage> WebAPI_Put_Global_Config(HttpClient client, int port, GlobalConfigurationViewModel config)
+        {
+            if (client == null)
+            {
+                throw new ArgumentException("null", nameof(client));
+            }
+
+            var jsonContent = JsonConvert.SerializeObject(config);
+            var buffer = System.Text.Encoding.UTF8.GetBytes(jsonContent);
+            var byteContent = new ByteArrayContent(buffer);
+            byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            var response = await client.PutAsync($"https://localhost:{port}/api/v1/Global/config", byteContent);
+            return response;
+        }
+
+        public static async Task<GlobalConfigurationViewModel> WebAPI_Get_Global_Config(HttpClient client, int port)
+        {
+            if (client == null)
+            {
+                throw new ArgumentException("null", nameof(client));
+            }
+
+            GlobalConfigurationViewModel config = new ();
+            var response = await client.GetAsync($"https://localhost:{port}/api/v1/Global/config");
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                if (content != null)
+                {
+                    config = JsonConvert.DeserializeObject<GlobalConfigurationViewModel>(content) ?? new ();
+                }
+            }
+
+            return config;
         }
 
         public static async Task<HttpResponseMessage> WebAPI_Post_Start_Global(HttpClient client, int port)
@@ -193,6 +255,23 @@ namespace VSEIoTCoreServer.CommonTestUtils
             return response;
         }
 
+        public static async Task<List<AddDeviceViewModel>> GetDeviceListFromResponse(HttpResponseMessage response)
+        {
+            if (response == null)
+            {
+                throw new ArgumentException("null", nameof(response));
+            }
+
+            List<AddDeviceViewModel> notAdded = new ();
+            if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.UnprocessableEntity)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                notAdded = JsonConvert.DeserializeObject<List<AddDeviceViewModel>>(content) ?? new List<AddDeviceViewModel>();
+            }
+
+            return notAdded;
+        }
+
         public static async Task<List<DeviceConfigurationViewModel>> WebAPI_Get_Devices_Global(HttpClient client, int port)
         {
             if (client == null)
@@ -211,7 +290,7 @@ namespace VSEIoTCoreServer.CommonTestUtils
             return devices;
         }
 
-        public static HttpClient SetupTestServer(List<DeviceConfiguration> deviceConfigurations, int port)
+        public static HttpClient SetupTestServer(int port, GlobalConfiguration globalConfiguration, List<DeviceConfiguration> deviceConfigurations)
         {
             var application = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
@@ -239,11 +318,13 @@ namespace VSEIoTCoreServer.CommonTestUtils
                         var scopedServices = scope.ServiceProvider;
                         var db = scopedServices.GetRequiredService<SQLiteDbContext>();
                         db.Database.EnsureCreated();
+
                         foreach (var deviceConfig in deviceConfigurations)
                         {
                             db.DeviceConfigurations.Add(deviceConfig);
                         }
 
+                        db.GlobalConfiguration.Add(globalConfiguration);
                         db.SaveChangesAsync();
                     });
                 });

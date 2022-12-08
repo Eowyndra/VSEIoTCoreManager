@@ -11,10 +11,13 @@ namespace VSEIoTCoreServer.WebApp.Models
     using Microsoft.Extensions.Options;
     using VSEIoTCoreServer.DAL.Models.Enums;
     using VSEIoTCoreServer.LibraryRuntime;
+    using VSEIoTCoreServer.WebApp.Services;
     using VSEIoTCoreServer.WebApp.ViewModels;
 
     public class IoTCoreServer : IoTCoreRuntime, IIoTCoreServer, IDisposable
     {
+        // private readonly IGlobalConfigurationService _globalConfigService;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IOptions<IoTCoreOptions> _options;
         private readonly IoTCoreOptions _iotCoreOptions;
         private readonly ILoggerFactory _loggerFactory;
@@ -25,8 +28,9 @@ namespace VSEIoTCoreServer.WebApp.Models
 
         private readonly Timer? _statusUpdater;
 
-        public IoTCoreServer(ILoggerFactory loggerFactory, IOptions<IoTCoreOptions> iotCoreOptions)
+        public IoTCoreServer(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, IOptions<IoTCoreOptions> iotCoreOptions)
         {
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _logger = _loggerFactory.CreateLogger<IoTCoreServer>();
 
@@ -81,8 +85,12 @@ namespace VSEIoTCoreServer.WebApp.Models
             // Start the global IoTCore instance
             try
             {
+                using var scope = _serviceProvider.CreateScope();
+                var globalConfigService = scope.ServiceProvider.GetRequiredService<IGlobalConfigurationService>();
+                var config = await globalConfigService.GetConfig();
+
                 _logger.LogInformation("Starting global IoTCore server");
-                base.Start(_iotCoreOptions.IoTCoreURI, _iotCoreOptions.GlobalIoTCorePort);
+                base.Start(_iotCoreOptions.IoTCoreURI, config.GlobalIoTCorePort);
                 _logger.LogInformation("Global IoTCore server started");
             }
             catch (Exception ex)

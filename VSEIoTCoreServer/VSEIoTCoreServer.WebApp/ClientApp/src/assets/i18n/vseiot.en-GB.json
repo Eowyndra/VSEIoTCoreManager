@@ -73,19 +73,27 @@
       "table": {
         "ip": "IP",
         "vseport": "VSE Port",
-        "iotcoreport": "IoT Core Port"
+        "iotcoreport": "IoT Core Port",
+        "onboard-status": "Onboard status",
+        "already-onboarded": "Already onboarded"
       },
       "button-scan": "Scan",
       "button-add-to-list": "Add to list",
       "button-add": "ADD DEVICES",
       "button-cancel": "CANCEL",
       "devices-found": "devices found"
+    },
+    "message": {
+      "addUnsuccessful": "An error occured while adding devices (devices might already be configured): ",
+      "failure": "Failure",
+      "and-others": "And {{ remainingAmount }} other devices"
     }
   },
   "validation": {
     "required": "Required",
     "min": "Min = {{ min }}",
     "max": "Max = {{ max }}",
-    "already-used": "Already used"
+    "already-used": "Already used",
+    "already-in-list": "Already in List"
   }
 }

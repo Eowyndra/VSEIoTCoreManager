@@ -14,6 +14,7 @@ namespace VSEIoTCoreServer.UnitTests
     using System.Threading.Tasks;
     using ifmIoTCore.Messages;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
     using Microsoft.Extensions.Options;
@@ -21,9 +22,11 @@ namespace VSEIoTCoreServer.UnitTests
     using VSEIoTCoreServer.CommonTestUtils;
     using VSEIoTCoreServer.CommonUtils;
     using VSEIoTCoreServer.CommonUtils.ExtensionMethods;
+    using VSEIoTCoreServer.DAL.Models;
     using VSEIoTCoreServer.DAL.Models.Enums;
     using VSEIoTCoreServer.WebApp;
     using VSEIoTCoreServer.WebApp.Models;
+    using VSEIoTCoreServer.WebApp.Services;
     using VSEIoTCoreServer.WebApp.ViewModels;
     using Xunit;
 
@@ -36,6 +39,8 @@ namespace VSEIoTCoreServer.UnitTests
         private readonly DeviceConfigurationViewModel _deviceConfig1;
         private readonly DeviceConfigurationViewModel _deviceConfig2;
         private readonly DeviceConfigurationViewModel _deviceConfig3;
+        private readonly GlobalConfiguration _globalConfiguration;
+        private readonly IServiceProvider _serviceProviderMock;
         private readonly IOptions<IoTCoreOptions> _iotCoreOptions;
         private readonly ILoggerFactory _loggerFactoryMock;
 
@@ -65,25 +70,34 @@ namespace VSEIoTCoreServer.UnitTests
             _deviceConfig2 = TestUtils.GetDeviceConfigurationViewModel(_testDevice2);
             _deviceConfig3 = TestUtils.GetDeviceConfigurationViewModel(_testDevice3);
 
+            _globalConfiguration = TestUtils.GetGlobalConfiguration();
+
+            _serviceProviderMock = new Mock<IServiceProvider>().Object;
             _loggerFactoryMock = new Mock<ILoggerFactory>().Object;
         }
 
         [Fact]
         public void Ctor_Test()
         {
-            Assert.NotNull(new IoTCoreServer(_loggerFactoryMock, _iotCoreOptions));
+            Assert.NotNull(new IoTCoreServer(_serviceProviderMock, _loggerFactoryMock, _iotCoreOptions));
+        }
+
+        [Fact]
+        public void Ctor_ServiceProvider_Null_Error_Test()
+        {
+            Assert.Throws<ArgumentNullException>("serviceProvider", () => new IoTCoreServer(null, _loggerFactoryMock, _iotCoreOptions));
         }
 
         [Fact]
         public void Ctor_LoggerFactory_Null_Error_Test()
         {
-            Assert.Throws<ArgumentNullException>("loggerFactory", () => new IoTCoreServer(null, _iotCoreOptions));
+            Assert.Throws<ArgumentNullException>("loggerFactory", () => new IoTCoreServer(_serviceProviderMock, null, _iotCoreOptions));
         }
 
         [Fact]
         public void Ctor_IoTCoreOptions_Null_Error_Test()
         {
-            Assert.Throws<ArgumentNullException>("iotCoreOptions", () => new IoTCoreServer(_loggerFactoryMock, null));
+            Assert.Throws<ArgumentNullException>("iotCoreOptions", () => new IoTCoreServer(_serviceProviderMock, _loggerFactoryMock, null));
         }
 
         [Fact]
@@ -104,7 +118,7 @@ namespace VSEIoTCoreServer.UnitTests
             await AssertRemoteIoTCoreIsReachable(1);
             await AssertRemoteIoTCoreIsReachable(2);
 
-            using var globalIoTCore = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _iotCoreOptions.Value.GlobalIoTCorePort);
+            using var globalIoTCore = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _globalConfiguration.GlobalIoTCorePort);
             using var vseIoTCore1 = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig1.IoTCorePort);
             using var vseIoTCore2 = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig2.IoTCorePort);
 
@@ -143,7 +157,7 @@ namespace VSEIoTCoreServer.UnitTests
             await AssertRemoteIoTCoreIsReachable(1);
             await AssertRemoteIoTCoreIsReachable(2);
 
-            using var globalIoTCore = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _iotCoreOptions.Value.GlobalIoTCorePort);
+            using var globalIoTCore = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _globalConfiguration.GlobalIoTCorePort);
             using var vseIoTCore1 = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig1.IoTCorePort);
             using var vseIoTCore2 = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig2.IoTCorePort);
 
@@ -191,7 +205,7 @@ namespace VSEIoTCoreServer.UnitTests
             await AssertRemoteIoTCoreIsReachable(1);
             await AssertRemoteIoTCoreIsReachable(2);
 
-            using var globalIoTCore = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _iotCoreOptions.Value.GlobalIoTCorePort);
+            using var globalIoTCore = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _globalConfiguration.GlobalIoTCorePort);
             using var vseIoTCore1 = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig1.IoTCorePort);
             using var vseIoTCore2 = new Client(_iotCoreOptions.Value.IoTCoreURI + ":" + _deviceConfig2.IoTCorePort);
 
@@ -532,7 +546,34 @@ namespace VSEIoTCoreServer.UnitTests
         private async void Arrange(List<DeviceConfigurationViewModel> deviceConfigurations)
         {
             _nullLoggerFactory = new NullLoggerFactory();
-            _iotCoreServer = new IoTCoreServer(_nullLoggerFactory, _iotCoreOptions);
+
+            // Mock IServiceProvider to return IGlobalConfigurationService used in IIoTCoreServer
+            var globalConfigViewModel = TestUtils.GetGlobalConfigurationViewModel(_globalConfiguration);
+            var globalConfigMock = new Mock<IGlobalConfigurationService>();
+            globalConfigMock
+                .Setup(x => x.GetConfig())
+                .Returns(Task.FromResult(globalConfigViewModel));
+
+            var serviceProvider = new Mock<IServiceProvider>();
+            serviceProvider
+                .Setup(x => x.GetService(typeof(IGlobalConfigurationService)))
+                .Returns(globalConfigMock.Object);
+
+            var serviceScope = new Mock<IServiceScope>();
+            serviceScope
+                .Setup(x => x.ServiceProvider)
+                .Returns(serviceProvider.Object);
+
+            var serviceScopeFactory = new Mock<IServiceScopeFactory>();
+            serviceScopeFactory
+                .Setup(x => x.CreateScope())
+                .Returns(serviceScope.Object);
+
+            serviceProvider
+                .Setup(x => x.GetService(typeof(IServiceScopeFactory)))
+                .Returns(serviceScopeFactory.Object);
+
+            _iotCoreServer = new IoTCoreServer(serviceProvider.Object, _nullLoggerFactory, _iotCoreOptions);
 
             foreach (var deviceConfiguration in deviceConfigurations)
             {
@@ -543,28 +584,28 @@ namespace VSEIoTCoreServer.UnitTests
         private async Task AssertGlobalIoTCoreStarted()
         {
             // Wait for the global IoTCore to start
-            var started = await IoTCoreUtils.WaitUntilGlobalIoTCoreStarted(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort);
+            var started = await IoTCoreUtils.WaitUntilGlobalIoTCoreStarted(_iotCoreOptions.Value.IoTCoreURI, _globalConfiguration.GlobalIoTCorePort);
             Assert.True(started);
         }
 
         private async Task AssertGlobalIoTCoreStopped()
         {
             // Wait for the global IoTCore to stop
-            var stopped = await IoTCoreUtils.WaitUntilGlobalIoTCoreStopped(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort);
+            var stopped = await IoTCoreUtils.WaitUntilGlobalIoTCoreStopped(_iotCoreOptions.Value.IoTCoreURI, _globalConfiguration.GlobalIoTCorePort);
             Assert.True(stopped);
         }
 
         private async Task AssertRemoteIoTCoreIsReachable(int remoteId)
         {
             // Wait for the remote IoTCore to be reachable
-            var reachable = await IoTCoreUtils.WaitUntilRemoteIoTCoreReachable(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort, remoteId);
+            var reachable = await IoTCoreUtils.WaitUntilRemoteIoTCoreReachable(_iotCoreOptions.Value.IoTCoreURI, _globalConfiguration.GlobalIoTCorePort, remoteId);
             Assert.True(reachable);
         }
 
         private async Task AssertRemoteIoTCoreIsNotReachable(int remoteId)
         {
             // Wait for the remote IoTCore to be reachable
-            var notReachable = await IoTCoreUtils.WaitUntilRemoteIoTCoreNotReachable(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort, remoteId);
+            var notReachable = await IoTCoreUtils.WaitUntilRemoteIoTCoreNotReachable(_iotCoreOptions.Value.IoTCoreURI, _globalConfiguration.GlobalIoTCorePort, remoteId);
             Assert.True(notReachable);
         }
 

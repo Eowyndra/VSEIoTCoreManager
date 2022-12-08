@@ -15,6 +15,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { AppRoutingModule } from './app-routing.module';
 import { DataSourcesComponent } from './components/data-sources/data-sources.component';
 import { AddDeviceComponent } from './components/data-sources/add-device/add-device.component';
+import { NotificationComponent } from './components/notification/notification.component';
 
 //Services
 import { UtilitiesService } from './services/utilities.service';
@@ -25,6 +26,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatSortModule } from '@angular/material/sort';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -81,6 +83,9 @@ const availableLanguages = ['en-GB'];
     //Data Sources Page
     DataSourcesComponent,
     AddDeviceComponent,
+
+    //Notification
+    NotificationComponent,
     
   ],
   imports: [
@@ -116,6 +121,7 @@ const availableLanguages = ['en-GB'];
     MatTableModule,
     MatInputModule,
     MatSortModule,
+    MatSnackBarModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
 

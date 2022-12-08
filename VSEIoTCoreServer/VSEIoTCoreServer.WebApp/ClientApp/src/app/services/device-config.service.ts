@@ -44,12 +44,12 @@ export class ConfigurationService {
       );
   }
 
-  addDevices(addDevices: AddDeviceUI[]): Observable<void> {
+  addDevices(addDevices: AddDeviceUI[]): Observable<AddDeviceViewModel[]> {
     var addDevicesModel = new Array<AddDeviceViewModel>();
     addDevices.forEach(device => {
       var addDeviceModel = mapper.map<AddDeviceUI, AddDeviceViewModel>(device, 'AddDeviceViewModel', 'AddDeviceUI');
       addDevicesModel.push(addDeviceModel);
     });
-    return this.deviceApi.apiV1DevicePost({ body: addDevicesModel });
+    return this.deviceApi.apiV1DevicePost$Json({ body: addDevicesModel });
   }
 }

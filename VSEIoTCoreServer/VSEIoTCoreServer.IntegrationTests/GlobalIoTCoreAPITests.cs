@@ -21,6 +21,7 @@ namespace VSEIoTCoreServer.IntegrationTests
     using VSEIoTCoreServer.DAL.Models;
     using VSEIoTCoreServer.DAL.Models.Enums;
     using VSEIoTCoreServer.WebApp;
+    using VSEIoTCoreServer.WebApp.ViewModels;
     using Xunit;
 
     [Collection("Sequential")]
@@ -32,6 +33,7 @@ namespace VSEIoTCoreServer.IntegrationTests
 
         private DeviceConfiguration _deviceConfig1;
         private DeviceConfiguration _deviceConfig2;
+        private GlobalConfiguration _globalConfiguration;
         private HttpClient _httpClient;
 
         public GlobalIoTCoreAPITests()
@@ -53,6 +55,8 @@ namespace VSEIoTCoreServer.IntegrationTests
 
             _deviceConfig1 = TestUtils.GetDeviceConfiguration(_testDevice1);
             _deviceConfig2 = TestUtils.GetDeviceConfiguration(_testDevice2);
+
+            _globalConfiguration = TestUtils.GetGlobalConfiguration();
         }
 
         [Fact]
@@ -61,7 +65,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5201;
             var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1, _deviceConfig2 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             // Act
             var response = await TestUtils.WebAPI_Post_Start_Global(_httpClient, testServerPort);
@@ -83,7 +87,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5202;
             var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1, _deviceConfig2 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             var response = await TestUtils.WebAPI_Post_Start_Global(_httpClient, testServerPort);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -105,7 +109,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5203;
             var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1, _deviceConfig2 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             // Act
             await AssertedGlobalIoTCoreStopped();
@@ -120,7 +124,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5204;
             var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1, _deviceConfig2 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             await AssertedGlobalIoTCoreStopped();
 
             // Act
@@ -142,7 +146,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5205;
             var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1, _deviceConfig2 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             await AssertedGlobalIoTCoreStopped();
             await TestUtils.WebAPI_Post_Start_Global(_httpClient, testServerPort);
             await AssertGlobalStatus(testServerPort, GlobalIoTCoreStatus.Started);
@@ -164,7 +168,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5206;
             var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1, _deviceConfig2 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             await AssertedGlobalIoTCoreStopped();
 
             // Act
@@ -188,7 +192,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             var timeoutDevice = _deviceConfig1;
             timeoutDevice.VseIpAddress = "123.123.123.123";
             var deviceConfigurations = new List<DeviceConfiguration> { timeoutDevice, _deviceConfig2 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             await AssertedGlobalIoTCoreStopped();
 
             // Act
@@ -204,24 +208,77 @@ namespace VSEIoTCoreServer.IntegrationTests
             await AssertedGlobalIoTCoreStopped();
         }
 
+        [Fact]
+        public async Task UpdateConfiguration_Test()
+        {
+            // Arrange
+            var testServerPort = 5208;
+            var testGlobalConfig = new GlobalConfigurationViewModel();
+            testGlobalConfig.GlobalIoTCorePort = 1234;
+            var deviceConfigurations = new List<DeviceConfiguration> { };
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
+
+            // Act
+            var response = await TestUtils.WebAPI_Put_Global_Config(_httpClient, testServerPort, testGlobalConfig);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateConfiguration_Invalid_GlobalIoTCorePort_Test()
+        {
+            // Arrange
+            var testServerPort = 5209;
+            var testGlobalConfig = new GlobalConfigurationViewModel();
+            testGlobalConfig.GlobalIoTCorePort = 700000;
+            var deviceConfigurations = new List<DeviceConfiguration> { };
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
+
+            // Act
+            var response = await TestUtils.WebAPI_Put_Global_Config(_httpClient, testServerPort, testGlobalConfig);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetConfiguration_Test()
+        {
+            // Arrange
+            var testServerPort = 5210;
+            var deviceConfigurations = new List<DeviceConfiguration> { };
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
+
+            // Act
+            var config = await TestUtils.WebAPI_Get_Global_Config(_httpClient, testServerPort);
+
+            // Assert
+            Assert.NotNull(config);
+            Assert.Equal(_globalConfiguration.GlobalIoTCorePort, config.GlobalIoTCorePort);
+        }
+
         public void Dispose()
         {
             _deviceConfig1 = null;
             _deviceConfig2 = null;
+            _globalConfiguration = null;
             _httpClient?.Dispose();
         }
 
         private async Task AssertedGlobalIoTCoreStarted()
         {
             // Wait for the global IoTCore to start
-            var started = await IoTCoreUtils.WaitUntilGlobalIoTCoreStarted(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort);
+            var started = await IoTCoreUtils.WaitUntilGlobalIoTCoreStarted(_iotCoreOptions.Value.IoTCoreURI, _globalConfiguration.GlobalIoTCorePort);
             Assert.True(started);
         }
 
         private async Task AssertedGlobalIoTCoreStopped()
         {
             // Wait for the global IoTCore to stop
-            var stopped = await IoTCoreUtils.WaitUntilGlobalIoTCoreStopped(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort);
+            var stopped = await IoTCoreUtils.WaitUntilGlobalIoTCoreStopped(_iotCoreOptions.Value.IoTCoreURI, _globalConfiguration.GlobalIoTCorePort);
             Assert.True(stopped);
         }
 

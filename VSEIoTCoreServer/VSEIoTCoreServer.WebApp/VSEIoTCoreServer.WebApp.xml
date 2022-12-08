@@ -64,5 +64,17 @@
             </summary>
             <param name="deviceModel">The model containing the device configuration.</param>
         </member>
+        <member name="M:VSEIoTCoreServer.WebApp.Services.IGlobalConfigurationService.GetConfig">
+            <summary>
+            Get the global configuration from the SQLite database.
+            </summary>
+            <returns>The the global configuration.</returns>
+        </member>
+        <member name="M:VSEIoTCoreServer.WebApp.Services.IGlobalConfigurationService.UpdateConfig(VSEIoTCoreServer.WebApp.ViewModels.GlobalConfigurationViewModel)">
+            <summary>
+            Update the global configuration in the database.
+            </summary>
+            <param name="config">The model containing the global configuration.</param>
+        </member>
     </members>
 </doc>

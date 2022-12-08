@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Injectable, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { IfmDialogService } from '@ifm/components';
 import { IfmLoggingService, UseIfmLogging } from '@ifm/sdk';
@@ -7,6 +7,7 @@ import { DeviceConfigurationUI } from 'src/app/models/device-configuration';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfigPageDirective, FormModel } from 'src/app/directives/config-page.directive';
 import { ConfigurationService } from 'src/app/services/device-config.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -15,6 +16,10 @@ import { filter, take, takeUntil } from 'rxjs/operators';
 import { DeviceConfigurationViewModel, DeviceStatus, IoTStatus, StatusViewModel } from 'src/app/api/models';
 import { AddDeviceComponent } from './add-device/add-device.component';
 import { mapper } from 'src/app/services/mapper';
+import { NotificationMessage } from 'src/app/models/notification-message';
+import { NotificationComponent } from '../notification/notification.component';
+import { NotificationType } from 'src/app/enums/notification-type';
+import { TranslocoService } from '@ngneat/transloco';
 
 @Component({
   selector: 'app-data-sources',
@@ -45,9 +50,11 @@ export class DataSourcesComponent extends ConfigPageDirective implements OnInit,
   constructor(
     readonly configurationService: ConfigurationService,
     private readonly logger: IfmLoggingService,
+    private readonly snackBar: MatSnackBar,
     public dialog: MatDialog,
     private cd: ChangeDetectorRef,
-    private readonly ifmDialog: IfmDialogService
+    private readonly ifmDialog: IfmDialogService,
+    private translocoService: TranslocoService
   ) {
     super();
   }
@@ -98,11 +105,45 @@ export class DataSourcesComponent extends ConfigPageDirective implements OnInit,
           this.configurationService.addDevices(newDevices._selected).subscribe(
             () => {
               this.logger.debug('Devices added successfully.');
+
+              // Reload the device list from the data base
               this.loadDeviceList();
             },
             (error) => {
-              console.log("error adding device: " + error);
               this.logger.error('Error adding devices: ', error);
+
+              // Create a notification message to show that some devices could not be added
+              const message: NotificationMessage[] = [];
+              message.push({ text: this.translocoService.translate('vseiot.data-sources.message.addUnsuccessful'), bold: false });
+
+              // Add a line {vseIpAddress}:{vsePort} for each of the first {cutoffAmount} devices that could not be added
+              var cutoffAmount : number = 5;
+              var remainingAmount = error.error.length;
+              error.error.forEach((device: { vseIpAddress: string; vsePort: number; ioTCorePort: number; }) => {
+                if (cutoffAmount >= 1) {
+                  message.push({ text: device.vseIpAddress + ":" + device.vsePort, bold: false });
+                  cutoffAmount--;
+                  remainingAmount--;
+                }
+              });
+
+              // If there are more devices than the cutoff amount, add a line that says the remaining amount
+              if (remainingAmount > 0) {
+                message.push({ text: this.translocoService.translate('vseiot.data-sources.message.and-others', { remainingAmount: remainingAmount }), bold: false });
+              }
+
+              // Show the notification message on screen
+              this.snackBar.openFromComponent(NotificationComponent, {
+                duration: 5000,
+                data: {
+                  type: NotificationType.failure,
+                  title: this.translocoService.translate('vseiot.data-sources.message.failure'),
+                  message,
+                },
+              });
+
+              // Reload the device list from the data base
+              this.loadDeviceList();
             });
         }
       });

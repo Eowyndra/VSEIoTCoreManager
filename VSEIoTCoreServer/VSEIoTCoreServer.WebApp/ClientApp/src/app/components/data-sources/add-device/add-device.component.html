@@ -21,7 +21,8 @@
                 <div class="cell">
                     <div class="inline">
                         <ifm-radio (onChange)="typeChanged()" [value]="ScanType.Specific" formControlName="scanType"
-                            inputName="scanTypeGroup" label="{{'vseiot.data-sources.add-device.specific' | transloco}}" [(ngModel)]="defaultScanType">
+                            inputName="scanTypeGroup" label="{{'vseiot.data-sources.add-device.specific' | transloco}}"
+                            [(ngModel)]="defaultScanType">
                         </ifm-radio>
                         <ifm-font-icon class="tooltip-info" icon="info"
                             ifm-tooltip="{{'vseiot.data-sources.add-device.tooltip-specific' | transloco}}"
@@ -50,25 +51,21 @@
                 <!-- Line 2 - Specific -->
                 <div class="cell">
                     <div [ngClass]="{'ip-disabled': scanType.value !== ScanType.Specific}" class="ip-zone">
-                        <ifm-input 
-                            [formControl]="vseIpAddress"
-                            class="ip-input"
-                            label="{{'vseiot.data-sources.add-device.ip-address' | transloco  }}" 
-                            type="text">
+                        <ifm-input [formControl]="vseIpAddress" class="ip-input"
+                            label="{{'vseiot.data-sources.add-device.ip-address' | transloco  }}" type="text">
                             <ng-template ifm-template="required" type="error">
                                 {{'vseiot.validation.required' | transloco }}
                             </ng-template>
                             <ng-template ifm-template="pattern" let-error type="error">
                                 {{'vseiot.data-sources.add-device.invalid-ip' | transloco }}
                             </ng-template>
+                            <ng-template ifm-template="alreadyInList" let-error type="error">
+                                {{'vseiot.validation.already-in-list' | transloco }}
+                            </ng-template>
                         </ifm-input>
 
-                        <ifm-input
-                            [formControl]="vsePort"
-                            class="port-input"
-                            placeholder="3321"
-                            label="{{'vseiot.data-sources.add-device.vseport' | transloco  }}" 
-                            type="number">
+                        <ifm-input [formControl]="vsePort" class="port-input" placeholder="3321"
+                            label="{{'vseiot.data-sources.add-device.vseport' | transloco  }}" type="number">
                             <ng-template ifm-template="required" type="error">
                                 {{'vseiot.validation.required' | transloco }}
                             </ng-template>
@@ -80,12 +77,8 @@
                             </ng-template>
                         </ifm-input>
 
-                        <ifm-input
-                            [formControl]="ioTCorePort" 
-                            class="port-input"
-                            [placeholder]="findFreePort()"
-                            label="{{'vseiot.data-sources.add-device.iotcoreport' | transloco  }}"
-                            type="number">
+                        <ifm-input [formControl]="ioTCorePort" class="port-input" [placeholder]="findFreePort()"
+                            label="{{'vseiot.data-sources.add-device.iotcoreport' | transloco  }}" type="number">
                             <ng-template ifm-template="required" type="error">
                                 {{'vseiot.validation.required' | transloco }}
                             </ng-template>
@@ -104,11 +97,8 @@
                 <!-- Line 3 - Range -->
                 <div class="cell">
                     <div [ngClass]="{'ip-disabled': scanType.value !== ScanType.Range}" class="ip-zone">
-                        <ifm-input 
-                            class="ip-input"
-                            formControlName="rangeIp"
-                            label="{{'vseiot.data-sources.add-device.ip-address' | transloco  }}"
-                            type="text">
+                        <ifm-input class="ip-input" formControlName="rangeIp"
+                            label="{{'vseiot.data-sources.add-device.ip-address' | transloco  }}" type="text">
                             <ng-template ifm-template="required" type="error">
                                 {{'vseiot.validation.required' | transloco }}
                             </ng-template>
@@ -117,11 +107,8 @@
                             </ng-template>
                         </ifm-input>
                         <div class="ip-separator">-</div>
-                        <ifm-input 
-                            class="ip-end-input"
-                            formControlName="rangeIp_end"
-                            label="{{'vseiot.data-sources.add-device.ip-end' | transloco  }}"
-                            type="number">
+                        <ifm-input class="ip-end-input" formControlName="rangeIp_end"
+                            label="{{'vseiot.data-sources.add-device.ip-end' | transloco  }}" type="number">
                             <ng-template ifm-template="required" type="error">
                                 {{'vseiot.validation.required' | transloco }}
                             </ng-template>
@@ -132,11 +119,8 @@
                                 {{'vseiot.validation.max' | transloco : { max: error.max } }}
                             </ng-template>
                         </ifm-input>
-                        <ifm-input 
-                            class="port-input"
-                            formControlName="rangePort"
-                            label="{{'vseiot.data-sources.add-device.vseport' | transloco  }}"
-                            type="number">
+                        <ifm-input class="port-input" formControlName="rangePort"
+                            label="{{'vseiot.data-sources.add-device.vseport' | transloco  }}" type="number">
                             <ng-template ifm-template="required" type="error">
                                 {{'vseiot.validation.required' | transloco }}
                             </ng-template>
@@ -154,30 +138,21 @@
             <!-- Buttons -->
             <div class="column-buttons">
                 <div class="cell">
-                    <button 
-                        class="top"
-                        (click)="scanNetwork()"
-                        [disabled]="isLoading || scanType.value !== ScanType.ScanNetwork"
-                        ifm-standard-button
+                    <button class="top" (click)="scanNetwork()"
+                        [disabled]="isLoading || scanType.value !== ScanType.ScanNetwork" ifm-standard-button
                         label="{{'vseiot.data-sources.add-device.button-scan' | transloco}}">
                     </button>
                 </div>
                 <div class="cell">
-                    <button 
-                        class="top"
-                        (click)="specific()"
+                    <button class="top" (click)="specific()"
                         [disabled]="isLoading || scanType.value !== ScanType.Specific || !vseIpAddress.valid || !vsePort.valid || !ioTCorePort.valid"
-                        ifm-standard-button
-                        label="{{'vseiot.data-sources.add-device.button-add-to-list' | transloco}}">
+                        ifm-standard-button label="{{'vseiot.data-sources.add-device.button-add-to-list' | transloco}}">
                     </button>
                 </div>
                 <div class="cell">
-                    <button
-                        class="top"
-                        (click)="range()"
+                    <button class="top" (click)="range()"
                         [disabled]="isLoading || scanType.value !== ScanType.Range || !rangeIp.valid || !rangeIp_end.valid || !rangePort.valid"
-                        ifm-standard-button
-                        label="{{'vseiot.data-sources.add-device.button-add-to-list' | transloco}}">
+                        ifm-standard-button label="{{'vseiot.data-sources.add-device.button-add-to-list' | transloco}}">
                     </button>
                 </div>
             </div>
@@ -231,7 +206,9 @@
                         <ng-container matColumnDef="vseIpAddress">
                             <th *matHeaderCellDef mat-header-cell mat-sort-header>
                                 {{'vseiot.data-sources.add-device.table.ip' | transloco}}</th>
-                            <td *matCellDef="let row" [ngClass]="{'disabled': false}" mat-cell>{{ row.vseIpAddress }}
+                            <td *matCellDef="let row"
+                                [ngClass]="{ disabled: row.onboardStatus === true || (!selection.isSelected(row) && isAllSelected()) }"
+                                mat-cell>{{ row.vseIpAddress }}
                             </td>
                         </ng-container>
 
@@ -239,7 +216,9 @@
                         <ng-container matColumnDef="vsePort">
                             <th *matHeaderCellDef mat-header-cell mat-sort-header>
                                 {{'vseiot.data-sources.add-device.table.vseport' | transloco}}</th>
-                            <td *matCellDef="let row" [ngClass]="{'disabled': false}" mat-cell>{{ row.vsePort }}
+                            <td *matCellDef="let row"
+                                [ngClass]="{ disabled: row.onboardStatus === true || (!selection.isSelected(row) && isAllSelected()) }"
+                                mat-cell>{{ row.vsePort }}
                             </td>
                         </ng-container>
 
@@ -247,7 +226,23 @@
                         <ng-container matColumnDef="ioTCorePort">
                             <th *matHeaderCellDef mat-header-cell mat-sort-header>
                                 {{'vseiot.data-sources.add-device.table.iotcoreport' | transloco}}</th>
-                            <td *matCellDef="let row" [ngClass]="{'disabled': false}" mat-cell>{{ row.ioTCorePort }}
+                            <td *matCellDef="let row"
+                                [ngClass]="{ disabled: row.onboardStatus === true || (!selection.isSelected(row) && isAllSelected()) }"
+                                mat-cell>{{ row.ioTCorePort }}
+                            </td>
+                        </ng-container>
+
+                        <!--Onboard status -->
+                        <ng-container matColumnDef="onboardStatus">
+                            <th *matHeaderCellDef mat-header-cell>
+                                {{ 'vseiot.data-sources.add-device.table.onboard-status' | transloco }}
+                            </th>
+                            <td *matCellDef="let row"
+                                [ngClass]="{ disabled: row.onboardStatus === true || (!selection.isSelected(row) && isAllSelected()) }"
+                                mat-cell>
+                                <ng-template [ngIf]="row.onboardStatus === true">
+                                    {{ 'vseiot.data-sources.add-device.table.already-onboarded' | transloco }}
+                                </ng-template>
                             </td>
                         </ng-container>
 

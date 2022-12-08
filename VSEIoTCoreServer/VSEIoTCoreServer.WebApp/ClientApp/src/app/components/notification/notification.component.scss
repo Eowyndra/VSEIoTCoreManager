@@ -1,0 +1,57 @@
+.toast {
+    font-size: 1.2em;
+    text-align: center;
+    background-color: var(--ifm-content-background-color);
+    padding: 17px;
+    color: var(--ifm-text-color);
+    border: 1px solid var(--ifm-border-alt-color);
+    box-shadow: 0 2px 4px 0 rgba(var(--ifm-shadow-color-rgb), 0.5);
+  
+    div {
+      display: block;
+      z-index: 1;
+      position: relative;
+    }
+  
+    .title {
+      font-weight: bolder;
+      margin-bottom: 1em;
+    }
+  
+    .message {
+      margin-bottom: 1em;
+    }
+  
+    .bold {
+      font-weight: bold;
+    }
+  }
+  
+  .failure {
+    border: 2px solid var(--ifm-alarm-color);
+  
+    &::before {
+      content: '';
+      background-color: rgba(var(--ifm-alarm-color-rgb), 0.3);
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+  }
+  
+  .warning {
+    border: 2px solid var(--ifm-warning-color);
+  
+    &::before {
+      content: '';
+      background-color: rgba(var(--ifm-warning-color-rgb), 0.17);
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+  }
+  

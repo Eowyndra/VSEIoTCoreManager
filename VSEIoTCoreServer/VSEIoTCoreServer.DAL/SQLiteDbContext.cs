@@ -22,6 +22,7 @@ namespace VSEIoTCoreServer.DAL
         }
 
         public virtual DbSet<DeviceConfiguration> DeviceConfigurations { get; set; }
+        public virtual DbSet<GlobalConfiguration> GlobalConfiguration { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,6 +37,14 @@ namespace VSEIoTCoreServer.DAL
                 entity.HasKey(k => k.Id);
                 entity.HasIndex(i => i.Id).IsUnique();
             });
+
+            modelBuilder.Entity<GlobalConfiguration>().ToTable("GlobalConfiguration");
+            modelBuilder.Entity<GlobalConfiguration>(entity =>
+            {
+                entity.HasKey(k => k.Id);
+                entity.HasIndex(i => i.Id).IsUnique();
+            });
+
             base.OnModelCreating(modelBuilder);
         }
     }
