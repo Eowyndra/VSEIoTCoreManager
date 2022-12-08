@@ -5,38 +5,42 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace VSEIoTCoreServer.UnitTest
+namespace VSEIoTCoreServer.UnitTests
 {
     using System;
     using Microsoft.Extensions.Logging;
     using Moq;
     using VSEIoTCoreServer.WebApp.Controllers;
-    using VSEIoTCoreServer.WebApp.Services;
+    using VSEIoTCoreServer.WebApp.Models;
     using Xunit;
 
-    [Collection("Sequential")]
     public class GlobalControllerTest : IDisposable
     {
+        private readonly IIoTCoreServer _iotCoreServerMock;
+        private readonly ILoggerFactory _loggerFactoryMock;
+
+        public GlobalControllerTest()
+        {
+            _iotCoreServerMock = new Mock<IIoTCoreServer>().Object;
+            _loggerFactoryMock = new Mock<ILoggerFactory>().Object;
+        }
+
         [Fact]
         public void Ctor_Test()
         {
-            var mockGlobalIoTCoreService = new Mock<IGlobalIoTCoreService>().Object;
-            var mockLoggerFactory = new Mock<ILoggerFactory>().Object;
-            Assert.NotNull(new GlobalController(mockGlobalIoTCoreService, mockLoggerFactory));
+            Assert.NotNull(new GlobalController(_iotCoreServerMock, _loggerFactoryMock));
         }
 
         [Fact]
-        public void Ctor_Service_Null_Error_Test()
+        public void Ctor_IoTCoreServer_Null_Error_Test()
         {
-            var mockLoggerFactory = new Mock<ILoggerFactory>().Object;
-            Assert.Throws<ArgumentNullException>("globalIoTCoreService", () => new GlobalController(null, mockLoggerFactory));
+            Assert.Throws<ArgumentNullException>("iotCoreServer", () => new GlobalController(null, _loggerFactoryMock));
         }
 
         [Fact]
-        public void Ctor_Logger_Null_Error_Test()
+        public void Ctor_LoggerFactory_Null_Error_Test()
         {
-            var mockGlobalIoTCoreService = new Mock<IGlobalIoTCoreService>().Object;
-            Assert.Throws<ArgumentNullException>("loggerFactory", () => new GlobalController(mockGlobalIoTCoreService, null));
+            Assert.Throws<ArgumentNullException>("loggerFactory", () => new GlobalController(_iotCoreServerMock, null));
         }
 
         public void Dispose()

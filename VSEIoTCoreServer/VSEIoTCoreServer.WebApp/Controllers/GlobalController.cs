@@ -8,19 +8,20 @@
 namespace VSEIoTCoreServer.WebApp.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
-    using VSEIoTCoreServer.WebApp.Services;
+    using VSEIoTCoreServer.WebApp.Models;
     using VSEIoTCoreServer.WebApp.ViewModels;
 
     [ApiController]
     [Route("api/v1/[controller]")]
     public class GlobalController : ControllerBase
     {
-        private readonly IGlobalIoTCoreService _globalIoTCoreService;
+        private readonly IIoTCoreServer _iotCoreServer;
         private readonly ILogger<GlobalController> _logger;
 
-        public GlobalController(IGlobalIoTCoreService globalIoTCoreService, ILoggerFactory loggerFactory)
+        public GlobalController(IIoTCoreServer iotCoreServer, ILoggerFactory loggerFactory)
         {
-            _globalIoTCoreService = globalIoTCoreService ?? throw new ArgumentNullException(nameof(globalIoTCoreService));
+            _iotCoreServer = iotCoreServer ?? throw new ArgumentNullException(nameof(iotCoreServer));
+
             var factory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _logger = factory.CreateLogger<GlobalController>();
         }
@@ -35,8 +36,7 @@ namespace VSEIoTCoreServer.WebApp.Controllers
             StatusCodeResult result;
             try
             {
-                await _globalIoTCoreService.Start();
-
+                await _iotCoreServer.Start();
                 result = Ok();
             }
             catch (InvalidOperationException e)
@@ -56,15 +56,20 @@ namespace VSEIoTCoreServer.WebApp.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(409)]
         [HttpPost("stop")]
         public async Task<IActionResult> Stop()
         {
             StatusCodeResult result;
             try
             {
-                await _globalIoTCoreService.Stop();
-
+                await _iotCoreServer.Stop();
                 result = Ok();
+            }
+            catch (InvalidOperationException e)
+            {
+                _logger.LogError("Error stopping global IoTCore instance: " + e.Message);
+                result = StatusCode(409);
             }
             catch (Exception e)
             {
@@ -84,8 +89,7 @@ namespace VSEIoTCoreServer.WebApp.Controllers
             ActionResult result;
             try
             {
-                var status = await _globalIoTCoreService.GetStatus();
-
+                var status = await _iotCoreServer.GetStatus();
                 result = Ok(status);
             }
             catch (Exception ex)

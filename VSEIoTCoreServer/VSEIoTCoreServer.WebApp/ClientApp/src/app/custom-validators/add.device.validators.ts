@@ -35,6 +35,12 @@ export class AddDeviceValidators {
       return null;
     }
     if (value !== null && value !== undefined) {
+      // global IoT Core port is not available
+      // todo get global IoT Core port from settings when it is implemented
+      if (value === 8090) {
+        return { alreadyUsed: true };
+      }
+      
       if (AddDeviceValidators.usedPortsList.indexOf(value) > -1) {
           return { alreadyUsed: true };
       }

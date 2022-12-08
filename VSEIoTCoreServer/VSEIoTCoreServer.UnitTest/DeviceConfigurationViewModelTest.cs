@@ -5,7 +5,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-namespace VSEIoTCoreServer.UnitTest
+namespace VSEIoTCoreServer.UnitTests
 {
     using System;
     using System.IO;

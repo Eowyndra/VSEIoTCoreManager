@@ -10,9 +10,9 @@ namespace VSEIoTCoreServer.DAL.Models.Enums
     public enum GlobalIoTCoreStatus
     {
         Stopped,
+        Stopping,
+        Starting,
         PartlyRunning,
         Started,
-        Starting,
-        Stopping,
     }
 }

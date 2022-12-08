@@ -4,6 +4,40 @@
         <name>VSEIoTCoreServer.WebApp</name>
     </assembly>
     <members>
+        <member name="M:VSEIoTCoreServer.WebApp.Models.IIoTCoreServer.Start">
+            <summary>
+            Starts a global IoTCore instance and all configured VSEIoTCore instances and mirrors them into the global IoTCore.
+            </summary>
+        </member>
+        <member name="M:VSEIoTCoreServer.WebApp.Models.IIoTCoreServer.Stop">
+            <summary>
+            Stops the global IoTCore instance and all started VSEIoTCore instances.
+            </summary>
+        </member>
+        <member name="M:VSEIoTCoreServer.WebApp.Models.IIoTCoreServer.AddRange(System.Collections.Generic.List{VSEIoTCoreServer.WebApp.ViewModels.DeviceConfigurationViewModel})">
+            <summary>
+            Add a list of new devices to the cache.
+            </summary>
+            <param name="devices">A list of new devices to be added to the cache.</param>
+        </member>
+        <member name="M:VSEIoTCoreServer.WebApp.Models.IIoTCoreServer.Add(VSEIoTCoreServer.WebApp.ViewModels.DeviceConfigurationViewModel)">
+            <summary>
+            Add a new device to the cache.
+            </summary>
+            <param name="device">The device to be added to the cache.</param>
+        </member>
+        <member name="M:VSEIoTCoreServer.WebApp.Models.IIoTCoreServer.GetStatus">
+            <summary>
+            Get the status of the global IoTCore instance.
+            </summary>
+            <returns>The status of the global IoTCore instance.</returns>
+        </member>
+        <member name="M:VSEIoTCoreServer.WebApp.Models.IIoTCoreServer.GetDevices">
+            <summary>
+            Get a list of devices that are stored in the cache.
+            </summary>
+            <returns>A list of devices stored in the cache.</returns>
+        </member>
         <member name="M:VSEIoTCoreServer.WebApp.Services.IDeviceConfigurationService.GetAll">
             <summary>
             Get a List of configured devices from the SQLite DataBase.
@@ -29,62 +63,6 @@
             Update an existing device configuration in the database.
             </summary>
             <param name="deviceModel">The model containing the device configuration.</param>
-        </member>
-        <member name="M:VSEIoTCoreServer.WebApp.Services.IGlobalIoTCoreService.Start">
-            <summary>
-            Starts a global IoTCore instance and all configured VSEIoTCore instances and mirrors them into the global IoTCore.
-            </summary>
-        </member>
-        <member name="M:VSEIoTCoreServer.WebApp.Services.IGlobalIoTCoreService.Stop">
-            <summary>
-            Stops the global IoTCore instance and all started VSEIoTCore instances.
-            </summary>
-        </member>
-        <member name="M:VSEIoTCoreServer.WebApp.Services.IGlobalIoTCoreService.AddMirror(VSEIoTCoreServer.WebApp.ViewModels.DeviceConfigurationViewModel)">
-            <summary>
-            Add the VSEIoTCore instance of the device specified by deviceId to the global IoTCore.
-            </summary>
-            <param name="deviceConfig">The configuration of the device that shall be added to the global IoTCore.</param>
-        </member>
-        <member name="M:VSEIoTCoreServer.WebApp.Services.IGlobalIoTCoreService.GetStatus">
-            <summary>
-            Get the status of the global IoTCore instance.
-            </summary>
-            <returns>The status of the global IoTCore instance.</returns>
-        </member>
-        <member name="M:VSEIoTCoreServer.WebApp.Services.IIoTCoreService.Start(System.Int32)">
-            <summary>
-            Starts a VSEIoTCore process for the device with the given deviceId.
-            </summary>
-            <param name="deviceId">The ID of the device.</param>
-        </member>
-        <member name="M:VSEIoTCoreServer.WebApp.Services.IIoTCoreService.Stop(System.Int32)">
-            <summary>
-            Stops a VSEIoTCore process for the device with the given deviceId.
-            </summary>
-            <param name="deviceId">The ID of the device.</param>
-        </member>
-        <member name="M:VSEIoTCoreServer.WebApp.Services.IIoTCoreService.Status(System.Int32)">
-            <summary>
-            Get the current status of the device with the given deviceId.
-            </summary>
-            <param name="deviceId">The ID of the device.</param>
-            <returns>The StatusViewModel containing the IoTStatus and DeviceStatus of the device.</returns>
-        </member>
-        <member name="M:VSEIoTCoreServer.WebApp.Services.IIoTCoreService.GetDeviceStatus(System.String,System.Int32)">
-            <summary>
-            Get the status of the device with the given url and port.
-            </summary>
-            <param name="iotCoreUrl">The URL of the device.</param>
-            <param name="iotCorePort">The Port of the device.</param>
-            <returns>The DeviceStatus of the device.</returns>
-        </member>
-        <member name="M:VSEIoTCoreServer.WebApp.Services.IIoTCoreService.GetIoTStatus(System.Int32)">
-            <summary>
-            Get the status of the IoTCore process for the device with the given deviceId.
-            </summary>
-            <param name="deviceId">The ID of the device.</param>
-            <returns>The IoTStatus of the device.</returns>
         </member>
     </members>
 </doc>

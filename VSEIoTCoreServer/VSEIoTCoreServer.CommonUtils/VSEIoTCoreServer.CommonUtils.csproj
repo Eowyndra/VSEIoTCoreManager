@@ -48,6 +48,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\VSEIoTCoreServer.DAL\VSEIoTCoreServer.DAL.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Compile Update="IoTCoreRoutes.gen.cs">
 	    <DesignTime>True</DesignTime>
 	    <AutoGen>True</AutoGen>

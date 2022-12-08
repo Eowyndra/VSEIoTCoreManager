@@ -2,8 +2,8 @@
 /* eslint-disable */
 export enum GlobalIoTCoreStatus {
   Stopped = 'Stopped',
-  PartlyRunning = 'PartlyRunning',
-  Started = 'Started',
+  Stopping = 'Stopping',
   Starting = 'Starting',
-  Stopping = 'Stopping'
+  PartlyRunning = 'PartlyRunning',
+  Started = 'Started'
 }
