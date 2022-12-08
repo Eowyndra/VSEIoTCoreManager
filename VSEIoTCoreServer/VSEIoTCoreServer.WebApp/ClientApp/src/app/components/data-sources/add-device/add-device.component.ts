@@ -24,7 +24,7 @@ const ipPattern = '^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[1-9])[.])((25[
 export class AddDeviceComponent implements OnInit, AfterViewInit, OnDestroy {
   public ScanType = ScanType;
   defaultScanType = ScanType.Specific;
-  columns: string[] = ['checkbox', 'vseIpAddress', 'vsePort', 'ioTCorePort'];
+  columns: string[] = ['checkbox', 'vseIpAddress', 'vsePort', 'ioTCorePort', 'onboardStatus'];
   dataSource: MatTableDataSource<AddDeviceUI> = new MatTableDataSource<AddDeviceUI>();
   selection = new SelectionModel<AddDeviceUI>(true, []);
   @ViewChild(MatSort) sort = new MatSort();
@@ -32,8 +32,8 @@ export class AddDeviceComponent implements OnInit, AfterViewInit, OnDestroy {
   public searched = false; // will become true after first device scan/add to list
   public formModel: FormModel<ScanFilterUI> = {
     scanType: new FormControl('ScanType.Specific'),
-    vseIpAddress: new FormControl('', [Validators.required, Validators.pattern(ipPattern)]),
-    vsePort: new FormControl('', [Validators.required, Validators.min(1), Validators.max(65535)]),
+    vseIpAddress: new FormControl('', [Validators.required, Validators.pattern(ipPattern), AddDeviceValidators.checkAlreadyInList]),
+    vsePort: new FormControl('', [Validators.required, Validators.min(1), Validators.max(65535), AddDeviceValidators.updateIpValidity]),
     ioTCorePort: new FormControl('', [Validators.required, Validators.min(1), Validators.max(65535), AddDeviceValidators.checkPortAvailable]),
     rangeIp: new FormControl('', [Validators.required, Validators.pattern(ipPattern)]),
     rangeIp_end: new FormControl('', [Validators.required, Validators.min(0), Validators.max(255)]),
@@ -43,6 +43,8 @@ export class AddDeviceComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly destroyed$ = new Subject();
   deviceList: DeviceConfigurationViewModel[] | undefined;
   usedPortsList: number[] = new Array<number>();
+  // Issue#59 will make this port changeable --> ToDo: get the current global IoTCore Port from the configuration
+  globalIoTCorePort: number = 8090;
 
   constructor(
     private cd: ChangeDetectorRef
@@ -70,6 +72,8 @@ export class AddDeviceComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.updateUsedPortsList();
+    this.updateAlreadyListed();
+    this.ioTCorePort.setValue(this.findFreePort());
     this.dataSource.sort = this.sort;
     this.cd.detectChanges();
   }
@@ -86,13 +90,20 @@ export class AddDeviceComponent implements OnInit, AfterViewInit, OnDestroy {
   addDevice(scanFilter: ScanFilterUI): AddDeviceUI {
     const vseIpAddress = scanFilter.vseIpAddress;
     const vsePort: number = +scanFilter.vsePort;
-    const ioTCorePort: number = +scanFilter.ioTCorePort;
+
+    // Check if a device with the same vseIpAddress and vsePort is already configured
+    var alreadyExists = this.deviceList?.find((s) => s.vseIpAddress === vseIpAddress && s.vsePort === vsePort);
+
+    // If the device is already on-boarded, display the IoTCore Port it already has
+    const ioTCorePort: number = alreadyExists !== undefined ? +alreadyExists.ioTCorePort : +scanFilter.ioTCorePort;
+    const onboardStatus: boolean = alreadyExists !== undefined;
 
     const device: AddDeviceUI = {
-      name: '',  //name field not defined in UI yet
+      name: '',  //name field not defined in UI, name will be automatically assigned in the back-end
       vseIpAddress,
       vsePort,
-      ioTCorePort
+      ioTCorePort,
+      onboardStatus
     };
 
     return device;
@@ -108,6 +119,7 @@ export class AddDeviceComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dataSource.data = devices;
     this.isLoading = false;
     this.updateUsedPortsList();
+    this.updateAlreadyListed();
     this.ioTCorePort.setValue(this.findFreePort());
   }
 
@@ -117,18 +129,21 @@ export class AddDeviceComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isAllSelected(): boolean {
     const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.length;
+    const numRows = this.dataSource.data.filter((s) => s.onboardStatus === false).length;
     return numSelected === numRows;
   }
 
   masterToggle(): void {
     this.isAllSelected() ? this.selection.clear() : this.dataSource._orderData(this.dataSource.data).forEach(row => {
-      this.selection.select(row);
+      if (row.onboardStatus === false) {
+        this.selection.select(row);
+      }
     });
   }
 
   selectableRows(): number {
-    return 1000;
+    const notOnboarded = this.dataSource.data.filter((s) => s.onboardStatus === false).length;
+    return notOnboarded;
   }
 
   typeChanged(): void {
@@ -141,21 +156,39 @@ export class AddDeviceComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateUsedPortsList(): void {
+    // Add the IoTCore Port of each device from the data base
     this.deviceList?.forEach(device => {
       if (!this.usedPortsList?.includes(device.ioTCorePort)) {
         this.usedPortsList?.push(device.ioTCorePort);
       }
     });
+
+    // Add the IoTCore Port of each device currently in the add-device dialog list
     this.dataSource.data.forEach(device => {
       if (!this.usedPortsList?.includes(device.ioTCorePort)) {
         this.usedPortsList?.push(device.ioTCorePort);
       }
     });
+
+    // Add the global IoTCore Port
+    this.usedPortsList?.push(this.globalIoTCorePort);
+
+    // Update the validator with the current list of already used ports
     AddDeviceValidators.setUsedPortsList(this.usedPortsList);
   }
 
+  updateAlreadyListed(): void {
+    // Update the validator with the current list of devices in the add-device dialog
+    AddDeviceValidators.setListedDevices(this.dataSource.data);
+
+    // Retrigger validity check
+    this.formModel.vseIpAddress.updateValueAndValidity();
+  }
+
   findFreePort(): number {
-    var freePort:number = 8091;
+    // The range of ports starts at the global IoTCore Port +1
+    var freePort:number = this.globalIoTCorePort+1;
+
     while(true) {
       if(this.isPortFree(freePort)) {
         break;
@@ -163,6 +196,7 @@ export class AddDeviceComponent implements OnInit, AfterViewInit, OnDestroy {
       freePort++;
       continue;
     }
+
     return freePort;
   }
 

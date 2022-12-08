@@ -14,9 +14,16 @@ namespace VSEIoTCoreServer.WebApp.ViewModels
     {
         public AutoMapperProfile()
         {
+            // DTO to ViewModel
             CreateMap<DeviceConfiguration, DeviceConfigurationViewModel>();
-            CreateMap<AddDeviceViewModel, DeviceConfiguration>();
+            CreateMap<GlobalConfiguration, GlobalConfigurationViewModel>();
+
+            // ViewModel to DTO
             CreateMap<DeviceConfigurationViewModel, DeviceConfiguration>();
+            CreateMap<GlobalConfigurationViewModel, GlobalConfiguration>();
+            CreateMap<AddDeviceViewModel, DeviceConfiguration>();
+
+            // ViewModel to ViewModel
             CreateMap<DeviceConfigurationViewModel, StatusViewModel>();
         }
     }

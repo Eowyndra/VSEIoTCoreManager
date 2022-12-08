@@ -45,7 +45,8 @@ export function createMetadata(): void {
     name: String,
     vseIpAddress: String,
     vsePort: Number,
-    ioTCorePort: Number
+    ioTCorePort: Number,
+    onboardStatus: Boolean
   });
 }
 

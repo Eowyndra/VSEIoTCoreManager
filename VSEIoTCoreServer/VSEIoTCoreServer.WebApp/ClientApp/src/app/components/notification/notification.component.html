@@ -1,0 +1,15 @@
+<div
+  [ngClass]="{
+    warning: data.type === type.warning,
+    failure: data.type === type.failure
+  }"
+  class="toast">
+  <div class="title">
+    {{ data.title }}
+  </div>
+  <div *ngFor="let msg of data.message" class="message">
+    <div [ngClass]="{ bold: msg.bold === true }">
+      {{ msg.text }}
+    </div>
+  </div>
+</div>

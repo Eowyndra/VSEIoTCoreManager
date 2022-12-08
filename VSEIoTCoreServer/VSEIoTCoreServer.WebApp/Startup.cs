@@ -38,6 +38,7 @@ namespace VSEIoTCoreServer.WebApp
             services.AddDbContext<SQLiteDbContext>(options => options.UseSqlite(conStr));
 
             services.AddScoped<IDeviceConfigurationService, DeviceConfigurationService>();
+            services.AddScoped<IGlobalConfigurationService, GlobalConfigurationService>();
 
             // Main IoT Core must be singleton otherwise you would create multiple different iotcores - this might be the issue of not being able to access remote/1/ ...
             services.AddSingleton<IIoTCoreServer, IoTCoreServer>();

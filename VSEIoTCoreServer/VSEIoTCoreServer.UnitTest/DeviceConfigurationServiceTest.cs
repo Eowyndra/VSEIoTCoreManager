@@ -307,7 +307,7 @@ namespace VSEIoTCoreServer.UnitTests
                 .Options;
             var databaseContext = new SQLiteDbContext(options);
             databaseContext.Database.EnsureCreated();
-            if (await databaseContext.DeviceConfigurations.CountAsync() <= 0)
+            if (!await databaseContext.DeviceConfigurations.AnyAsync())
             {
                 databaseContext.DeviceConfigurations.Add(_deviceConfig1);
                 databaseContext.DeviceConfigurations.Add(_deviceConfig2);

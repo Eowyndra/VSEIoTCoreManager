@@ -3,4 +3,5 @@ export interface AddDeviceUI {
     vseIpAddress: string;
     vsePort: number;
     ioTCorePort: number;
+    onboardStatus: boolean;
 }

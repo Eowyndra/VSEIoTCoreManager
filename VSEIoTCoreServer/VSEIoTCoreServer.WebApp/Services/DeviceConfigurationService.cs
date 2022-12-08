@@ -114,17 +114,17 @@ namespace VSEIoTCoreServer.WebApp.Services
 
         public async Task UpdateDevice(DeviceConfigurationViewModel deviceModel)
         {
-            var dbDevice = _mapper.Map<DeviceConfiguration>(deviceModel);
+            var device = _mapper.Map<DeviceConfiguration>(deviceModel);
 
             try
             {
-                var record = await _context.DeviceConfigurations.FirstOrDefaultAsync(dev => dev.Id == dbDevice.Id);
-                if (record != null)
+                var dbDevice = await _context.DeviceConfigurations.FirstOrDefaultAsync(dev => dev.Id == device.Id);
+                if (dbDevice != null)
                 {
-                    record.VseType = dbDevice.VseType;
-                    record.VseIpAddress = dbDevice.VseIpAddress;
-                    record.VsePort = dbDevice.VsePort;
-                    record.IoTCorePort = dbDevice.IoTCorePort;
+                    dbDevice.VseType = device.VseType;
+                    dbDevice.VseIpAddress = device.VseIpAddress;
+                    dbDevice.VsePort = device.VsePort;
+                    dbDevice.IoTCorePort = device.IoTCorePort;
                     await _context.SaveChangesAsync();
                     _logger.LogInformation("Successfully updated device configuration");
                 }

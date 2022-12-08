@@ -112,13 +112,13 @@ export class DeviceService extends BaseService {
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `apiV1DevicePost()` instead.
+   * To access only the response body, use `apiV1DevicePost$Plain()` instead.
    *
    * This method sends `application/*+json` and handles request body of type `application/*+json`.
    */
-  apiV1DevicePost$Response(params?: {
+  apiV1DevicePost$Plain$Response(params?: {
     body?: Array<AddDeviceViewModel>
-  }): Observable<StrictHttpResponse<void>> {
+  }): Observable<StrictHttpResponse<Array<AddDeviceViewModel>>> {
 
     const rb = new RequestBuilder(this.rootUrl, DeviceService.ApiV1DevicePostPath, 'post');
     if (params) {
@@ -127,27 +127,68 @@ export class DeviceService extends BaseService {
 
     return this.http.request(rb.build({
       responseType: 'text',
-      accept: '*/*'
+      accept: 'text/plain'
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return (r as HttpResponse<any>).clone({ body: undefined }) as StrictHttpResponse<void>;
+        return r as StrictHttpResponse<Array<AddDeviceViewModel>>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `apiV1DevicePost$Response()` instead.
+   * To access the full response (for headers, for example), `apiV1DevicePost$Plain$Response()` instead.
    *
    * This method sends `application/*+json` and handles request body of type `application/*+json`.
    */
-  apiV1DevicePost(params?: {
+  apiV1DevicePost$Plain(params?: {
     body?: Array<AddDeviceViewModel>
-  }): Observable<void> {
+  }): Observable<Array<AddDeviceViewModel>> {
 
-    return this.apiV1DevicePost$Response(params).pipe(
-      map((r: StrictHttpResponse<void>) => r.body as void)
+    return this.apiV1DevicePost$Plain$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<AddDeviceViewModel>>) => r.body as Array<AddDeviceViewModel>)
+    );
+  }
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `apiV1DevicePost$Json()` instead.
+   *
+   * This method sends `application/*+json` and handles request body of type `application/*+json`.
+   */
+  apiV1DevicePost$Json$Response(params?: {
+    body?: Array<AddDeviceViewModel>
+  }): Observable<StrictHttpResponse<Array<AddDeviceViewModel>>> {
+
+    const rb = new RequestBuilder(this.rootUrl, DeviceService.ApiV1DevicePostPath, 'post');
+    if (params) {
+      rb.body(params.body, 'application/*+json');
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'text/json'
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Array<AddDeviceViewModel>>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `apiV1DevicePost$Json$Response()` instead.
+   *
+   * This method sends `application/*+json` and handles request body of type `application/*+json`.
+   */
+  apiV1DevicePost$Json(params?: {
+    body?: Array<AddDeviceViewModel>
+  }): Observable<Array<AddDeviceViewModel>> {
+
+    return this.apiV1DevicePost$Json$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<AddDeviceViewModel>>) => r.body as Array<AddDeviceViewModel>)
     );
   }
 

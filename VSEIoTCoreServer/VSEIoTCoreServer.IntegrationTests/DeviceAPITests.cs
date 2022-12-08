@@ -36,6 +36,7 @@ namespace VSEIoTCoreServer.IntegrationTests
         private DeviceConfiguration _deviceConfig1;
         private DeviceConfiguration _deviceConfig2;
         private DeviceConfiguration _deviceConfig3;
+        private GlobalConfiguration _globalConfiguration;
         private HttpClient _httpClient;
 
         public DeviceAPITests()
@@ -60,6 +61,8 @@ namespace VSEIoTCoreServer.IntegrationTests
             _deviceConfig1 = TestUtils.GetDeviceConfiguration(_testDevice1);
             _deviceConfig2 = TestUtils.GetDeviceConfiguration(_testDevice2);
             _deviceConfig3 = TestUtils.GetDeviceConfiguration(_testDevice3);
+
+            _globalConfiguration = TestUtils.GetGlobalConfiguration();
         }
 
         [Fact]
@@ -68,7 +71,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5101;
             var deviceConfigurations = new List<DeviceConfiguration>() { _deviceConfig1, _deviceConfig2 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             // Act
             var devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
@@ -105,7 +108,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5102;
             var deviceConfigurations = new List<DeviceConfiguration>();
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             // Act
             var devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
@@ -121,7 +124,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5103;
             var deviceConfigurations = new List<DeviceConfiguration>() { _deviceConfig1 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             await AssertedGlobalIoTCoreStopped();
 
             // Assert
@@ -134,7 +137,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5104;
             var deviceConfigurations = new List<DeviceConfiguration>() { _deviceConfig1 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             await AssertedGlobalIoTCoreStopped();
 
             // Act
@@ -157,7 +160,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             var timeoutDevice = _deviceConfig1;
             timeoutDevice.VseIpAddress = "123.123.123.123";
             var deviceConfigurations = new List<DeviceConfiguration>() { timeoutDevice };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             // Act
             await TestUtils.WebAPI_Post_Start_Global(_httpClient, testServerPort);
@@ -177,7 +180,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5106;
             var deviceConfigurations = new List<DeviceConfiguration>() { _deviceConfig1 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             await AssertedGlobalIoTCoreStopped();
 
             // Act
@@ -198,7 +201,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5107;
             var deviceConfigurations = new List<DeviceConfiguration>() { _deviceConfig1 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             await AssertedGlobalIoTCoreStopped();
 
             // Assert
@@ -211,7 +214,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5108;
             var deviceConfigurations = new List<DeviceConfiguration>() { _deviceConfig1 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             await AssertedGlobalIoTCoreStopped();
 
             // Act
@@ -233,7 +236,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5109;
             var deviceConfigurations = new List<DeviceConfiguration>();
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             var devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
             Assert.NotNull(devices);
             Assert.Empty(devices);
@@ -244,10 +247,16 @@ namespace VSEIoTCoreServer.IntegrationTests
             };
 
             // Act
-            await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
+            var response = await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
+            var notAdded = await TestUtils.GetDeviceListFromResponse(response);
+            devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
 
             // Assert
-            devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(notAdded);
+            Assert.Empty(notAdded);
             Assert.NotNull(devices);
             Assert.Single(devices);
 
@@ -264,7 +273,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5110;
             var deviceConfigurations = new List<DeviceConfiguration>();
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             var devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
             Assert.NotNull(devices);
             Assert.Empty(devices);
@@ -286,10 +295,16 @@ namespace VSEIoTCoreServer.IntegrationTests
             };
 
             // Act
-            await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
+            var response = await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
+            var notAdded = await TestUtils.GetDeviceListFromResponse(response);
+            devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
 
             // Assert
-            devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(notAdded);
+            Assert.Empty(notAdded);
             Assert.NotNull(devices);
             Assert.Equal(3, devices.Count);
 
@@ -318,7 +333,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5111;
             var deviceConfigurations = new List<DeviceConfiguration>();
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
             var devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
             Assert.NotNull(devices);
             Assert.Empty(devices);
@@ -331,10 +346,19 @@ namespace VSEIoTCoreServer.IntegrationTests
 
             // Act
             var response = await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
+            var notAdded = await TestUtils.GetDeviceListFromResponse(response);
+            devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
 
             // Assert
-            devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
+            Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+
+            Assert.NotNull(notAdded);
+            Assert.Single(notAdded);
+            Assert.Equal(newDevices.First().Name, notAdded.First().Name);
+            Assert.Equal(newDevices.First().VseIpAddress, notAdded.First().VseIpAddress);
+            Assert.Equal(newDevices.First().VsePort, notAdded.First().VsePort);
+            Assert.Equal(newDevices.First().IoTCorePort, notAdded.First().IoTCorePort);
             Assert.NotNull(devices);
             Assert.Single(devices);
 
@@ -351,7 +375,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5112;
             var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             var newDevices = new List<AddDeviceViewModel>()
             {
@@ -360,10 +384,19 @@ namespace VSEIoTCoreServer.IntegrationTests
 
             // Act
             var response = await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
+            var notAdded = await TestUtils.GetDeviceListFromResponse(response);
             var devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
 
             // Assert
+            Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+
+            Assert.NotNull(notAdded);
+            Assert.Single(notAdded);
+            Assert.Equal(newDevices.First().Name, notAdded.First().Name);
+            Assert.Equal(newDevices.First().VseIpAddress, notAdded.First().VseIpAddress);
+            Assert.Equal(newDevices.First().VsePort, notAdded.First().VsePort);
+            Assert.Equal(newDevices.First().IoTCorePort, notAdded.First().IoTCorePort);
             Assert.NotNull(devices);
             Assert.Single(devices);
         }
@@ -374,7 +407,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5113;
             var deviceConfigurations = new List<DeviceConfiguration> { _deviceConfig1 };
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             var newDevices = new List<AddDeviceViewModel>()
             {
@@ -383,10 +416,19 @@ namespace VSEIoTCoreServer.IntegrationTests
 
             // Act
             var response = await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
+            var notAdded = await TestUtils.GetDeviceListFromResponse(response);
             var devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
 
             // Assert
+            Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+
+            Assert.NotNull(notAdded);
+            Assert.Single(notAdded);
+            Assert.Equal(newDevices.First().Name, notAdded.First().Name);
+            Assert.Equal(newDevices.First().VseIpAddress, notAdded.First().VseIpAddress);
+            Assert.Equal(newDevices.First().VsePort, notAdded.First().VsePort);
+            Assert.Equal(newDevices.First().IoTCorePort, notAdded.First().IoTCorePort);
             Assert.NotNull(devices);
             Assert.Single(devices);
         }
@@ -397,7 +439,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5114;
             var deviceConfigurations = new List<DeviceConfiguration>();
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             var newDevices = new List<AddDeviceViewModel>()
             {
@@ -408,6 +450,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             var response = await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
 
             // Assert
+            Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
@@ -417,7 +460,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5115;
             var deviceConfigurations = new List<DeviceConfiguration>();
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             var newDevices = new List<AddDeviceViewModel>()
             {
@@ -428,6 +471,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             var response = await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
 
             // Assert
+            Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
@@ -437,7 +481,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5116;
             var deviceConfigurations = new List<DeviceConfiguration>();
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             var newDevices = new List<AddDeviceViewModel>()
             {
@@ -448,6 +492,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             var response = await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
 
             // Assert
+            Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
@@ -457,7 +502,7 @@ namespace VSEIoTCoreServer.IntegrationTests
             // Arrange
             var testServerPort = 5117;
             var deviceConfigurations = new List<DeviceConfiguration>();
-            _httpClient = TestUtils.SetupTestServer(deviceConfigurations, testServerPort);
+            _httpClient = TestUtils.SetupTestServer(testServerPort, _globalConfiguration, deviceConfigurations);
 
             var newDevices = new List<AddDeviceViewModel>()
             {
@@ -469,10 +514,15 @@ namespace VSEIoTCoreServer.IntegrationTests
 
             // Act
             var response = await TestUtils.WebAPI_Post_Devices_Global(_httpClient, newDevices, testServerPort);
+            var notAdded = await TestUtils.GetDeviceListFromResponse(response);
             var devices = await TestUtils.WebAPI_Get_Devices_Global(_httpClient, testServerPort);
 
             // Assert
+            Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(notAdded);
+            Assert.Empty(notAdded);
             Assert.NotNull(devices);
             Assert.Single(devices);
             Assert.Equal(_deviceConfig1.Name, devices[0].Name);
@@ -483,20 +533,21 @@ namespace VSEIoTCoreServer.IntegrationTests
             _deviceConfig1 = null;
             _deviceConfig2 = null;
             _deviceConfig3 = null;
+            _globalConfiguration = null;
             _httpClient?.Dispose();
         }
 
         private async Task AssertedGlobalIoTCoreStarted()
         {
             // Wait for the global IoTCore to start
-            var started = await IoTCoreUtils.WaitUntilGlobalIoTCoreStarted(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort);
+            var started = await IoTCoreUtils.WaitUntilGlobalIoTCoreStarted(_iotCoreOptions.Value.IoTCoreURI, _globalConfiguration.GlobalIoTCorePort);
             Assert.True(started);
         }
 
         private async Task AssertedGlobalIoTCoreStopped()
         {
             // Wait for the global IoTCore to start
-            var stopped = await IoTCoreUtils.WaitUntilGlobalIoTCoreStopped(_iotCoreOptions.Value.IoTCoreURI, _iotCoreOptions.Value.GlobalIoTCorePort);
+            var stopped = await IoTCoreUtils.WaitUntilGlobalIoTCoreStopped(_iotCoreOptions.Value.IoTCoreURI, _globalConfiguration.GlobalIoTCorePort);
             Assert.True(stopped);
         }
 

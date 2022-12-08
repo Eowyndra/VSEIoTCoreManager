@@ -9,6 +9,7 @@ namespace VSEIoTCoreServer.WebApp.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
     using VSEIoTCoreServer.WebApp.Models;
+    using VSEIoTCoreServer.WebApp.Services;
     using VSEIoTCoreServer.WebApp.ViewModels;
 
     [ApiController]
@@ -16,11 +17,13 @@ namespace VSEIoTCoreServer.WebApp.Controllers
     public class GlobalController : ControllerBase
     {
         private readonly IIoTCoreServer _iotCoreServer;
+        private readonly IGlobalConfigurationService _globalConfigurationService;
         private readonly ILogger<GlobalController> _logger;
 
-        public GlobalController(IIoTCoreServer iotCoreServer, ILoggerFactory loggerFactory)
+        public GlobalController(IIoTCoreServer iotCoreServer, IGlobalConfigurationService globalConfigurationService, ILoggerFactory loggerFactory)
         {
             _iotCoreServer = iotCoreServer ?? throw new ArgumentNullException(nameof(iotCoreServer));
+            _globalConfigurationService = globalConfigurationService ?? throw new ArgumentNullException(nameof(globalConfigurationService));
 
             var factory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _logger = factory.CreateLogger<GlobalController>();
@@ -91,6 +94,48 @@ namespace VSEIoTCoreServer.WebApp.Controllers
             {
                 var status = await _iotCoreServer.GetStatus();
                 result = Ok(status);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Internal Error: " + ex.Message);
+                result = StatusCode(500);
+            }
+
+            return result;
+        }
+
+        [ProducesResponseType(200)]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(404)]
+        [HttpPut("config")]
+        public async Task<IActionResult> UpdateConfiguration([FromBody] GlobalConfigurationViewModel config)
+        {
+            ActionResult result;
+            try
+            {
+                await _globalConfigurationService.UpdateConfig(config);
+                result = Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Internal Error: " + ex.Message);
+                result = StatusCode(500);
+            }
+
+            return result;
+        }
+
+        [ProducesResponseType(200, Type = typeof(GlobalConfigurationViewModel))]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(404)]
+        [HttpGet("config")]
+        public async Task<IActionResult> GetConfig()
+        {
+            ActionResult result;
+            try
+            {
+                var config = await _globalConfigurationService.GetConfig();
+                result = Ok(config);
             }
             catch (Exception ex)
             {

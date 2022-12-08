@@ -92,7 +92,7 @@ namespace VSEIoTCoreServer.WebApp.Controllers
             return result;
         }
 
-        [ProducesResponseType(200)]
+        [ProducesResponseType(200, Type = typeof(List<AddDeviceViewModel>))]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
         [ProducesResponseType(422)]
@@ -110,34 +110,35 @@ namespace VSEIoTCoreServer.WebApp.Controllers
                 return NoContent();
             }
 
-            ActionResult result;
-            try
-            {
-                var newDevices = new List<DeviceConfigurationViewModel>();
+            // A list of devices that could not be added to the data base
+            var notAdded = new List<AddDeviceViewModel>(addDevices);
 
-                foreach (var addDevice in addDevices)
+            foreach (var addDevice in addDevices)
+            {
+                try
                 {
-                    // Add devices to database
+                    // Add device to database
                     var newDevice = await _deviceConfigurationService.AddDevice(addDevice);
-                    newDevices.Add(newDevice);
+
+                    // Add device to cache
+                    await _iotCoreServer.Add(newDevice);
+
+                    // Remove the device from the list of unsuccessfully added devices
+                    notAdded.Remove(addDevice);
                 }
-
-                // Add devices to cache
-                await _iotCoreServer.AddRange(newDevices);
-                result = Ok();
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError("Error adding devices: " + ex.Message);
-                result = StatusCode(422);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError("Internal Error:" + e.Message);
-                result = StatusCode(500);
+                catch (ArgumentException ex)
+                {
+                    _logger.LogError("Error adding device: " + ex.Message);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError("Internal Error:" + e.Message);
+                    return StatusCode(500, notAdded);
+                }
             }
 
-            return result;
+            // Return a list of unsuccessfully added devices, is any device could not be added set status code to 422 "Unprocessable Entity"
+            return notAdded.Count > 0 ? StatusCode(422, notAdded) : Ok(notAdded);
         }
     }
 }
