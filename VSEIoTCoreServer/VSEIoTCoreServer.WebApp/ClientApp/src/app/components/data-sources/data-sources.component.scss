@@ -27,7 +27,13 @@ form {
       padding: 2px 0 8px !important;
       min-width: 3.5em !important;
     }
+
+    .mat-form-field-flex {
+      background-color: var(--ifm-shell-background-color);
+    }
   }
+
+
   
   .align-center {
     align-self: center;

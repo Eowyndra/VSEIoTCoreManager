@@ -12,6 +12,8 @@ namespace VSEIoTCoreServer.CommonUtils
     using System.Threading.Tasks;
     using ifmIoTCore.Messages;
     using Newtonsoft.Json.Linq;
+    using VSEIoTCoreServer.CommonUtils.ExtensionMethods;
+    using VSEIoTCoreServer.DAL.Models.Enums;
 
     public class IoTCoreUtils
     {
@@ -51,9 +53,39 @@ namespace VSEIoTCoreServer.CommonUtils
             {
                 try
                 {
-                    var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Information().Device().GetData());
+                    var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.GetTree());
                     var msg = CreateResponseMessage(response);
                     if (msg.Code == 200)
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    // Do nothing
+                }
+
+                Thread.Sleep(500); // waiting 500 ms, then re-checking
+                maxWaitInMilliseconds -= 500;
+            }
+
+            return result;
+        }
+
+        public static async Task<bool> WaitUntilDeviceConnected(string iotCoreUri, int iotCorePort, int maxWaitInMilliseconds = 60_000)
+        {
+            var result = false;
+
+            using var client = new Client(iotCoreUri + ":" + iotCorePort);
+            while (maxWaitInMilliseconds > 0)
+            {
+                try
+                {
+                    var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Device().Status().GetData());
+                    var msg = CreateResponseMessage(response);
+                    var status = msg.Data.GetDeviceStatus();
+                    if (status == DeviceStatus.Connected)
                     {
                         result = true;
                         break;
@@ -105,6 +137,62 @@ namespace VSEIoTCoreServer.CommonUtils
                     var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.GetTree());
                     var msg = CreateResponseMessage(response);
                     if (msg.Code == 200)
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    // Do nothing
+                }
+
+                Thread.Sleep(500); // waiting 500 ms, then re-checking
+                maxWaitInMilliseconds -= 500;
+            }
+
+            return result;
+        }
+
+        public static async Task<bool> WaitUntilRemoteIoTCoreReachable(string iotCoreUri, int iotCorePort, int remoteId, int maxWaitInMilliseconds = 60_000)
+        {
+            var result = false;
+            using var client = new Client(iotCoreUri + ":" + iotCorePort);
+            while (maxWaitInMilliseconds > 0)
+            {
+                try
+                {
+                    var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(remoteId).GetTree());
+                    var msg = CreateResponseMessage(response);
+                    if (msg.Code == 200)
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    // Do nothing
+                }
+
+                Thread.Sleep(500); // waiting 500 ms, then re-checking
+                maxWaitInMilliseconds -= 500;
+            }
+
+            return result;
+        }
+
+        public static async Task<bool> WaitUntilRemoteIoTCoreNotReachable(string iotCoreUri, int iotCorePort, int remoteId, int maxWaitInMilliseconds = 60_000)
+        {
+            var result = false;
+            using var client = new Client(iotCoreUri + ":" + iotCorePort);
+            while (maxWaitInMilliseconds > 0)
+            {
+                try
+                {
+                    var response = await client.SendRequestAndAwaitResponseAsync(IoTCoreRoutes.Remote(remoteId).GetTree());
+                    var msg = CreateResponseMessage(response);
+                    if (msg.Code == 404)
                     {
                         result = true;
                         break;

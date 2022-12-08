@@ -14,7 +14,7 @@ namespace VSEIoTCoreServer.LibraryRuntime
     using ifmIoTCore.Profiles.Device.ServiceData.Requests;
     using ifmIoTCore.Utilities;
 
-    public class IoTCoreRuntime : IIoTCoreRuntime
+    public abstract class IoTCoreRuntime : IIoTCoreRuntime
     {
         private static IIoTCore _iotCore;
         private static HttpServerNetAdapter _httpServer;
@@ -22,11 +22,7 @@ namespace VSEIoTCoreServer.LibraryRuntime
         private static bool _globalIoTCoreStarted = false;
         private static Uri _globalIoTCoreServerUri;
 
-        public IoTCoreRuntime()
-        {
-        }
-
-        public void AddMirror(string vseIoTCoreIpAddress, int vseIoTCorePort)
+        public virtual void AddMirror(string vseIoTCoreIpAddress, int vseIoTCorePort)
         {
             if (!_globalIoTCoreStarted)
             {
@@ -37,7 +33,7 @@ namespace VSEIoTCoreServer.LibraryRuntime
             _deviceManagementProfileBuilder.Mirror(new MirrorRequestServiceData(vseIoTCoreURI, _globalIoTCoreServerUri.ToString()));
         }
 
-        public void Start(string ipAddress, int port)
+        public virtual void Start(string ipAddress, int port)
         {
             _globalIoTCoreServerUri = new Uri($"{ipAddress}:{port}");
             _iotCore = IoTCoreFactory.Create("global_IoTCore", new NullLogger());
@@ -50,7 +46,7 @@ namespace VSEIoTCoreServer.LibraryRuntime
             _globalIoTCoreStarted = true;
         }
 
-        public void Stop()
+        public virtual void Stop()
         {
             _httpServer?.Stop();
             _httpServer?.Dispose();

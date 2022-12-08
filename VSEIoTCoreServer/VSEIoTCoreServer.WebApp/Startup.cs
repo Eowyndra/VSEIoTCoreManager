@@ -13,7 +13,7 @@ namespace VSEIoTCoreServer.WebApp
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
     using VSEIoTCoreServer.DAL;
-    using VSEIoTCoreServer.LibraryRuntime;
+    using VSEIoTCoreServer.WebApp.Models;
     using VSEIoTCoreServer.WebApp.Services;
     using VSEIoTCoreServer.WebApp.ViewModels;
 
@@ -38,9 +38,9 @@ namespace VSEIoTCoreServer.WebApp
             services.AddDbContext<SQLiteDbContext>(options => options.UseSqlite(conStr));
 
             services.AddScoped<IDeviceConfigurationService, DeviceConfigurationService>();
-            services.AddScoped<IIoTCoreService, IoTCoreService>();
-            services.AddScoped<IGlobalIoTCoreService, GlobalIoTCoreService>();
-            services.AddScoped<IIoTCoreRuntime, IoTCoreRuntime>();
+
+            // Main IoT Core must be singleton otherwise you would create multiple different iotcores - this might be the issue of not being able to access remote/1/ ...
+            services.AddSingleton<IIoTCoreServer, IoTCoreServer>();
 
             services.AddControllersWithViews()
                 .AddJsonOptions(p => p.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
@@ -54,7 +54,7 @@ namespace VSEIoTCoreServer.WebApp
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IDeviceConfigurationService deviceConfigurationService, IIoTCoreServer iotCoreServer)
         {
             // Configure the HTTP request pipeline.
             if (!Env.IsDevelopment())
@@ -80,6 +80,16 @@ namespace VSEIoTCoreServer.WebApp
                         pattern: "{controller}/{action=Index}/{id?}");
                     endpoints.MapFallbackToFile("index.html");
                 });
+
+            // Populate in-memory cache
+            if (deviceConfigurationService != null)
+            {
+                var dbDevices = deviceConfigurationService.GetAll().GetAwaiter().GetResult();
+                foreach (var dbDevice in dbDevices)
+                {
+                    iotCoreServer?.Add(dbDevice).GetAwaiter().GetResult();
+                }
+            }
         }
     }
 }
